@@ -18,11 +18,17 @@
 
     function run_timestep(p, v, d, t)
 
-        # Create temporary variables.
-        CO₂_diff = p.CO₂[t]-p.CO₂_0
-        N̄ = 0.5 * (p.N₂O[t] + p.N₂O_0)
+        if is_first(t)
+            # Set initial radiative forcing to 0.
+            v.rf_CO₂[t] = 0.0
 
-        # Calculate carbon dioxide radiative forcing.
-        v.rf_CO₂[t] = ((p.a₁*CO₂_diff^2 + p.b₁*abs(CO₂_diff) + p.c₁*N̄ + 5.36) * log(p.CO₂[t] / p.CO₂_0)) * p.rf_scale_CO₂
+        else
+            # Create temporary variables.
+            CO₂_diff = p.CO₂[t]-p.CO₂_0
+            N̄ = 0.5 * (p.N₂O[t] + p.N₂O_0)
+
+            # Calculate carbon dioxide radiative forcing.
+            v.rf_CO₂[t] = ((p.a₁*CO₂_diff^2 + p.b₁*abs(CO₂_diff) + p.c₁*N̄ + 5.36) * log(p.CO₂[t] / p.CO₂_0)) * p.rf_scale_CO₂
+        end
     end
 end
