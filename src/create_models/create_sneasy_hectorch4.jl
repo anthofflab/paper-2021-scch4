@@ -13,7 +13,7 @@ using CSVFiles
 include(joinpath("additional_model_components", "rf_total.jl"))
 include(joinpath("additional_model_components", "rf_co2.jl"))
 include(joinpath("additional_model_components", "rf_ch4.jl"))
-
+include(joinpath("..", "helper_functions.jl"))
 
 function create_sneasy_hector(;rcp_scenario::String="RCP85", start_year::Int=1765, end_year::Int=2300, etminan_ch4_forcing::Bool=true)
 
