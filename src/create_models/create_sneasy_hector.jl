@@ -27,9 +27,9 @@ function create_sneasy_hector(;rcp_scenario::String="RCP85", start_year::Int=176
     rcp_forcing 	   = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp_scenario*"_midyear_radforcings.csv"), skiplines_begin=58))
 
   	# Find start and end year indices to crop RCP scenario data to correct model time horizon.
-    rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS) # Set initial CH₄ and N₂O concentrations to RCP 1765 values.
+    rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS)
 
-    # Set pre-industrial atmospheric CH₄ and N₂O concentrations to RCP values in 1765.
+    # Set pre-industrial atmospheric CO₂, CH₄, and N₂O concentrations to RCP values in 1765.
     CO₂_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CO2][1]
     CH₄_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CH4][1]
     N₂O_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :N2O][1]
