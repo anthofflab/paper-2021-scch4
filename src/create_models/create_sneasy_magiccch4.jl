@@ -11,8 +11,8 @@ using CSVFiles
 
 # Load required files.
 include(joinpath("additional_model_components", "rf_total.jl"))
-include(joinpath("additional_model_components", "rf_co2.jl"))
-include(joinpath("additional_model_components", "rf_ch4.jl"))
+include(joinpath("additional_model_components", "rf_co2_etminan.jl"))
+include(joinpath("additional_model_components", "rf_ch4_etminan.jl"))
 include(joinpath("additional_model_components", "total_co2_emissions.jl"))
 include(joinpath("..", "helper_functions.jl"))
 
