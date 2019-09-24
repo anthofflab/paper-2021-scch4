@@ -34,7 +34,8 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     CH₄_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CH4][1]
     N₂O_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :N2O][1]
 
-    # Calculate aerosol and exogenous RCP radiative forcing scenarios.
+    # Calculate carbon dioxide emissions as well as aerosol and exogenous RCP radiative forcing scenarios.
+    rcp_co2_emissions     = rcp_emissions.FossilCO2 .+ rcp_emissions.OtherCO2
     rcp_aerosol_forcing   = rcp_forcing.TOTAER_DIR_RF .+ rcp_forcing.CLOUD_TOT_RF
     rcp_exogenous_forcing = rcp_forcing.TOTAL_INCLVOLCANIC_RF .- rcp_forcing.CO2_RF .- rcp_forcing.CH4_RF .- rcp_forcing.TROPOZ_RF .- rcp_forcing.CH4OXSTRATH2O_RF .- rcp_aerosol_forcing
 
@@ -70,6 +71,9 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # ---------------------------------------------
     # Set component parameters.
     # ---------------------------------------------
+
+    # ---- Carbon Cycle ---- #
+    set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
 
  	# ---- Tropospheric Sink (OH) Lifetime ---- #
     set_param!(m, :oh_cycle, :CNOX, 0.0042)
