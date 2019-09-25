@@ -79,6 +79,10 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Set component parameters.
     # ---------------------------------------------
 
+    # ---- Carbon Cycle ---- #
+    set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
+    set_param!(m, :ccm, :atmco20, CO₂_0)
+
     # ---- Methane Cycle ---- #
     set_param!(m, :ch4_cycle, :index_2000, index_2000)
     set_param!(m, :ch4_cycle, :BBCH4, 2.78)

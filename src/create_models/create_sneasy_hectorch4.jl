@@ -74,6 +74,7 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
 
     # ---- Carbon Cycle ---- #
     set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
+    set_param!(m, :ccm, :atmco20, CO₂_0)
 
  	# ---- Tropospheric Sink (OH) Lifetime ---- #
     set_param!(m, :oh_cycle, :CNOX, 0.0042)
