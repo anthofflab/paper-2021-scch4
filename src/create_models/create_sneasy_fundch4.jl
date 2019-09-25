@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# This function creates an instance of SNEASY+MAGICC.
+# This function creates an instance of SNEASY+FUND.
 #-------------------------------------------------------------------------------
 
 # Load required packages.

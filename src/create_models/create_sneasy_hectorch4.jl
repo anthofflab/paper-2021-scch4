@@ -21,12 +21,12 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Load and clean up necessary data.
     # ---------------------------------------------
 
- 	# Load RCP emissions and concentration scenario values (RCP options = "RCP26" and "RCP85").
+    # Load RCP emissions and concentration scenario values (RCP options = "RCP26" and "RCP85").
     rcp_emissions      = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp_scenario*"_emissions.csv"), skiplines_begin=36))
     rcp_concentrations = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp_scenario*"_concentrations.csv"), skiplines_begin=37))
-    rcp_forcing 	   = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp_scenario*"_midyear_radforcings.csv"), skiplines_begin=58))
+    rcp_forcing        = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp_scenario*"_midyear_radforcings.csv"), skiplines_begin=58))
 
-  	# Find start and end year indices to crop RCP scenario data to correct model time horizon.
+    # Find start and end year indices to crop RCP scenario data to correct model time horizon.
     rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS)
 
     # Set pre-industrial atmospheric CO₂, CH₄, and N₂O concentrations to RCP values in 1765.
@@ -40,14 +40,14 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     rcp_exogenous_forcing = rcp_forcing.TOTAL_INCLVOLCANIC_RF .- rcp_forcing.CO2_RF .- rcp_forcing.CH4_RF .- rcp_forcing.TROPOZ_RF .- rcp_forcing.CH4OXSTRATH2O_RF .- rcp_aerosol_forcing
 
 
- 	# ------------------------------------------------------------
+    # ------------------------------------------------------------
     # Initialize Mimi-SNEASY and add new CH₄ components to model.
     # ------------------------------------------------------------
 
     # Get an instance of Mimi-SNEASY.
-	m = MimiSNEASY.getsneasy(start_year=start_year, end_year=end_year)
+    m = MimiSNEASY.getsneasy(start_year=start_year, end_year=end_year)
 
-	# Remove old radiative forcing components.
+    # Remove old radiative forcing components.
     delete!(m, :rfco2)
     delete!(m, :radiativeforcing)
 
@@ -62,9 +62,9 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Add in user-specified CH₄ radiative forcing component.
     # Note: If not using Etminan et al. equations, use original forcing equations from parent CH₄ model.
     if etminan_ch4_forcing == true
-    	add_comp!(m, rf_ch4_etminan, before = :rf_ch4h2o)
+        add_comp!(m, rf_ch4_etminan, before = :rf_ch4h2o)
     else
-    	add_comp!(m, MimiHECTOR.rf_ch4, before = :rf_ch4h2o)
+        add_comp!(m, MimiHECTOR.rf_ch4, before = :rf_ch4h2o)
     end
 
 
@@ -76,7 +76,7 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
     set_param!(m, :ccm, :atmco20, CO₂_0)
 
- 	# ---- Tropospheric Sink (OH) Lifetime ---- #
+    # ---- Tropospheric Sink (OH) Lifetime ---- #
     set_param!(m, :oh_cycle, :CNOX, 0.0042)
     set_param!(m, :oh_cycle, :CCO, -0.000105)
     set_param!(m, :oh_cycle, :CNMVOC, -0.000315)
@@ -130,11 +130,11 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
 
     # ---- Total Radiative Forcing ---- #
     set_param!(m, :rf_total, :α, 1.0)
-  	set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
 
 
-	# ----------------------------------------------------------
+    # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.
     # ----------------------------------------------------------
     connect_param!(m, :doeclim,        :forcing, :rf_total,  :total_forcing)
@@ -147,11 +147,11 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
 
     # Create different connections if using updated Etminan et al. CH₄ forcing equations.
     if etminan_ch4_forcing == true
-  	    connect_param!(m, :rf_ch4_etminan, :CH₄,    :ch4_cycle,      :CH4)
-    	connect_param!(m, :rf_total,       :rf_CH₄, :rf_ch4_etminan, :rf_CH₄)
+        connect_param!(m, :rf_ch4_etminan, :CH₄,    :ch4_cycle,      :CH4)
+        connect_param!(m, :rf_total,       :rf_CH₄, :rf_ch4_etminan, :rf_CH₄)
     else
-  	    connect_param!(m, :rf_ch4,   :CH4,    :ch4_cycle, :CH4)
-    	connect_param!(m, :rf_total, :rf_CH₄, :rf_ch4,    :rf_CH4)
+        connect_param!(m, :rf_ch4,   :CH4,    :ch4_cycle, :CH4)
+        connect_param!(m, :rf_total, :rf_CH₄, :rf_ch4,    :rf_CH4)
     end
 
     connect_param!(m, :rf_total, :rf_O₃,      :rf_o3,          :rf_O₃)
