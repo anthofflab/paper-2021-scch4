@@ -351,7 +351,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
         # Calculate CH₄ concentration (Law Dome) log-likelihoods for individual data points (assuming 8 year model mean centered on year of ice core observation).
         for (i,index) = enumerate(lawdome_ch4_iid_indices)
             lawdome_ch4_mean[i] = mean(modeled_CH₄[index .+ (-4:3)])
-            lawdome_ch4_single_llik_iid[i] = lawdome_ch4_single_llik_iid[i] + logpdf(Normal(lawdome_ch4_mean[i], sqrt(σ_CH₄ice^2 + calibration_data[index, :lawdome_ch4_sigma]^2)), calibration_data[index, :lawdome_ch4_obs])
+            lawdome_ch4_single_llik_iid[i] = logpdf(Normal(lawdome_ch4_mean[i], sqrt(σ_CH₄ice^2 + calibration_data[index, :lawdome_ch4_sigma]^2)), calibration_data[index, :lawdome_ch4_obs])
         end
 
         # Calculate CH₄ concentration (Law Dome) total log-likelihood as sum of individual data point likelihoods.
