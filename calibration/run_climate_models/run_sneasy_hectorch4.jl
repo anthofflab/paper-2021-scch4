@@ -43,7 +43,7 @@ function construct_run_sneasy_hectorch4(calibration_end_year::Int)
 
 
         #----------------------------------------------------------
-        # Set SNEASY-FAIR with sampled parameter values.
+        # Set SNEASY-Hector with sampled parameter values.
         #----------------------------------------------------------
 
         # ---- Diffusion Ocean Energy balance CLIMate model (DOECLIM) ---- #
