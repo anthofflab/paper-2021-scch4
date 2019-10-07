@@ -1,0 +1,36 @@
+Data: Paramater values to initialize the MCMC algorithm for each of the four SNEASY+CH4 models.,,,,,,
+,,,,,,
+Notes: ,(1) These parameter values correspond to posterior mean values from previous model calibrations. This ensures the MCMC algoirthm starts in a region of high posterior probability.,,,,,
+,"(2) The methane lifetime corresponds to either a constant lifetime (SNEASY-FAIR and SNEASY-FUND), or an initial condition for time-varying tropospheric lifetimes (SNEASY-Hector and SNEASY-MAGICC)",,,,,
+,"(3) Not all models share the same uncertain methane cycle parameters (for example, SNEASY-FUND does not have a methane soil sink lifetime parameter).",,,,,
+,"(4) For parameters without lower or upper bounds, a physically informed range was selected based on past calibrations (these bounds are only used to select an initial step size in the adaptive MCMC sampling algorithm).",,,,,
+,,,,,,
+parameter,sneasy_fund,sneasy_fair,sneasy_hector,sneasy_magicc,lower_bound,upper_bound
+sd_temp,0.08,0.08,0.08,0.08,0,0.2
+sd_ocheat,1.8,1.7,1.7,1.6,0,4
+sd_co2inst,0.4,0.4,0.4,0.4,0,1
+sd_co2ice,4.2,4.6,4.5,4.7,0,10
+sd_ch4inst,8,5.6,5.8,5.2,0,20
+sd_ch4ice,38,29,26,27,0,45
+rho_temp,0.54,0.56,0.56,0.56,0,0.99
+rho_ocheat,0.63,0.61,0.61,0.6,0,0.99
+rho_co2inst,0.81,0.8,0.8,0.81,0,0.99
+rho_ch4inst,0.98,0.98,0.96,0.97,0,0.99
+rho_ch4ice,0.82,0.52,0.43,0.4,0,0.99
+T0,0.002,-0.01,-0.008,-0.01,-0.3,0.3
+H0,-32,-23,-25,-20,-100,0
+CO20,281,281,281,281,275,281
+CH4_0,694,716,722,717,691,753
+N2O_0,273,273,273,273,264,282
+ECS,3,2.6,2.6,2.7,0,10
+kappa,2.9,2.8,2.8,2.9,1,7
+alpha,1,1,1.1,1.1,0,3
+rf_schale_ch4,0.98,0.97,0.98,0.97,0.72,1.28
+F2xco2,3.8,3.8,3.8,3.8,2.97,4.45
+Q10,1.6,1.5,1.5,1.3,1,5
+beta,0.58,0.56,0.55,0.54,0,1
+eta,21,20,21,20,0,200
+tau_0,7.4,9.4,6.9,7,6.7,13.5
+CH4_nat,,166,268,266,150,484
+Tsoil,,,118,119,96,144
+Tstrat,,,143,144,100,200
