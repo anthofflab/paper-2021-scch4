@@ -15,7 +15,7 @@ include("create_log_posterior.jl")
 #------------------------------------------------------------------------------------------------------
 
 # Select the climate model to use (options = :sneasy_fair, :sneasy_fund, :sneasy_hector, & :sneasy_magicc).
-climate_model = :sneasy_fund
+climate_model = :sneasy_magicc
 
 # The length of the final chain (i.e. number of samples from joint posterior pdf after discarding burn-in period values).
 final_chain_length = 1_000
@@ -85,10 +85,19 @@ elseif climate_model == :sneasy_hector
 	run_sneasych4! = construct_run_sneasy_hectorch4(calibration_end_year)
 
 #---------------------------------------
-elseif climate_model == :sneasy_fund
+elseif climate_model == :sneasy_magicc
 #---------------------------------------
 
-	error("Sneasy-FUND not coded up yet.")
+	# Select starting parameter values to initialize MCMC algorithm.
+	initial_mcmc_θ = initial_parameters.sneasy_magicc
+
+	# Select initial MCMC algorithm step size (set to 5% of difference between upper and lower parameter bounds).
+	n_params = length(initial_mcmc_θ)
+	mcmc_step_size = (initial_parameters[1:n_params, :upper_bound] .- initial_parameters[1:n_params, :lower_bound]) * 0.05
+
+	# Create `run_sneasy_hectorch4` function used in log-posterior calculations.
+	include(joinpath("run_climate_models", "run_sneasy_magiccch4.jl"))
+	run_sneasych4! = construct_run_sneasy_magiccch4(calibration_end_year)
 
 else
 	error("Selected a climate model that does not exist. Available options are :sneasy_fair, :sneasy_fund, :sneasy_hector, and :sneasy_magicc")
