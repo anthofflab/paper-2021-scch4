@@ -1,5 +1,168 @@
 #Various functions used for Sneasy Methane work.
 
+# Create function to set up folder structure for saving results
+function build_result_folders(results_name::String)
+
+    climate_model_names = ["s_fair", "s_fund", "s_hector", "s_magicc"]
+    iam_model_names     = ["dice", "fund"]
+
+    # Loop over the various IAM and climate model combinations.
+    for climate_model in climate_model_names
+
+        # Create folders to store calibrated posterior parameter samples.
+        mkpath(joinpath("results", results_name, "calibrated_parameters", climate_model))
+
+        # Create folders to store climate projections for the different scenarios.
+        mkpath(joinpath("results", results_name, "climate_projections", "baseline_run", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "outdated_forcing", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "remove_correlations", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "us_climate_sensitivity", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "rcp26", climate_model))
+
+        # Create folders to store SC-CH4 estiamtes for DICE and FUND.
+        for iam_model in iam_model_names
+            mkpath(joinpath("results", results_name, "scch4_estimates", "baseline_run", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_forcing", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "remove_correlations", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "us_climate_sensitivity", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "rcp26", iam_model, climate_model))
+        end
+
+        # Equity-weighted SC-CH4 estimates only uses FUND.
+        mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", climate_model))
+    end
+
+    # Create folder to store Bayesian model averaging (BMA) weights.
+    mkpath(joinpath("results", results_name, "calibrated_parameters", "bma_weights"))
+
+end
+
+
+# Function that sets CH4 cycle related parameters based on version of SNEASY-CH4 selected.
+function create_update_ch4_function(climate_model::Symbol)
+
+    update_ch4_params! =
+
+        if climate_model == :sneasy_fair
+
+            function(m::Model, params::Array{Float64,1})
+                CH₄_0         = params[15]
+                N₂O_0         = params[16]
+                rf_scale_CH₄  = params[20]
+                τ_troposphere = params[25]
+                CH₄_natural   = params[26]
+
+                update_param!(m, :natural_emiss_CH₄, ones(length(dim_keys(m, :time))) .* CH₄_natural)
+                update_param!(m, :CH₄_0,             CH₄_0)
+                update_param!(m, :τ_CH₄,             τ_troposphere)
+                update_param!(m, :N₂O_0,             N₂O_0)
+                update_param!(m, :scale_CH₄,         rf_scale_CH₄)
+                return
+            end
+
+        elseif climate_model == :sneasy_fund
+
+            function(m::Model, params::Array{Float64,1})
+                CH₄_0         = params[15]
+                N₂O_0         = params[16]
+                rf_scale_CH₄  = params[20]
+                τ_troposphere = params[25]
+
+                update_param!(m, :ch4pre,    CH₄_0)
+                update_param!(m, :acch4_0,   CH₄_0)
+                update_param!(m, :lifech4,   τ_troposphere)
+                update_param!(m, :CH₄_0,     CH₄_0)
+                update_param!(m, :N₂O_0,     N₂O_0)
+                update_param!(m, :scale_CH₄, rf_scale_CH₄)
+                return
+            end
+
+        elseif climate_model == :sneasy_hector
+
+            function(m::Model, params::Array{Float64,1})
+                CH₄_0          = params[15]
+                N₂O_0          = params[16]
+                rf_scale_CH₄   = params[20]
+                τ_troposphere  = params[25]
+                CH₄_natural    = params[26]
+                τ_soil         = params[27]
+                τ_stratosphere = params[28]
+
+                update_param!(m, :TOH0,      τ_troposphere)
+                update_param!(m, :M0,        CH₄_0)
+                update_param!(m, :CH4N,      CH₄_natural)
+                update_param!(m, :Tsoil,     τ_soil)
+                update_param!(m, :Tstrat,    τ_stratosphere)
+                update_param!(m, :CH₄_0,     CH₄_0)
+                update_param!(m, :N₂O_0,     N₂O_0)
+                update_param!(m, :scale_CH₄, rf_scale_CH₄)
+                return
+            end
+
+        elseif climate_model == :sneasy_magicc
+
+            function(m::Model, params::Array{Float64,1})
+                CH₄_0          = params[15]
+                N₂O_0          = params[16]
+                rf_scale_CH₄   = params[20]
+                τ_troposphere  = params[25]
+                CH₄_natural    = params[26]
+                τ_soil         = params[27]
+                τ_stratosphere = params[28]
+
+                update_param!(m, :CH₄_0,       CH₄_0)
+                update_param!(m, :CH4_natural, CH₄_natural)
+                update_param!(m, :TAUSOIL,     τ_soil)
+                update_param!(m, :TAUSTRAT,    τ_stratosphere)
+                update_param!(m, :TAUINIT,     τ_troposphere)
+                update_param!(m, :N₂O_0,       N₂O_0)
+                update_param!(m, :scale_CH₄,   rf_scale_CH₄)
+                return
+            end
+        end
+
+    return update_ch4_params!
+end
+
+
+
+function calculate_discount_factors!(df::Array{Float64,1}, pc_consumption::Array{Float64,1}, ρ::Float64, η::Float64, years::Array{Int,1}, pulse_year::Int, pulse_year_index::Int)
+    for t=pulse_year_index:length(years)
+        df[t] = (pc_consumption[pulse_year_index] / pc_consumption[t])^η * 1.0 / (1.0 + ρ)^(years[t]-pulse_year)
+    end
+end
+
+#---------------------------------------------------------------------------------------------------------------------
+# Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated uncertain model parameters.
+#---------------------------------------------------------------------------------------------------------------------
+function create_get_ch4_results_function(climate_model::Symbol)
+
+    get_ch4_results! =
+
+        if climate_model == :sneasy_fair || climate_model == :sneasy_magicc
+
+            function(m::Model)
+                return m[:ch4_cycle, :CH₄]
+            end
+
+        elseif climate_model == :sneasy_fund
+
+            function(m::Model)
+                return m[:climatech4cycle, :acch4]
+            end
+
+        elseif climate_model == :sneasy_hector
+
+            function(m::Model)
+                return m[:ch4_cycle, :CH4]
+            end
+        end
+
+    return get_ch4_results!
+end
+
+
+
 # Function to calculate scaling coefficient so CO2 RF is consistent with user
 # supplied F2x parameter (default = 3.7 for old, 3.801 for Etiman update)
 
@@ -96,20 +259,19 @@ end
 ###########################################################################################
 # Function to replicate observation errors for periods without observations
 
-# This only works if model starts in 1850
-    function replicate_errors(start_year, end_year, error_data)
+    function replicate_errors(start_year::Int, end_year::Int, error_data)
 
         model_years = collect(start_year:end_year)
         #Initialize new vector of errors (assume )
         errors = zeros(length(model_years))
         # Find indices for periods that have observation errors.
-        err_indices = find(x-> !isna(x), error_data)
+        err_indices = findall(x-> !ismissing(x), error_data)
         #Replicate 1st error for all periods prior to start of observations.
-        errors[1:err_indices[1]] = mean(error_data[err_indices[1]:err_indices[10]])
+        errors[1:err_indices[1]] .= mean(error_data[err_indices[1:10]])
         #Add all errors for periods with observations.
-        errors[err_indices[2]:err_indices[end]] = error_data[err_indices[2]:err_indices[end]]
+        errors[err_indices[2:end]] = error_data[err_indices[2:end]]
         # Replicate last error for all periods after observation data.
-        errors[(err_indices[end]+1):end] = mean(error_data[err_indices[end-9]:err_indices[end]])
+        errors[(err_indices[end]+1):end] .= mean(error_data[err_indices[(end-9):end]])
 
         return errors
     end
@@ -217,7 +379,7 @@ function dice_interpolate(data, spacing)
     # Create an interpolation object for the data (assume first and last points are end points, e.g. no interpolation beyond support).
     interp_linear = interpolate(data, BSpline(Linear()), OnGrid())
 
-    # Create points to interpolate for (based on spacing term). DICE has 10 year time steps.
+    # Create points to interpolate for (based on spacing term). DICE2013 has 5 year time steps.
     interp_points = collect(1:(1/spacing):length(data))
 
     # Carry out interpolation.
@@ -227,36 +389,43 @@ end
 ####################################################################################
 #Function to calculate confidence intervals from mcmc runs
 
-#Have data in form: Column 1 = Year, Column 2 = Chain Means, Columns 3+ = Bootstraps
+#this assumes each row is a new model run, each column is a year)
 
 #Gives back data in form Year, Chain Mean, Upper1, Lower1, Upper2, Lower2, Confidence for Plotting
 
-function confidence_int(years, my_data, conf_1_percent, conf_2_percent)
-    alpha1 = 1-conf_1_percent
-    alpha2 = 1-conf_2_percent
-    n_years = size(my_data, 1)
 
-    confidence = DataFrame(Year=years[:,1], Mean_Chain=zeros(n_years), Lower1=zeros(n_years), Upper1=zeros(n_years), Lower2=zeros(n_years), Upper2=zeros(n_years))
+function get_confidence_interval(years, model_result, conf_1_percent, conf_2_percent)
 
-    my_data = convert(Array, my_data)
+    # Set intervals for quantile function and calculate total number of years in results.
+    α1 = 1-conf_1_percent
+    α2 = 1-conf_2_percent
+    n_years = length(years)
 
-    my_data[find(isnan(my_data))] = - 9999.99
+    # Initialize dataframe of results with the column of years, mean results, and missing values.
+    ci_results = DataFrame(Year=years, Mean=vec(mean(model_result, dims=1)), Lower1=zeros(Union{Missing,Float64}, n_years), Upper1=zeros(Union{Missing,Float64}, n_years), Lower2=zeros(Union{Missing,Float64}, n_years), Upper2=zeros(Union{Missing,Float64}, n_years))
 
-    confidence[:,2]=vec(mapslices(mean, my_data, 2))
-
+    # Calculate confidnece intervals (CI for years with 'missing' values also set to 'missing').
     for i in 1:n_years
-        confidence[:Lower1][i] = quantile(vec(my_data[i,:]), alpha1 /2)
-        confidence[:Upper1][i] = quantile(vec(my_data[i,:]), 1-alpha1 /2)
-        confidence[:Lower2][i] = quantile(vec(my_data[i,:]), alpha2/2)
-        confidence[:Upper2][i] = quantile(vec(my_data[i,:]), 1-alpha2/2)
+        if all(x-> x !== missing, model_result[:,i])
+            ci_results.Lower1[i] = quantile(model_result[:,i], α1/2)
+            ci_results.Upper1[i] = quantile(model_result[:,i], 1-α1/2)
+            ci_results.Lower2[i] = quantile(model_result[:,i], α2/2)
+            ci_results.Upper2[i] = quantile(model_result[:,i], 1-α2/2)
+        else
+            ci_results.Lower1[i] = missing
+            ci_results.Upper1[i] = missing
+            ci_results.Lower2[i] = missing
+            ci_results.Upper2[i] = missing
+        end
     end
 
-    rename!(confidence, :Lower1, Symbol(join(["LowerConf" conf_1_percent], '_')))
-    rename!(confidence, :Upper1, Symbol(join(["UpperConf" conf_1_percent], '_')))
-    rename!(confidence, :Lower2, Symbol(join(["LowerConf" conf_2_percent], '_')))
-    rename!(confidence, :Upper2, Symbol(join(["UpperConf" conf_2_percent], '_')))
+    # Rename columns to have names specific to user-provided confidence intervals.
+    rename!(ci_results, :Lower1 => Symbol(join(["LowerConf" conf_1_percent], '_')))
+    rename!(ci_results, :Upper1 => Symbol(join(["UpperConf" conf_1_percent], '_')))
+    rename!(ci_results, :Lower2 => Symbol(join(["LowerConf" conf_2_percent], '_')))
+    rename!(ci_results, :Upper2 => Symbol(join(["UpperConf" conf_2_percent], '_')))
 
-    return(confidence)
+    return ci_results
 end
 
 ###########################################################################################
@@ -293,6 +462,9 @@ function clim_sens_distribution(n::Int64)
 
     return(clim_sens)
 end
+
+
+#
 
 ##############################################################################################
 # TODO: Add description of what this does with function argument descriptions
