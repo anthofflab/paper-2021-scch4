@@ -305,7 +305,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 
         # Calculate CO₂ concentration (Law Dome) log-likelihoods for individual data points (assuming 8 year model mean centered on year of ice core observation.
         for (i, index)=enumerate(indices_lawdome_co2_data)
-            lawdome_co2_mean[i] = 150.5#mean(modeled_CO₂[index .+ (-4:3)])
+            lawdome_co2_mean[i] = mean(modeled_CO₂[index .+ (-4:3)])
             lawdome_co2_single_llik[i] = logpdf(Normal(lawdome_co2_mean[i], sqrt(σ_CO₂ice^2 + calibration_data[index, :lawdome_co2_sigma]^2)), calibration_data[index, :lawdome_co2_obs])
         end
 
@@ -395,8 +395,12 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 	# (log) posterior distribution:  posterior ~ likelihood * prior
 	function log_posterior(p)
 		log_prior = total_log_prior(p)
-		log_post = isfinite(log_prior) ? total_log_likelihood(p) + log_prior : -Inf
-		return log_post
+		# In case a parameter sample leads to non-physical model outcomes, return -Inf rather than erroring out.
+        try
+            log_post = isfinite(log_prior) ? total_log_likelihood(p) + log_prior : -Inf
+        catch
+            log_post = - Inf
+        end
 	end
 
 	return log_posterior
