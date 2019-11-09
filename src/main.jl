@@ -1,3 +1,9 @@
+# #-------------------------------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------------------------------
+# # This file carries out all of the runs to replicate the results from Errickson et al., 2019.
+# #-------------------------------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------------------------------
+
 # Load required Julia packages.
 using CSVFiles
 using DataFrames
@@ -60,6 +66,9 @@ thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, leng
 # SNEASY+FAIR-CH4
 # ----------------
 
+println("Begin calibrating SNEASY+FAIR-CH4.")
+
+# Load model file.
 include(joinpath(@__DIR__, "..", "calibration", "run_climate_models", "run_sneasy_fairch4.jl"))
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
@@ -91,6 +100,9 @@ names!(thin10k_chain_fairch4,  [Symbol(initial_parameters.parameter[i]) for i in
 # SNEASY+FUND-CH4
 # ----------------
 
+println("Begin calibrating SNEASY+FUND-CH4.")
+
+# Load model file.
 include(joinpath(@__DIR__, "..", "calibration", "run_climate_models", "run_sneasy_fundch4.jl"))
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
@@ -119,9 +131,12 @@ names!(thin100k_chain_fundch4, [Symbol(initial_parameters.parameter[i]) for i in
 names!(thin10k_chain_fundch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
 
 #-------------------
-# SNEASY+HECTOR-CH4
+# SNEASY+Hector-CH4
 # ------------------
 
+println("Begin calibrating SNEASY+Hector-CH4.")
+
+# Load model file.
 include(joinpath("..", "calibration", "run_climate_models", "run_sneasy_hectorch4.jl"))
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
@@ -153,6 +168,9 @@ names!(thin10k_chain_hectorch4,  [Symbol(initial_parameters.parameter[i]) for i 
 # SNEASY+MAGICC-CH4
 # ------------------
 
+println("Begin calibrating SNEASY+MAGICC-CH4.")
+
+# Load model file.
 include(joinpath("..", "calibration", "run_climate_models", "run_sneasy_magiccch4.jl"))
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
@@ -208,6 +226,8 @@ save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters
 # Calculate and Save BMA Weights.
 # ----------------------------------
 
+println("Calculating BMA Weights.")
+
 bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
 save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
 
@@ -237,6 +257,8 @@ magicc_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@_
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 
+println("Begin baseline climate projections for all SNEASY+CH4 models.")
+
 # Set RCP scenario.
 rcp_scenario = "RCP85"
 
@@ -252,6 +274,7 @@ magicc_baseline_climate = construct_sneasych4_baseline_case(:sneasy_magicc, rcp_
 #------------------------------------
 # Make baseline climate projections.
 #------------------------------------
+
 # SNEASY-FAIR
 fair_base_temp_baseline, fair_base_co2_baseline, fair_base_ch4_baseline, fair_base_ocean_heat_baseline,
 fair_base_oceanco2_baseline, fair_pulse_temperature_baseline, fair_pulse_co2_baseline,
@@ -333,12 +356,13 @@ save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc
 
 
 
-
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # Calculate Climate Projections for RCP 2.6 Scenario.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
+
+println("Begin baseline climate projections for all SNEASY+CH4 models under the RCP2.6 scenario.")
 
 # Set RCP scenario.
 rcp_scenario = "RCP26"
@@ -352,6 +376,7 @@ magicc_rcp26_climate = construct_sneasych4_baseline_case(:sneasy_magicc, rcp_sce
 #------------------------------------
 # Make RCP 2.6 climate projections.
 #------------------------------------
+
 # SNEASY-FAIR
 fair_base_temp_rcp26, fair_base_co2_rcp26, fair_base_ch4_rcp26, fair_base_ocean_heat_rcp26,
 fair_base_oceanco2_rcp26, fair_pulse_temperature_rcp26, fair_pulse_co2_rcp26,
@@ -433,14 +458,13 @@ save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_
 
 
 
-
-
-
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # Calculate Climate Projections for Outdated CH₄ Forcing Scenario.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
+
+println("Begin climate projections for all SNEASY+CH4 models using outdated CH₄ radiative forcing equations.")
 
 # Set RCP scenario.
 rcp_scenario = "RCP85"
@@ -543,6 +567,8 @@ save(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_ma
 # Calculate Climate Projections for Scenario Without Posterior Correlations.
 #----------------------------------------------------------------------------
 #----------------------------------------------------------------------------
+
+println("Begin climate projections for all SNEASY+CH4 models while neglecting posterior parameter correlations.")
 
 # Set RCP scenario.
 rcp_scenario = "RCP85"
@@ -652,14 +678,13 @@ save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s
 
 
 
-
-
-
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 # Calculate Climate Projections for Scenario Sampling U.S. Climate Sensitivity Distribution.
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
+
+println("Begin climate projections for all SNEASY+CH4 models while sampling ECS values from the U.S. ECS distribution.")
 
 # Set RCP scenario.
 rcp_scenario = "RCP85"
@@ -801,6 +826,8 @@ high_ci_interval       = 0.98
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 
+println("Calculate the SC-CH4 for the baseline climate projections.")
+
 # Load baseline temperature and CO₂ projections for each climate model.
 fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
 fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
@@ -821,7 +848,6 @@ magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__
 magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
 magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
 magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
-
 
 # Calculate marginal damages for DICE.
 dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
@@ -1052,12 +1078,13 @@ save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "
 
 
 
-
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 # Calculate SC-CH4 for RCP 2.6 Scenario.
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
+
+println("Calculate the SC-CH4 for the RCP2.6 climate projections.")
 
 # Load baseline temperature and CO₂ projections for each climate model.
 fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
@@ -1080,7 +1107,6 @@ magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__
 magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
 magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
 
-
 # Calculate marginal damages for DICE.
 dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
@@ -1104,8 +1130,6 @@ fund_scch4_fairch4_const30, fund_discounted_damages_fairch4_const30     = fund_s
 fund_scch4_fundch4_const30, fund_discounted_damages_fundch4_const30     = fund_scch4(fund_marginal_damages_fundch4[:,:,fund_good_indices_fundch4], fund_consumption_fundch4[:,:,fund_good_indices_fundch4], fund_population_fundch4[:,:,fund_good_indices_fundch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4[:,:,fund_good_indices_hectorch4], fund_consumption_hectorch4[:,:,fund_good_indices_hectorch4], fund_population_hectorch4[:,:,fund_good_indices_hectorch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4[:,:,fund_good_indices_magiccch4], fund_consumption_magiccch4[:,:,fund_good_indices_magiccch4], fund_population_magiccch4[:,:,fund_good_indices_magiccch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-
 
 #-------------------------------------------------------------------------------------------------
 # Save Outdated CH₄ Forcing SC-CH4 Estimates and Discounted Damage Projections for DICE and FUND.
@@ -1128,6 +1152,8 @@ save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", 
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 
+println("Calculate the SC-CH4 for the outdated CH₄ radiative forcing climate projections.")
+
 # Load baseline temperature and CO₂ projections for each climate model.
 fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_fair", "base_temperature.csv"))))
 fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_fair", "pulse_temperature.csv"))))
@@ -1148,7 +1174,6 @@ magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__
 magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_magicc", "pulse_temperature.csv"))))
 magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_magicc", "base_co2.csv"))))
 magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_forcing", "s_magicc", "pulse_co2.csv"))))
-
 
 # Calculate marginal damages for DICE.
 dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
@@ -1174,8 +1199,6 @@ fund_scch4_fundch4_const30, fund_discounted_damages_fundch4_const30     = fund_s
 fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4[:,:,fund_good_indices_hectorch4], fund_consumption_hectorch4[:,:,fund_good_indices_hectorch4], fund_population_hectorch4[:,:,fund_good_indices_hectorch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4[:,:,fund_good_indices_magiccch4], fund_consumption_magiccch4[:,:,fund_good_indices_magiccch4], fund_population_magiccch4[:,:,fund_good_indices_magiccch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 
-
-
 #-------------------------------------------------------------------------------------------------
 # Save Outdated CH₄ Forcing SC-CH4 Estimates and Discounted Damage Projections for DICE and FUND.
 #-------------------------------------------------------------------------------------------------
@@ -1190,11 +1213,14 @@ save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_forcing", "fund", "
 save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_forcing", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
 
 
+
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 # Calculate SC-CH4 for Climate Projections Without Posterior Parameter Correlations.
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
+
+println("Calculate the SC-CH4 for climate projections that neglect posterior climate parameter correlations.")
 
 # Load indices for successful climate model runs (in case radnomly sampled parameters produced non-physical result/model error).
 good_indices_corr_fairch4   = DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "good_indices.csv"))).indices
@@ -1223,7 +1249,6 @@ magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__
 magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))[good_indices_corr_magiccch4, :]
 magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))[good_indices_corr_magiccch4, :]
 
-
 # Calculate marginal damages for DICE.
 dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
@@ -1247,8 +1272,6 @@ fund_scch4_fairch4_const30, fund_discounted_damages_fairch4_const30     = fund_s
 fund_scch4_fundch4_const30, fund_discounted_damages_fundch4_const30     = fund_scch4(fund_marginal_damages_fundch4[:,:,fund_good_indices_fundch4], fund_consumption_fundch4[:,:,fund_good_indices_fundch4], fund_population_fundch4[:,:,fund_good_indices_fundch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4[:,:,fund_good_indices_hectorch4], fund_consumption_hectorch4[:,:,fund_good_indices_hectorch4], fund_population_hectorch4[:,:,fund_good_indices_hectorch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4[:,:,fund_good_indices_magiccch4], fund_consumption_magiccch4[:,:,fund_good_indices_magiccch4], fund_population_magiccch4[:,:,fund_good_indices_magiccch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-
 
 #-------------------------------------------------------------------------------------------------
 # Save SC-CH4 Estimates Without Posterior Parameter Correlations.
@@ -1293,6 +1316,8 @@ save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund"
 #---------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------
 
+println("Calculate the SC-CH4 for climate projections using the ECS distribution from official U.S. SC-CH4 estimates.")
+
 # Load indices for successful climate model runs (in case randomly sampled parameters produced non-physical result/model error).
 good_indices_ecs_fairch4   = DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "good_indices.csv"))).indices
 good_indices_ecs_fundch4   = DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "good_indices.csv"))).indices
@@ -1320,7 +1345,6 @@ magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__
 magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))[good_indices_ecs_magiccch4, :]
 magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))[good_indices_ecs_magiccch4, :]
 
-
 # Calculate marginal damages for DICE.
 dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
@@ -1344,7 +1368,6 @@ fund_scch4_fairch4_const30, fund_discounted_damages_fairch4_const30     = fund_s
 fund_scch4_fundch4_const30, fund_discounted_damages_fundch4_const30     = fund_scch4(fund_marginal_damages_fundch4[:,:,fund_good_indices_fundch4], fund_consumption_fundch4[:,:,fund_good_indices_fundch4], fund_population_fundch4[:,:,fund_good_indices_fundch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4[:,:,fund_good_indices_hectorch4], fund_consumption_hectorch4[:,:,fund_good_indices_hectorch4], fund_population_hectorch4[:,:,fund_good_indices_hectorch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
 fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4[:,:,fund_good_indices_magiccch4], fund_consumption_magiccch4[:,:,fund_good_indices_magiccch4], fund_population_magiccch4[:,:,fund_good_indices_magiccch4], pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
 
 #-------------------------------------------------------------------------------------------------
 # Save SC-CH4 Estimates Using U.S. Climate Sensitivity Distribution.
@@ -1381,3 +1404,4 @@ save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fu
 save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
 save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
 
+println("SC-CH4 Replication Analysis Complete.")
