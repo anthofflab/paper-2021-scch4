@@ -223,7 +223,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     # Load calibration data/observations.
     calibration_data = load_calibration_data(start_year, end_year)
 
-	# Calculate indices for each year that has an observation in calibration data sets.
+    # Calculate indices for each year that has an observation in calibration data sets.
     indices_temperature_data   = findall(x-> !ismissing(x), calibration_data.hadcrut_temperature_obs)
     indices_oceanheat_data     = findall(x-> !ismissing(x), calibration_data.ocean_heat_obs)
     indices_oceanco2_flux_data = findall(x-> !ismissing(x), calibration_data.oceanco2_flux_obs)
@@ -251,18 +251,18 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     lawdome_ch4_single_llik_iid = zeros(length(lawdome_ch4_iid_indices))
     lawdome_ch4_block_llik_ar1  = zeros(length(lawdome_ch4_ar1_start_index))
 
-	# Allocate vectors to store model output being calibrated to the observations.
-	modeled_CO₂           = zeros(n)
-	modeled_CH₄           = zeros(n)
-	modeled_oceanCO₂_flux = zeros(n)
-	modeled_temperature   = zeros(n)
-	modeled_ocean_heat    = zeros(n)
+    # Allocate vectors to store model output being calibrated to the observations.
+    modeled_CO₂           = zeros(n)
+    modeled_CH₄           = zeros(n)
+    modeled_oceanCO₂_flux = zeros(n)
+    modeled_temperature   = zeros(n)
+    modeled_ocean_heat    = zeros(n)
 
     #---------------------------------------------------------------------------------------------------------------------------------------
     # Create a function to calculate the log-likelihood for the observations, assuming residual independence across calibration data sets.
     #---------------------------------------------------------------------------------------------------------------------------------------
 
-	function total_log_likelihood(p::Array{Float64,1})
+    function total_log_likelihood(p::Array{Float64,1})
 
         # Assign names to uncertain statistical process parameters used in log-likelihood calculations.
         σ_temperature     = p[1]
@@ -278,7 +278,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
         ρ_CH₄ice          = p[11]
 
         # Run an instance of SNEASY+CH4 with sampled parameter set and return model output being compared to observations.
-		f_run_model(p, modeled_CO₂, modeled_CH₄, modeled_oceanCO₂_flux, modeled_temperature, modeled_ocean_heat)
+        f_run_model(p, modeled_CO₂, modeled_CH₄, modeled_oceanCO₂_flux, modeled_temperature, modeled_ocean_heat)
 
 
         #---------------------------------------------------------------------------
@@ -418,15 +418,15 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
         # Calculate the total log-likelihood (assuming residual independence across data sets).
         llik = llik_temperature + llik_ocean_heat + llik_maunaloa_co2 + llik_lawdome_co2 + llik_oceanco2_flux + llik_noaa_ch4 + llik_lawdome_ch4_iid + llik_lawdome_ch4_ar1
 
-		return llik
-	end
+        return llik
+    end
 
 
     #---------------------------------------------------------------------------------------------------------------
     # Create a function to calculate the log-posterior of uncertain parameters 'p' (posterior ∝ likelihood * prior)
     #---------------------------------------------------------------------------------------------------------------
 
-	function log_posterior(p)
+    function log_posterior(p)
 
         # Calculate log-prior
         log_prior = total_log_prior(p)
@@ -437,8 +437,8 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
         catch
             log_post = - Inf
         end
-	end
+    end
 
     # Return log posterior function given user specifications.
-	return log_posterior
+    return log_posterior
 end

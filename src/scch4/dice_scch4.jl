@@ -113,7 +113,7 @@ function dice_scch4(annual_marginal_damages::Array{Float64,2}, pc_consumption::A
     #Create vector of years DICE is run (note DICE2013 has 5 year timesteps).
     dice_annual_years = collect(2010:end_year)
 
-    # Find index in annual years when CH₄ emission pulse occurs.
+    # Find timestep index in annual years when CH₄ emission pulse occurs.
     pulse_index_annual = findall(x -> x == pulse_year, dice_annual_years)[1]
 
     # Calculate number of SC-CH4 values to calculate.
