@@ -15,7 +15,7 @@ function create_iam_fund(;end_year::Int=2300)
     # Create an instance of Mimi-FUND (time dimension will be set based on nsteps and offset by 1).
     m = MimiFUND.get_model(nsteps=n_steps-1)
 
-    # Remove climate and welfare components.
+    # Remove climate components.
     delete!(m, :climateco2cycle)
     delete!(m, :climatech4cycle)
     delete!(m, :climaten2ocycle)

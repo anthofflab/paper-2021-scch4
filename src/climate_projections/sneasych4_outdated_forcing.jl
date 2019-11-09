@@ -15,16 +15,33 @@ include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
 include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
 
 
+#############################################################################################################################
+# RUN VERSION OF SNEASY+CH4 USING OUTDATED CH₄ RADIATIVE FORCING EQUATIONS.
+#############################################################################################################################
+# Description: This creates a function that runs two versions of SNEASY+CH4 (a standard run, and a run with an extra pulse
+#              of CH₄ emissions in a user-specified year) and saves the key model projection output. It uses outdated equations
+#              that do not account for the recent upward revision to CH₄ radiative forcing from Etminan et al., 2016.
+#
+# Function Arguments:
+#
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#       rcp           = A string identifying the RCP emissions and forcing scenario to use (options are "RCP26" and "RCP85").
+#       pulse_year    = The year to add a pulse of methane emissions.
+#       pulse_size    = The size of the methane emissions pulse in MtCH₄.
+#       end_year      = The final year to run the model for.
+#----------------------------------------------------------------------------------------------------------------------------
+
 function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String,  pulse_year::Int, pulse_size::Float64, end_year::Int)
 
-    #---------------------------------------
-    # Load and clean up some data.
-    #---------------------------------------
+    #-------------------------------------------
+    # Load and clean up forcing scenario data.
+    #-------------------------------------------
 
     # Load RCP scenario emissions data.
     rcp_emissions = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp*"_emissions.csv"), skiplines_begin=36))
 
-    # Crop emissions to proper time periods (1765-end_year)
+    # Crop emissions to proper time periods (1765-end_year).
     rcp_indices = findall((in)(collect(1765:end_year)), rcp_emissions.YEARS)
     rcp_emissions = rcp_emissions[rcp_indices, :]
 
@@ -50,7 +67,7 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
     obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
 
-    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year (note: RCP CH₄ emissions in megatonnes).
+    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
     pulse_year_index = findall(x -> x == pulse_year, rcp_emissions.YEARS)[1]
     ch4_emissions_pulse[pulse_year_index] = ch4_emissions_pulse[pulse_year_index] + pulse_size
@@ -59,6 +76,8 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
     #-----------------------------------------------------------------------------------
     # Create two versions of SNEASY+CH4 based on the specific methane cycle selected.
     #-----------------------------------------------------------------------------------
+    # Note: These models do not use the updated Etminan et al. 2016 CH₄ forcing equations.
+
     if climate_model == :sneasy_fair
         sneasych4_base  = create_sneasy_fairch4(rcp_scenario=rcp, etminan_ch4_forcing=false)
         sneasych4_pulse = create_sneasy_fairch4(rcp_scenario=rcp, etminan_ch4_forcing=false)
@@ -97,12 +116,12 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
 
 
     #---------------------------------------------------------------------------------------------------------------------
-    # Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated uncertain model parameters.
+    # Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated posterior model parameters.
     #---------------------------------------------------------------------------------------------------------------------
 
     function sneasych4_outdated_forcing(calibrated_parameters::Array{Float64,2}, ci_interval_1::Float64, ci_interval_2::Float64)
 
-        # Caluclate number of calibrated parameter samples (each row = one sample of uncertain parameters, each column = one specific parameter)
+        # Calculate number of calibrated parameter samples (row = sample from joint posterior distribution, column = specific parameter).
         number_samples = size(calibrated_parameters,1)
 
         # Pre-allocate arrays to store SNEASY+CH4 results.

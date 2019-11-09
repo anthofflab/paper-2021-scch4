@@ -2,21 +2,21 @@
 # Create a function to run SNEASY-FAIR and return model output used in calibration.
 #-------------------------------------------------------------------------------------
 
-# Load require model files
+# Load model file.
 include("../../src/create_models/create_sneasy_fairch4.jl")
 
-# Create a function that will run SNEASY-FAIR and return required model output.
 function construct_run_sneasy_fairch4(calibration_end_year::Int)
 
-    # Load an instance of SNEASY-FAIR (with option of how many years to calibrate model for).
+    # Load an instance of SNEASY-FAIR.
     m = create_sneasy_fairch4(start_year=1765, end_year=calibration_end_year, etminan_ch4_forcing=true)
 
-    # Get indices needed to normalize temperature anomalues (currently using 1861-1880 mean).
+    # Get indices needed to normalize temperature anomalies relative to 1861-1880 mean.
     index_1861, index_1880 = findall((in)([1861, 1880]), collect(1765:calibration_end_year))
 
     # Calculate number of time periods to run model for.
     n_steps = length(1765:calibration_end_year)
 
+    # Given user settings, create a function to run SNEASY-FAIR and return model output used for calibration.
     function run_sneasy_fairch4!(
         params::Array{Float64,1},
         modeled_CO₂::Vector{Float64},
@@ -25,7 +25,8 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
         modeled_temperature::Vector{Float64},
         modeled_ocean_heat::Vector{Float64})
 
-        # Assign names to uncertain model and initial condition parameters (assumes p = full vector of uncertain parameters).
+        # Assign names to uncertain model and initial condition parameters for convenience.
+        # Note: This assumes "params" is the full vector of uncertain parameters with the same ordering as in "create_log_posterior.jl".
         temperature_0     = params[12]
         ocean_heat_0      = params[13]
         CO₂_0             = params[14]
@@ -42,9 +43,8 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
         τ_troposphere     = params[25]
         CH₄_natural       = params[26]
 
-
         #----------------------------------------------------------
-        # Set SNEASY-FAIR with sampled parameter values.
+        # Set SNEASY-FAIR to use sampled parameter values.
         #----------------------------------------------------------
 
         # ---- Diffusion Ocean Energy balance CLIMate model (DOECLIM) ---- #
@@ -79,7 +79,6 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
         # Run model.
         run(m)
 
-
         #----------------------------------------------------------
         # Calculate model output being compared to observations.
         #----------------------------------------------------------
@@ -102,5 +101,6 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
         return
     end
 
-   return run_sneasy_fairch4!
+    # Return function.
+    return run_sneasy_fairch4!
 end

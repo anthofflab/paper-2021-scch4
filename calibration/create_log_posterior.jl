@@ -1,10 +1,13 @@
+# #-------------------------------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------------------------------
+# # This file contains functions used to calculate the log-posterior.
+# #-------------------------------------------------------------------------------------------------------
+# #-------------------------------------------------------------------------------------------------------
 
-#fix sort (should be sort!())
 
-#RUN THIS THEN CHANGE INITIAL CONDITIONS OF CH4 IID ICE
 
 #######################################################################################################################
-# CALCULATE AR(1) LOG-LIKELIHOOD
+# CALCULATE AR(1) LOG-LIKELIHOOD.
 ########################################################################################################################
 # Description: This function calculates the AR(1) log-likelihood in terms of the data-model residuls when accounting for
 #              time-varying observation errors. It follows "The Effects of Time-Varying Observation Errors on Semi-Empirical
@@ -12,10 +15,10 @@
 #
 # Function Arguments:
 #
-#       residuals: A vector of data-model residuals.
-#       σ:         AR(1) innovation standard deviation.
-#       ρ:         AR(1) autocorrelation term.
-#       ϵ:         A vector of time-varying observation error estimates (from calibration data sets).
+#       residuals = A vector of data-model residuals.
+#       σ         = AR(1) innovation standard deviation.
+#       ρ         = AR(1) autocorrelation term.
+#       ϵ         = A vector of time-varying observation error estimates (from calibration data sets).
 #----------------------------------------------------------------------------------------------------------------------
 
 function hetero_logl_ar1(residuals::Array{Float64,1}, σ::Float64, ρ::Float64, ϵ::Array{Union{Float64, Missings.Missing},1})
@@ -39,10 +42,22 @@ end
 
 
 
-# Create a function to calculate total (log) prior for model/statistical parameters (spefiic to model being calibrated)
+#######################################################################################################################
+# CALCULATE TOTAL (LOG) PRIOR PROBABILITY.
+#######################################################################################################################
+# Description: This creates a function that will calculates the total (log) prior probability of the uncertain model,
+#              initial condition, and statistical process parameters specific to the CH₄ cycle model selected.
+#
+# Function Arguments:
+#
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#----------------------------------------------------------------------------------------------------------------------
+
 function construct_log_prior(climate_model::Symbol)
 
-    #Decalre all prior distributions for all uncertain parameters found in the four versions of SNEASY+CH4.
+    # Declare all prior distributions for all uncertain parameters found in the four versions of SNEASY+CH4.
+
     # -----------------------------------------
     # Statistical Process Priors.
     # -----------------------------------------
@@ -97,7 +112,7 @@ function construct_log_prior(climate_model::Symbol)
     # Create a function unique to each CH₄ cycle model to calculate prior distribution for uncertain CH₄ parameters.
     #----------------------------------------------------------------------------------------------------------------
 
-    # CH₄ prior function.
+    # CH₄ prior function (requires the particular ordering of uncertain parameters used below).
     ch4_model_priors =
 
         # Create function based on uncertain SNEASY-FAIR CH₄ cycle parameters.
@@ -108,7 +123,7 @@ function construct_log_prior(climate_model::Symbol)
                 return logpdf(prior_τ_troposphere, τ_troposphere) + logpdf(prior_CH₄_natural, CH₄_natural)
             end
 
-        # Create function based on uncertain SNEASY-FUND CH₄ cycle parameters (note, FUND does not have extra uncertain parameters).
+        # Create function based on uncertain SNEASY-FUND CH₄ cycle parameters.
         elseif climate_model == :sneasy_fund
             function(p)
                 τ_troposphere = p[25]
@@ -129,7 +144,6 @@ function construct_log_prior(climate_model::Symbol)
         else
             error("Incorrect climate model selected. Options include :sneasy_fair, :sneasy_fund, :sneasy_hector, or :sneasy_magicc.")
         end
-
 
     #------------------------------------------------------------------------------------
     # Create function that returns the log-prior of all uncertain model parameters.
@@ -163,7 +177,7 @@ function construct_log_prior(climate_model::Symbol)
         CO₂_fertilization = p[23]
         CO₂_diffusivity   = p[24]
 
-        # Return total log-prior of all uncertain parameters.
+        # Return total log-prior of all uncertain parameters (using "ch4_model_priors" function to account for different versions of SNEASY+CH4).
         log_prior = logpdf(prior_σ_temperature, σ_temperature) + logpdf(prior_σ_ocean_heat, σ_ocean_heat) + logpdf(prior_σ_CO₂inst, σ_CO₂inst) + logpdf(prior_σ_CO₂ice, σ_CO₂ice) + logpdf(prior_σ_CH₄inst, σ_CH₄inst) + logpdf(prior_σ_CH₄ice, σ_CH₄ice) +
                     logpdf(prior_ρ_temperature, ρ_temperature) + logpdf(prior_ρ_ocean_heat, ρ_ocean_heat) + logpdf(prior_ρ_CO₂inst, ρ_CO₂inst) + logpdf(prior_ρ_CH₄inst, ρ_CH₄inst) + logpdf(prior_ρ_CH₄ice, ρ_CH₄ice) +
                     logpdf(prior_temperature_0, temperature_0) + logpdf(prior_ocean_heat_0, ocean_heat_0) + logpdf(prior_CO₂_0, CO₂_0) + logpdf(prior_CH₄_0, CH₄_0) + logpdf(prior_N₂O_0, N₂O_0) +
@@ -179,15 +193,30 @@ function construct_log_prior(climate_model::Symbol)
 end
 
 
+
+#######################################################################################################################
+# CALCULATE LOG POSTERIOR.
+#######################################################################################################################
+# Description: This creates a function that will calculates the log-posterior probability of the uncertain model,
+#              initial condition, and statistical process parameters specific to the CH₄ cycle model selected.
+#
+# Function Arguments:
+#
+#       f_run_model   = A function that runs the specific version of SNEASY+CH4 and returns the output being calibrated to observations.
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#       end_year      = The final year to run the model calibration (defaults to 2017).
+#----------------------------------------------------------------------------------------------------------------------
+
 function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::Int=2017)
 
-    # Initialize models in 1765.
+    # Initialize model to start in 1765.
     start_year = 1765
 
     # Get log-prior function based on version of SNEASY+CH4 being used.
     total_log_prior = construct_log_prior(climate_model)
 
-    # Create a vector of calibration years and parameter for number of years.
+    # Create a vector of calibration years and calculate total number of years to run model.
     calibration_years = collect(start_year:end_year)
     n = length(calibration_years)
 
@@ -205,7 +234,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     # Calculate indices for i.i.d. and AR(1) blocks in CH₄ ice core data.
     lawdome_ch4_ar1_start_index, lawdome_ch4_ar1_end_index, lawdome_ch4_ar1_indices, lawdome_ch4_iid_indices = ch4_indices(calibration_data.lawdome_ch4_obs)
 
-    # Allocate arrays to calculate data-model residuals.
+    # Allocate arrays to store data-model residuals.
     temperature_residual     = zeros(length(indices_temperature_data))
     ocean_heat_residual      = zeros(length(indices_oceanheat_data))
     maunaloa_co2_residual    = zeros(length(indices_maunaloa_co2_data))
@@ -222,7 +251,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     lawdome_ch4_single_llik_iid = zeros(length(lawdome_ch4_iid_indices))
     lawdome_ch4_block_llik_ar1  = zeros(length(lawdome_ch4_ar1_start_index))
 
-	# Allocate vectors to store model output being compared to the observations.
+	# Allocate vectors to store model output being calibrated to the observations.
 	modeled_CO₂           = zeros(n)
 	modeled_CH₄           = zeros(n)
 	modeled_oceanCO₂_flux = zeros(n)
@@ -365,7 +394,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 
         # Use counter to track residuals for various blocks (for convenience).
         let
-        counter =0
+        counter = 0
 
             # Loop through every AR(1) block.
             for block = 1:length(lawdome_ch4_ar1_start_index)
@@ -392,10 +421,17 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 		return llik
 	end
 
-	# (log) posterior distribution:  posterior ~ likelihood * prior
+
+    #---------------------------------------------------------------------------------------------------------------
+    # Create a function to calculate the log-posterior of uncertain parameters 'p' (posterior ∝ likelihood * prior)
+    #---------------------------------------------------------------------------------------------------------------
+
 	function log_posterior(p)
-		log_prior = total_log_prior(p)
-		# In case a parameter sample leads to non-physical model outcomes, return -Inf rather than erroring out.
+
+        # Calculate log-prior
+        log_prior = total_log_prior(p)
+
+        # In case a parameter sample leads to non-physical model outcomes, return -Inf rather than erroring out.
         try
             log_post = isfinite(log_prior) ? total_log_likelihood(p) + log_prior : -Inf
         catch
@@ -403,5 +439,6 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
         end
 	end
 
+    # Return log posterior function given user specifications.
 	return log_posterior
 end

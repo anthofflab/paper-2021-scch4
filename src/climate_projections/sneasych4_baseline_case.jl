@@ -15,17 +15,33 @@ include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
 include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
 
 
+#############################################################################################################################
+# RUN BASELINE VERSION OF SNEASY+CH4.
+#############################################################################################################################
+# Description: This creates a function that runs two baseline versions of SNEASY+CH4 (a standard run, and a run with
+#              an extra pulse of CH₄ emissions in a user-specified year) and saves the key model projection output.
+#
+# Function Arguments:
+#
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#       rcp           = A string identifying the RCP emissions and forcing scenario to use (options are "RCP26" and "RCP85").
+#       pulse_year    = The year to add a pulse of methane emissions.
+#       pulse_size    = The size of the methane emissions pulse in MtCH₄.
+#       end_year      = The final year to run the model for.
+#----------------------------------------------------------------------------------------------------------------------------
+
 function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  pulse_year::Int, pulse_size::Float64, end_year::Int)
 
-    #---------------------------------------
-    # Load and clean up some data.
-    #---------------------------------------
+    #------------------------------------------
+    # Load and clean up forcing scenario data.
+    #------------------------------------------
 
     # Load RCP scenario emissions data.
     rcp_emissions = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp*"_emissions.csv"), skiplines_begin=36))
 
-    # Crop emissions to proper time periods (1765-end_year)
-    rcp_indices = findall((in)(collect(1765:end_year)), rcp_emissions.YEARS)
+    # Crop emissions to proper time periods (1765-end_year).
+    rcp_indices   = findall((in)(collect(1765:end_year)), rcp_emissions.YEARS)
     rcp_emissions = rcp_emissions[rcp_indices, :]
 
     # Get years the model is run for (initializing it in 1765).
@@ -50,7 +66,7 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
     obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
 
-    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year (note: RCP CH₄ emissions in megatonnes).
+    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
     pulse_year_index = findall(x -> x == pulse_year, rcp_emissions.YEARS)[1]
     ch4_emissions_pulse[pulse_year_index] = ch4_emissions_pulse[pulse_year_index] + pulse_size
@@ -97,13 +113,13 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
 
 
     #---------------------------------------------------------------------------------------------------------------------
-    # Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated uncertain model parameters.
+    # Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated posterior model parameters.
     #---------------------------------------------------------------------------------------------------------------------
 
     function sneasych4_base_case(calibrated_parameters::Array{Float64,2}, ci_interval_1::Float64, ci_interval_2::Float64)
 
-        # Caluclate number of calibrated parameter samples (each row = one sample of uncertain parameters, each column = one specific parameter)
-        number_samples = size(calibrated_parameters,1)
+        # Calculate number of calibrated parameter samples (row = sample from joint posterior distribution, column = specific parameter).
+        number_samples = size(calibrated_parameters, 1)
 
         # Pre-allocate arrays to store SNEASY+CH4 results.
         base_temperature  =   zeros(Union{Missing, Float64}, number_samples, number_years)
@@ -175,7 +191,7 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
             run(sneasych4_base)
             run(sneasych4_pulse)
 
-            # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: Both models use same estimated noise).
+            # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: both models use same estimated noise).
             ar1_temperature[:] = ar1_hetero_sim(number_years, ρ_temperature, sqrt.(obs_error_temperature.^2 .+ σ_temperature^2))
             ar1_co2[:]         = co2_mixed_noise(1765, end_year, σ_CO₂ice, σ_CO₂inst, 1.2, 0.12, ρ_CO₂inst)
             ar1_ch4[:]         = ch4_mixed_noise(1765, end_year, ρ_CH₄ice, σ_CH₄ice, 15.0, ρ_CH₄inst, σ_CH₄inst, obs_error_noaa_ch4)

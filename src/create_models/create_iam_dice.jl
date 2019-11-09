@@ -12,7 +12,7 @@ function create_iam_dice(;end_year::Int=2300)
     # Create an instance of DICE2013.
     m = MimiDICE2013.get_model()
 
-    # Set model time horizon.
+    # Set model time horizon (note DICE runs on 5-year timesteps).
     set_dimension!(m, :time, 2010:5:end_year)
 
     # Calculate default number of model timesteps.

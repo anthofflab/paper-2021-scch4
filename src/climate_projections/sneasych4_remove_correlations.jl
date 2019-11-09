@@ -15,16 +15,33 @@ include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
 include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
 
 
+##################################################################################################################################
+# RUN VERSION OF SNEASY+CH4 THAT NEGLECTS POSTERIOR PARAMETER CORRELATIONS.
+##################################################################################################################################
+# Description: This creates a function that runs two versions of SNEASY+CH4 (a standard run, and a run with an extra pulse
+#              of CH₄ emissions in a user-specified year) and saves the key model projection output. It samples the posterior
+#              parameters independently to remove any posterior correlations that emerged during model calibration.
+#
+# Function Arguments:
+#
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#       rcp           = A string identifying the RCP emissions and forcing scenario to use (options are "RCP26" and "RCP85").
+#       pulse_year    = The year to add a pulse of methane emissions.
+#       pulse_size    = The size of the methane emissions pulse in MtCH₄.
+#       end_year      = The final year to run the model for.
+#----------------------------------------------------------------------------------------------------------------------------------
+
 function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::String,  pulse_year::Int, pulse_size::Float64, end_year::Int)
 
-    #---------------------------------------
-    # Load and clean up some data.
-    #---------------------------------------
+    #-------------------------------------------
+    # Load and clean up forcing scenario data.
+    #-------------------------------------------
 
     # Load RCP scenario emissions data.
     rcp_emissions = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp*"_emissions.csv"), skiplines_begin=36))
 
-    # Crop emissions to proper time periods (1765-end_year)
+    # Crop emissions to proper time periods (1765-end_year).
     rcp_indices = findall((in)(collect(1765:end_year)), rcp_emissions.YEARS)
     rcp_emissions = rcp_emissions[rcp_indices, :]
 
@@ -50,7 +67,7 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
     obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
 
-    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year (note: RCP CH₄ emissions in megatonnes).
+    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
     pulse_year_index = findall(x -> x == pulse_year, rcp_emissions.YEARS)[1]
     ch4_emissions_pulse[pulse_year_index] = ch4_emissions_pulse[pulse_year_index] + pulse_size
@@ -96,13 +113,13 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
     get_ch4_results! = create_get_ch4_results_function(climate_model)
 
 
-    #---------------------------------------------------------------------------------------------------------------------
-    # Given user-specified settings, create a function to run SNEASY+CH4 over the calibrated uncertain model parameters.
-    #---------------------------------------------------------------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------------------------
+    # Given user-specified settings, create a function to run SNEASY+CH4 over the independently sampled posterior parameters.
+    #-------------------------------------------------------------------------------------------------------------------------
 
     function sneasych4_remove_correlations(calibrated_parameters::Array{Float64,2}, ci_interval_1::Float64, ci_interval_2::Float64)
 
-        # Caluclate number of calibrated samples (each row = one sample of uncertain parameters, each column = one specific parameter)
+        # Calculate number of calibrated parameter samples (row = sample from joint posterior distribution, column = specific parameter).
         number_samples = size(calibrated_parameters,1)
 
         # Calculate random indices to sample each posterior parameter independently (without repeating values).
@@ -178,7 +195,7 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
             update_param!(sneasych4_pulse, :α, rf_scale_aerosol)
             update_ch4_params!(sneasych4_pulse, Vector(calibrated_parameters[i,:]))
 
-            # Wrap code in a try/catch statement in case non-physical parameter combinations cause a model error.
+            # Wrap code in a try/catch statement in case non-physical parameter combinations produce a model error.
             try
 
                 # Run both models.
@@ -206,10 +223,10 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
                 # Normalize temperatures to be relative to the 1861-1880 mean.
                 base_temperature[i,:]  = base_temperature[i,:] .- mean(base_temperature[i, indices_1861_1880])
                 pulse_temperature[i,:] = pulse_temperature[i,:] .- mean(pulse_temperature[i, indices_1861_1880])
-            
+
             catch
 
-                # Set values to -99999.99 if model throws an error.
+                # Set values to -99999.99 if non-physical parameter combinations produce a model error.
                 base_temperature[i,:]  .= -99999.99
                 base_co2[i,:]          .= -99999.99
                 base_ocean_heat[i,:]   .= -99999.99
@@ -220,11 +237,11 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
             end
         end
 
-        # Distinguish between model indices that caused a model error or not.
+        # Distinguish between model indices that caused a model error and those that did not.
         error_indices = findall(x-> x == -99999.99, base_temperature[:,1])
         good_indices  = findall(x-> x != -99999.99, base_temperature[:,1])
 
-        # Calculate credible intervals for base model projections *using model indices that did not cause errors.
+        # Calculate credible intervals for base model projections using model indices that did not cause errors.
         ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature[good_indices,:], ci_interval_1, ci_interval_2)
         ci_co2         = get_confidence_interval(collect(1765:end_year), base_co2[good_indices,:],         ci_interval_1, ci_interval_2)
         ci_ocean_heat  = get_confidence_interval(collect(1765:end_year), base_ocean_heat[good_indices,:],  ci_interval_1, ci_interval_2)

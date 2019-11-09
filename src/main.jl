@@ -6,16 +6,8 @@ using LinearAlgebra
 using Mimi
 using RobustAdaptiveMetropolisSampler
 
-
-## !! Make sure to reset number samples for ECS and thinned chaains
-##
-##
-##
-##
-##
-
 # A folder with this name will be created to store all of the replication results.
-results_folder_name = "all_models_nov3_100sample_test_NO_BMA"
+results_folder_name = "my_results"
 
 #####################################################################################################
 #####################################################################################################
@@ -46,7 +38,7 @@ include(joinpath("..", "calibration", "create_log_posterior.jl"))
 calibration_end_year = 2017
 
 # The length of the final chain (i.e. number of samples from joint posterior pdf after discarding burn-in period values).
-final_chain_length = 1000
+final_chain_length = 5_000_000
 
 # Length of burn-in period (i.e. number of initial MCMC samples to discard).
 burn_in_length = final_chain_length * 0.1
@@ -61,8 +53,8 @@ mcmc_step_size = (initial_parameters[:, :upper_bound] .- initial_parameters[:, :
 n_mcmc_samples = Int(final_chain_length + burn_in_length)
 
 # Create equally-spaced indices to thin chains down to 10,000 and 100,000 samples.
-thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=100)))
-thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=50)))
+thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=100_000)))
+thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=10_000)))
 
 #-----------------
 # SNEASY+FAIR-CH4
@@ -216,8 +208,8 @@ save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters
 # Calculate and Save BMA Weights.
 # ----------------------------------
 
-#bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
-#save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
+bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
+save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
 
 
 #----------------------------------------------------------------------
@@ -689,7 +681,7 @@ magicc_ecs_climate = construct_sneasych4_ecs(:sneasy_magicc, rcp_scenario, pulse
 
 # Create a sample from the Roe & Baker climate sensitivty distribution using U.S. calibration.
 norm_dist = Truncated(Normal(0.6198, 0.1841), -0.2, 0.88)
-ecs_sample = 1.2 ./ (1 .- rand(norm_dist, 100))
+ecs_sample = 1.2 ./ (1 .- rand(norm_dist, 100_000))
 
 #----------------------------------------------------------
 # Make climate projections without posterior correlations.

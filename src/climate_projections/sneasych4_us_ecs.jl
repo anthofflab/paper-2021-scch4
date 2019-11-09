@@ -15,16 +15,34 @@ include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
 include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
 
 
+#############################################################################################################################
+# RUN VERSION OF SNEASY+CH4 SAMPLING FROM EQUILIBRIUM CLIMATE SENSITIVITY DISTRIBUTION USED FOR U.S. SC-CH4 ESTIMATES.
+#############################################################################################################################
+# Description: This creates a function that runs two versions of SNEASY+CH4 (a standard run, and a run with an extra pulse
+#              of CH₄ emissions in a user-specified year) and saves the key model projection output. It samples equilibrium
+#              climate sensitivity values from the distribution used to calculate official U.S. SC-CH4 estimates. All other
+#              uncertain model, initial condition, and statistical process parameters fixed at their mean posterior values.
+#
+# Function Arguments:
+#
+#       climate_model = A symbol identifying the specific version of SNEASY+CH4 (options are :sneasy_fair, :sneasy_fund,
+#                       :sneasy_hector, and :sneasy_magicc).
+#       rcp           = A string identifying the RCP emissions and forcing scenario to use (options are "RCP26" and "RCP85").
+#       pulse_year    = The year to add a pulse of methane emissions.
+#       pulse_size    = The size of the methane emissions pulse in MtCH₄.
+#       end_year      = The final year to run the model for.
+#----------------------------------------------------------------------------------------------------------------------------
+
 function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year::Int, pulse_size::Float64, end_year::Int)
 
-    #---------------------------------------
-    # Load and clean up some data.
-    #---------------------------------------
+    #-------------------------------------------
+    # Load and clean up forcing scenario data.
+    #-------------------------------------------
 
     # Load RCP scenario emissions data.
     rcp_emissions = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "model_data", rcp*"_emissions.csv"), skiplines_begin=36))
 
-    # Crop emissions to proper time periods (1765-end_year)
+    # Crop emissions to proper time periods (1765-end_year).
     rcp_indices = findall((in)(collect(1765:end_year)), rcp_emissions.YEARS)
     rcp_emissions = rcp_emissions[rcp_indices, :]
 
@@ -50,11 +68,10 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
     obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
 
-    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year (note: RCP CH₄ emissions in megatonnes).
+    # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
     pulse_year_index = findall(x -> x == pulse_year, rcp_emissions.YEARS)[1]
     ch4_emissions_pulse[pulse_year_index] = ch4_emissions_pulse[pulse_year_index] + pulse_size
-
 
 
     #-----------------------------------------------------------------------------------
@@ -103,7 +120,7 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
 
     function sneasych4_ecs(ecs_sample::Array{Float64,1}, mean_posterior_parameters::Array{Float64,1}, ci_interval_1::Float64, ci_interval_2::Float64)
 
-        # Caluclate number of ECS parameter samples.
+        # Calculate number of equilibrium climate sensitivity samples.
         number_samples = length(ecs_sample)
 
         # Pre-allocate arrays to store SNEASY+CH4 results.
@@ -175,9 +192,9 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
             update_param!(sneasych4_base,  :t2co, ecs_sample[i])
             update_param!(sneasych4_pulse, :t2co, ecs_sample[i])
 
-            # Wrap code in a try/catch statement in case extreme ECS value causes a model error.
-
+            # Wrap code in a try/catch statement in case extreme ECS values produce a model error.
             try
+
                 # Run both models.
                 run(sneasych4_base)
                 run(sneasych4_pulse)
@@ -206,7 +223,7 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
 
             catch
 
-                # Set values to -99999.99 if model throws an error.
+                # Set values to -99999.99 if non-physical results produce a model error.
                 base_temperature[i,:]  .= -99999.99
                 base_co2[i,:]          .= -99999.99
                 base_ocean_heat[i,:]   .= -99999.99
@@ -217,7 +234,7 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
             end
         end
 
-        # Distinguish between model indices that caused a model error or not.
+        # Distinguish between model indices that caused a model error and those that did not.
         error_indices = findall(x-> x == -99999.99, base_temperature[:,1])
         good_indices  = findall(x-> x != -99999.99, base_temperature[:,1])
 
