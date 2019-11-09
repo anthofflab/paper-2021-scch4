@@ -2,7 +2,7 @@
 include("../create_models/create_iam_fund.jl")
 
 #######################################################################################################################
-# CALCULATE MARGINAL DAMAGES FORM A CH₄ EMISSION PULKSE WITH FUND.
+# CALCULATE MARGINAL DAMAGES FROM A CH₄ EMISSION PULSE WITH FUND.
 #######################################################################################################################
 # Description: This function uses the FUND model to calculate marginal climate damages that occur from a CH₄ emissions
 #              pulse based on the SNEASY+CH4 climate projections.

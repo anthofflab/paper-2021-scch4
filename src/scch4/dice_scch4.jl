@@ -2,7 +2,7 @@
 include("../create_models/create_iam_dice.jl")
 
 #######################################################################################################################
-# CALCULATE MARGINAL DAMAGES FORM A CH₄ EMISSION PULKSE WITH DICE.
+# CALCULATE MARGINAL DAMAGES FROM A CH₄ EMISSION PULSE WITH DICE.
 #######################################################################################################################
 # Description: This function uses the DICE model to calculate marginal climate damages that occur from a CH₄ emissions
 #              pulse based on the SNEASY+CH4 climate projections.
