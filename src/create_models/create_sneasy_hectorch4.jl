@@ -105,7 +105,7 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
         set_param!(m, :rf_ch4_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
     else
         set_param!(m, :rf_ch4, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4, :CH4_0, CH₄_0)
+        set_param!(m, :rf_ch4, :CH₄_0, CH₄_0)
         set_param!(m, :rf_ch4, :scale_CH₄, 1.0)
     end
 
