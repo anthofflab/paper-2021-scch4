@@ -338,7 +338,7 @@ function ch4_mixed_noise(start_year, end_year, ρ_ice, σ_ice, err_ice, ρ_inst,
 
     # Allocate vectors for results. Start year-1983 uses calibrated Law Dome statistical process parameters, then NOAA values.
     n_years = length(start_year:end_year)
-    noise   = zeros(length(n_years))
+    noise   = zeros(n_years)
     n_ice   = length(start_year:1983)
     n_inst  = length(1984:end_year)
 
@@ -379,7 +379,7 @@ function co2_mixed_noise(start_year, end_year, σ_ice, σ_inst, err_ice, err_ins
 
     # Allocate vectors for results. Start year-1958 uses calibrated Law Dome statistical process parameters, then Mauna Loa values.
     n_years = length(start_year:end_year)
-    noise   = zeros(length(n_years))
+    noise   = zeros(n_years)
     n_ice   = length(start_year:1958)
     n_inst  = length(1959:end_year)
 

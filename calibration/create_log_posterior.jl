@@ -221,7 +221,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     n = length(calibration_years)
 
     # Load calibration data/observations.
-    calibration_data = load_calibration_data(start_year, end_year)
+    calibration_data = load_calibration_data(end_year)
 
     # Calculate indices for each year that has an observation in calibration data sets.
     indices_temperature_data   = findall(x-> !ismissing(x), calibration_data.hadcrut_temperature_obs)

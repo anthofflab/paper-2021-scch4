@@ -231,7 +231,6 @@ println("Calculating BMA Weights.")
 bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
 save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
 
-
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 # Load Data and Settings Common to Alll Climate Projection Scenarios.

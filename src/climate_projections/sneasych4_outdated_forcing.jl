@@ -52,8 +52,8 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
     # Get indices for 1861-1880 to normalize temperature projections.
     indices_1861_1880 = findall((in)(collect(1861:1880)), model_years)
 
-    # Load calibration data from 1850-2017 (measurement errors used in simulated noise).
-    calibration_data = load_calibration_data(1850, 2017)
+    # Load calibration data from 1765-2017 (measurement errors used in simulated noise).
+    calibration_data = load_calibration_data(2017)
 
     # Pre-allocate vectors to hold simulated AR(1) + measurement error noise.
     norm_oceanco2   = zeros(number_years)
