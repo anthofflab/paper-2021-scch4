@@ -27,21 +27,21 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
 
         # Assign names to uncertain model and initial condition parameters for convenience.
         # Note: This assumes "params" is the full vector of uncertain parameters with the same ordering as in "create_log_posterior.jl".
-        temperature_0     = p[9]
-        ocean_heat_0      = p[10]
-        CO₂_0             = p[11]
-        CH₄_0             = p[12]
-        N₂O_0             = p[13]
-        ECS               = p[14]
-        heat_diffusivity  = p[15]
-        rf_scale_aerosol  = p[16]
-        rf_scale_CH₄      = p[17]
-        F2x_CO₂           = p[18]
-        Q10               = p[19]
-        CO₂_fertilization = p[20]
-        CO₂_diffusivity   = p[21]
-        τ_troposphere     = p[22]
-        CH₄_natural       = p[23]
+        temperature_0     = params[9]
+        ocean_heat_0      = params[10]
+        CO₂_0             = params[11]
+        CH₄_0             = params[12]
+        N₂O_0             = params[13]
+        ECS               = params[14]
+        heat_diffusivity  = params[15]
+        rf_scale_aerosol  = params[16]
+        rf_scale_CH₄      = params[17]
+        F2x_CO₂           = params[18]
+        Q10               = params[19]
+        CO₂_fertilization = params[20]
+        CO₂_diffusivity   = params[21]
+        τ_troposphere     = params[22]
+        CH₄_natural       = params[23]
 
         #----------------------------------------------------------
         # Set SNEASY-FAIR to use sampled parameter values.
