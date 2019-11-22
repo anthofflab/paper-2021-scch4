@@ -5,7 +5,6 @@
 # #-------------------------------------------------------------------------------------------------------
 
 
-
 #######################################################################################################################
 # CALCULATE AR(1) LOG-LIKELIHOOD.
 ########################################################################################################################
@@ -43,6 +42,45 @@ end
 
 
 #######################################################################################################################
+# CALCULATE CAR(1) LOG-LIKELIHOOD.
+########################################################################################################################
+# Description: This function calculates the continuous time autoregressive, or CAR(1), log-likelihood for irregularly
+#              spaced data in terms of the data-model residuls when accounting for time-varying observation errors. It
+#              builds off of "The Effects of Time-Varying Observation Errors on Semi-Empirical Sea-Level Projections"
+#              (Ruckert et al., 2017) DOI 10.1007/s10584-016-1858-z and "The Analysis of Irregularly Observed Stochastic
+#              Astronomical Time-Series – I. Basics of Linear Stochastic Differential Equations" (Koen, 2005)
+#              doi.org/10.1111/j.1365-2966.2005.09213.x
+#
+# Function Arguments:
+#
+#       residuals      = A vector of data-model residuals.
+#       indices        = Index positions of observations relative to model time horizon (i.e. the first model time period = 1, the second = 2, etc.).
+#       σ²_white_noise = Variance of the continuous white noise process.
+#       α₀             = Parameter describing correlation memory of CAR(1) process.
+#       ϵ              = A vector of time-varying observation error estimates (from calibration data sets).
+#----------------------------------------------------------------------------------------------------------------------
+
+function hetero_logl_car1(residuals::Array{Float64,1}, indices::Array{Int,1}, σ²_white_noise::Float64, α₀::Float64, ϵ::Array{Union{Float64, Missings.Missing},1})
+
+    # Calculate length of residuals.
+    n=length(residuals)
+
+    # Initialize covariance matrix for irregularly spaced data with relationships decaying exponentially.
+    H = exp.(-α₀ .* abs.(indices' .- indices))
+
+    # Define the variance of x(t), a continous stochastic time-series.
+    σ² = σ²_white_noise / (2*α₀)
+
+    # Calculate residual covariance matrix (sum of CAR(1) process variance and observation error variances).
+    cov_matrix = σ² .* H + Diagonal(ϵ.^2)
+
+    # Return the log-likelihood.
+    return logpdf(MvNormal(cov_matrix), residuals)
+end
+
+
+
+#######################################################################################################################
 # CALCULATE TOTAL (LOG) PRIOR PROBABILITY.
 #######################################################################################################################
 # Description: This creates a function that will calculates the total (log) prior probability of the uncertain model,
@@ -61,18 +99,15 @@ function construct_log_prior(climate_model::Symbol)
     # -----------------------------------------
     # Statistical Process Priors.
     # -----------------------------------------
-    prior_σ_temperature     = Uniform(0, 0.2)
-    prior_σ_ocean_heat      = Uniform(0, 4)
-    prior_σ_CO₂inst         = Uniform(0, 1)
-    prior_σ_CO₂ice          = Uniform(0, 10)
-    prior_σ_CH₄inst         = Uniform(0, 20)
-    prior_σ_CH₄ice          = Uniform(0, 45)
+    prior_σ_temperature      = Uniform(0, 0.2)
+    prior_σ_ocean_heat       = Uniform(0, 4)
+    prior_σ²_white_noise_CO₂ = Uniform(0, 200)
+    prior_σ²_white_noise_CH₄ = Uniform(0, 800)
 
-    prior_ρ_temperature     = Uniform(0, 0.99)
-    prior_ρ_ocean_heat      = Uniform(0, 0.99)
-    prior_ρ_CO₂inst         = Uniform(0, 0.99)
-    prior_ρ_CH₄inst         = Uniform(0, 0.99)
-    prior_ρ_CH₄ice          = Uniform(0, 0.99)
+    prior_ρ_temperature      = Uniform(0, 0.99)
+    prior_ρ_ocean_heat       = Uniform(0, 0.99)
+    prior_α₀_CO₂             = Uniform(0.01, 11.5)
+    prior_α₀_CH₄             = Uniform(0.01, 11.5)
 
     # -----------------------------------------
     # Initial Condition Priors.
@@ -118,25 +153,25 @@ function construct_log_prior(climate_model::Symbol)
         # Create function based on uncertain SNEASY-FAIR CH₄ cycle parameters.
         if climate_model == :sneasy_fair
             function(p)
-                τ_troposphere = p[25]
-                CH₄_natural   = p[26]
+                τ_troposphere = p[22]
+                CH₄_natural   = p[23]
                 return logpdf(prior_τ_troposphere, τ_troposphere) + logpdf(prior_CH₄_natural, CH₄_natural)
             end
 
         # Create function based on uncertain SNEASY-FUND CH₄ cycle parameters.
         elseif climate_model == :sneasy_fund
             function(p)
-                τ_troposphere = p[25]
+                τ_troposphere = p[22]
                 return logpdf(prior_τ_troposphere, τ_troposphere)
             end
 
         # Create function based on uncertain SNEASY-Hector or SNEASY-MAGICC CH₄ cycle parameters.
         elseif climate_model == :sneasy_hector || climate_model == :sneasy_magicc
             function(p)
-                τ_troposphere  = p[25]
-                CH₄_natural    = p[26]
-                τ_soil         = p[27]
-                τ_stratosphere = p[28]
+                τ_troposphere  = p[22]
+                CH₄_natural    = p[23]
+                τ_soil         = p[24]
+                τ_stratosphere = p[25]
                 return logpdf(prior_τ_troposphere, τ_troposphere) + logpdf(prior_CH₄_natural, CH₄_natural) + logpdf(prior_τ_soil, τ_soil) + logpdf(prior_τ_stratosphere, τ_stratosphere)
             end
 
@@ -152,34 +187,31 @@ function construct_log_prior(climate_model::Symbol)
     function total_log_prior(p::Array{Float64,1})
 
         # Assign parameter values (common to all four models) names for convenience.
-        σ_temperature     = p[1]
-        σ_ocean_heat      = p[2]
-        σ_CO₂inst         = p[3]
-        σ_CO₂ice          = p[4]
-        σ_CH₄inst         = p[5]
-        σ_CH₄ice          = p[6]
-        ρ_temperature     = p[7]
-        ρ_ocean_heat      = p[8]
-        ρ_CO₂inst         = p[9]
-        ρ_CH₄inst         = p[10]
-        ρ_CH₄ice          = p[11]
-        temperature_0     = p[12]
-        ocean_heat_0      = p[13]
-        CO₂_0             = p[14]
-        CH₄_0             = p[15]
-        N₂O_0             = p[16]
-        ECS               = p[17]
-        heat_diffusivity  = p[18]
-        rf_scale_aerosol  = p[19]
-        rf_scale_CH₄      = p[20]
-        F2x_CO₂           = p[21]
-        Q10               = p[22]
-        CO₂_fertilization = p[23]
-        CO₂_diffusivity   = p[24]
+        σ_temperature      = p[1]
+        σ_ocean_heat       = p[2]
+        σ²_white_noise_CO₂ = p[3]
+        σ²_white_noise_CH₄ = p[4]
+        ρ_temperature      = p[5]
+        ρ_ocean_heat       = p[6]
+        α₀_CO₂             = p[7]
+        α₀_CH₄             = p[8]
+        temperature_0      = p[9]
+        ocean_heat_0       = p[10]
+        CO₂_0              = p[11]
+        CH₄_0              = p[12]
+        N₂O_0              = p[13]
+        ECS                = p[14]
+        heat_diffusivity   = p[15]
+        rf_scale_aerosol   = p[16]
+        rf_scale_CH₄       = p[17]
+        F2x_CO₂            = p[18]
+        Q10                = p[19]
+        CO₂_fertilization  = p[20]
+        CO₂_diffusivity    = p[21]
 
         # Return total log-prior of all uncertain parameters (using "ch4_model_priors" function to account for different versions of SNEASY+CH4).
-        log_prior = logpdf(prior_σ_temperature, σ_temperature) + logpdf(prior_σ_ocean_heat, σ_ocean_heat) + logpdf(prior_σ_CO₂inst, σ_CO₂inst) + logpdf(prior_σ_CO₂ice, σ_CO₂ice) + logpdf(prior_σ_CH₄inst, σ_CH₄inst) + logpdf(prior_σ_CH₄ice, σ_CH₄ice) +
-                    logpdf(prior_ρ_temperature, ρ_temperature) + logpdf(prior_ρ_ocean_heat, ρ_ocean_heat) + logpdf(prior_ρ_CO₂inst, ρ_CO₂inst) + logpdf(prior_ρ_CH₄inst, ρ_CH₄inst) + logpdf(prior_ρ_CH₄ice, ρ_CH₄ice) +
+        log_prior = logpdf(prior_σ_temperature, σ_temperature) + logpdf(prior_σ_ocean_heat, σ_ocean_heat) + logpdf(prior_σ²_white_noise_CO₂, σ²_white_noise_CO₂) + logpdf(prior_σ²_white_noise_CH₄, σ²_white_noise_CH₄) +
+                    logpdf(prior_ρ_temperature, ρ_temperature) + logpdf(prior_ρ_ocean_heat, ρ_ocean_heat) + logpdf(prior_α₀_CO₂, α₀_CO₂) + logpdf(prior_α₀_CH₄, α₀_CH₄) +
                     logpdf(prior_temperature_0, temperature_0) + logpdf(prior_ocean_heat_0, ocean_heat_0) + logpdf(prior_CO₂_0, CO₂_0) + logpdf(prior_CH₄_0, CH₄_0) + logpdf(prior_N₂O_0, N₂O_0) +
                     logpdf(prior_ECS, ECS) + logpdf(prior_heat_diffusivity, heat_diffusivity) + logpdf(prior_rf_scale_aerosol, rf_scale_aerosol) + logpdf(prior_rf_scale_CH₄, rf_scale_CH₄) + logpdf(prior_F2x_CO₂, F2x_CO₂) +
                     logpdf(prior_Q10, Q10) + logpdf(prior_CO₂_fertilization, CO₂_fertilization) + logpdf(prior_CO₂_diffusivity, CO₂_diffusivity) +
@@ -197,8 +229,8 @@ end
 #######################################################################################################################
 # CALCULATE LOG POSTERIOR.
 #######################################################################################################################
-# Description: This creates a function that will calculates the log-posterior probability of the uncertain model,
-#              initial condition, and statistical process parameters specific to the CH₄ cycle model selected.
+# Description: This creates a function that calculates the log-posterior probability of the uncertain model, initial
+#              condition, and statistical process parameters specific to the CH₄ cycle model selected.
 #
 # Function Arguments:
 #
@@ -230,26 +262,31 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     indices_maunaloa_co2_data  = findall(x-> !ismissing(x), calibration_data.maunaloa_co2_obs)
     indices_lawdome_co2_data   = findall(x-> !ismissing(x), calibration_data.lawdome_co2_obs)
     indices_noaa_ch4_data      = findall(x-> !ismissing(x), calibration_data.noaa_ch4_obs)
+    indices_lawdome_ch4_data   = findall(x-> !ismissing(x), calibration_data.lawdome_ch4_obs)
 
-    # Calculate indices for i.i.d. and AR(1) blocks in CH₄ ice core data.
-    lawdome_ch4_ar1_start_index, lawdome_ch4_ar1_end_index, lawdome_ch4_ar1_indices, lawdome_ch4_iid_indices = ch4_indices(calibration_data.lawdome_ch4_obs)
+    # Combine CO₂ and CH₄ indices from Law Dome and more recent observations.
+    indices_co2_data = sort(vcat(indices_lawdome_co2_data, indices_maunaloa_co2_data))
+    indices_ch4_data = sort(vcat(indices_noaa_ch4_data, indices_lawdome_ch4_data))
+
+    # Combine CO₂ and CH₄ measurement errors from Law Dome and more recent observations (just for convenience).
+    calibration_data.co2_combined_sigma = calibration_data.lawdome_co2_sigma
+    calibration_data.co2_combined_sigma[indices_maunaloa_co2_data] = calibration_data.maunaloa_co2_sigma[indices_maunaloa_co2_data]
+
+    calibration_data.ch4_combined_sigma = calibration_data.lawdome_ch4_sigma
+    calibration_data.ch4_combined_sigma[indices_noaa_ch4_data] = calibration_data.noaa_ch4_sigma[indices_noaa_ch4_data]
+
+    # Calculate number of ice core observations for CO₂ and CH₄ (used for indexing).
+    n_lawdome_co2 = length(indices_lawdome_co2_data)
+    n_lawdome_ch4 = length(indices_lawdome_ch4_data)
 
     # Allocate arrays to store data-model residuals.
-    temperature_residual     = zeros(length(indices_temperature_data))
-    ocean_heat_residual      = zeros(length(indices_oceanheat_data))
-    maunaloa_co2_residual    = zeros(length(indices_maunaloa_co2_data))
-    noaa_ch4_residual        = zeros(length(indices_noaa_ch4_data))
-    lawdome_ch4_ar1_residual = zeros(length(lawdome_ch4_ar1_indices))
+    temperature_residual = zeros(length(indices_temperature_data))
+    ocean_heat_residual  = zeros(length(indices_oceanheat_data))
+    co2_residual         = zeros(length(indices_co2_data))
+    ch4_residual         = zeros(length(indices_ch4_data))
 
-    # Allocate arrays for iid ice core data to store 8 year means of model output.
-    lawdome_co2_mean          = zeros(length(indices_lawdome_co2_data))
-    lawdome_ch4_mean          = zeros(length(lawdome_ch4_iid_indices))
-
-    # Allocate arrays to store likelihoods for individual data points that need to be summed up to get a total likelihood.
-    lawdome_co2_single_llik     = zeros(length(indices_lawdome_co2_data))
+    # Allocate array to store likelihoods for individual ocean CO₂ flux data points that need to be summed up to get a total likelihood (assuming iid error structure).
     oceanco2_flux_single_llik   = zeros(length(indices_oceanco2_flux_data))
-    lawdome_ch4_single_llik_iid = zeros(length(lawdome_ch4_iid_indices))
-    lawdome_ch4_block_llik_ar1  = zeros(length(lawdome_ch4_ar1_start_index))
 
     # Allocate vectors to store model output being calibrated to the observations.
     modeled_CO₂           = zeros(n)
@@ -258,6 +295,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     modeled_temperature   = zeros(n)
     modeled_ocean_heat    = zeros(n)
 
+
     #---------------------------------------------------------------------------------------------------------------------------------------
     # Create a function to calculate the log-likelihood for the observations, assuming residual independence across calibration data sets.
     #---------------------------------------------------------------------------------------------------------------------------------------
@@ -265,17 +303,14 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     function total_log_likelihood(p::Array{Float64,1})
 
         # Assign names to uncertain statistical process parameters used in log-likelihood calculations.
-        σ_temperature     = p[1]
-        σ_ocean_heat      = p[2]
-        σ_CO₂inst         = p[3]
-        σ_CO₂ice          = p[4]
-        σ_CH₄inst         = p[5]
-        σ_CH₄ice          = p[6]
-        ρ_temperature     = p[7]
-        ρ_ocean_heat      = p[8]
-        ρ_CO₂inst         = p[9]
-        ρ_CH₄inst         = p[10]
-        ρ_CH₄ice          = p[11]
+        σ_temperature      = p[1]
+        σ_ocean_heat       = p[2]
+        σ²_white_noise_CO₂ = p[3]
+        σ²_white_noise_CH₄ = p[4]
+        ρ_temperature      = p[5]
+        ρ_ocean_heat       = p[6]
+        α₀_CO₂             = p[7]
+        α₀_CH₄             = p[8]
 
         # Run an instance of SNEASY+CH4 with sampled parameter set and return model output being compared to observations.
         f_run_model(p, modeled_CO₂, modeled_CH₄, modeled_oceanCO₂_flux, modeled_temperature, modeled_ocean_heat)
@@ -312,34 +347,43 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 
 
         #-----------------------------------------------------------------------
-        # Atmospheric CO₂ Concentration Log-Likelihood (Mauna Loa)
+        # Atmospheric CO₂ Concentration Log-Likelihood
         #-----------------------------------------------------------------------
 
-        llik_maunaloa_co2 = 0.
+        llik_co2 = 0.
+
+        # Calculate CO₂ concentration (Law Dome) residuals (assuming 8 year model mean centered on year of ice core observation).
+        for (i, index)=enumerate(indices_lawdome_co2_data)
+            co2_residual[i] = calibration_data[index, :lawdome_co2_obs] - mean(modeled_CO₂[index .+ (-4:3)])
+        end
 
         # Calculate CO₂ concentration (Mauna Loa) residuals.
         for (i, index)=enumerate(indices_maunaloa_co2_data)
-            maunaloa_co2_residual[i] = calibration_data[index, :maunaloa_co2_obs] - modeled_CO₂[index]
+            co2_residual[i+n_lawdome_co2] = calibration_data[index, :maunaloa_co2_obs] - modeled_CO₂[index]
         end
 
-        # Calculate CO₂ concentration (Mauna Loa) log-likelihood.
-        llik_maunaloa_co2 = hetero_logl_ar1(maunaloa_co2_residual, σ_CO₂inst, ρ_CO₂inst, calibration_data[indices_maunaloa_co2_data, :maunaloa_co2_sigma])
+        # Calculate atmospheric CO₂ concentration log-likelihood.
+        llik_co2 = hetero_logl_car1(co2_residual, indices_co2_data, σ²_white_noise_CO₂, α₀_CO₂, calibration_data[indices_co2_data, :co2_combined_sigma])
 
 
         #-----------------------------------------------------------------------
-        # Atmospheric CO₂ Concentration Log-Likelihood (Law Dome)
+        # Atmospheric CH₄ Concentration Log-Likelihood
         #-----------------------------------------------------------------------
 
-        llik_lawdome_co2 = 0.
+        llik_ch4 = 0.
 
-        # Calculate CO₂ concentration (Law Dome) log-likelihoods for individual data points (assuming 8 year model mean centered on year of ice core observation.
-        for (i, index)=enumerate(indices_lawdome_co2_data)
-            lawdome_co2_mean[i] = mean(modeled_CO₂[index .+ (-4:3)])
-            lawdome_co2_single_llik[i] = logpdf(Normal(lawdome_co2_mean[i], sqrt(σ_CO₂ice^2 + calibration_data[index, :lawdome_co2_sigma]^2)), calibration_data[index, :lawdome_co2_obs])
+        # Calculate CH₄ concentration (Law Dome) residuals for individual data points (assuming 8 year model mean centered on year of ice core observation).
+        for (i,index) = enumerate(indices_lawdome_ch4_data)
+            ch4_residual[i] = calibration_data[index, :lawdome_ch4_obs] - mean(modeled_CH₄[index .+ (-4:3)])
         end
 
-        # Calculate CO₂ concentration (Law Dome) total log-likelihood as sum of individual data point likelihoods.
-        llik_lawdome_co2 = sum(lawdome_co2_single_llik)
+        # Calculate CH₄ concentration (NOAA) residuals.
+        for (i, index)=enumerate(indices_noaa_ch4_data)
+            ch4_residual[i+n_lawdome_ch4] = calibration_data[index, :noaa_ch4_obs] - modeled_CH₄[index]
+        end
+
+        # Calculate atmospheric CH₄ concentration log-likelihood.
+        llik_ch4 = hetero_logl_car1(ch4_residual, indices_ch4_data, σ²_white_noise_CH₄, α₀_CH₄, calibration_data[indices_ch4_data, :ch4_combined_sigma])
 
 
         #-----------------------------------------------------------------------
@@ -358,65 +402,11 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
 
 
         #-----------------------------------------------------------------------
-        # Atmospheric CH₄ Concentration Log-Likelihood (NOAA)
-        #-----------------------------------------------------------------------
-
-        llik_noaa_ch4 = 0.
-
-        # Calculate CH₄ concentration (NOAA) residuals.
-        for (i, index)=enumerate(indices_noaa_ch4_data)
-            noaa_ch4_residual[i] = calibration_data[index, :noaa_ch4_obs] - modeled_CH₄[index]
-        end
-
-        # Calculate CH₄ concentration (NOAA) log-likelihood.
-        llik_noaa_ch4 = hetero_logl_ar1(noaa_ch4_residual, σ_CH₄inst, ρ_CH₄inst, calibration_data[indices_noaa_ch4_data, :noaa_ch4_sigma])
-
-        #-----------------------------------------------------------------------
-        # Atmospheric CH₄ Concentration i.i.d Blocks Log-Likelihood (Law Dome)
-        #-----------------------------------------------------------------------
-
-        llik_lawdome_ch4_iid = 0.
-
-        # Calculate CH₄ concentration (Law Dome) log-likelihoods for individual data points (assuming 8 year model mean centered on year of ice core observation).
-        for (i,index) = enumerate(lawdome_ch4_iid_indices)
-            lawdome_ch4_mean[i] = mean(modeled_CH₄[index .+ (-4:3)])
-            lawdome_ch4_single_llik_iid[i] = logpdf(Normal(lawdome_ch4_mean[i], sqrt(σ_CH₄ice^2 + calibration_data[index, :lawdome_ch4_sigma]^2)), calibration_data[index, :lawdome_ch4_obs])
-        end
-
-        # Calculate CH₄ concentration (Law Dome) total log-likelihood as sum of individual data point likelihoods.
-        llik_lawdome_ch4_iid = sum(lawdome_ch4_single_llik_iid)
-
-        #-----------------------------------------------------------------------
-        # Atmospheric CH₄ Concentration AR1 Blocks Log-Likelihood (Law Dome)
-        #-----------------------------------------------------------------------
-
-        llik_lawdome_ch4_ar1 = 0.
-
-        # Use counter to track residuals for various blocks (for convenience).
-        let
-        counter = 0
-
-            # Loop through every AR(1) block.
-            for block = 1:length(lawdome_ch4_ar1_start_index)
-                # Within a single AR1 block, calculate residuals (8 year model average, centered on year of ice core observation).
-                for index in collect(lawdome_ch4_ar1_start_index[block]:lawdome_ch4_ar1_end_index[block])
-                    counter+=1
-                    lawdome_ch4_ar1_residual[counter] = calibration_data[index, :lawdome_ch4_obs] - mean(modeled_CH₄[index .+ (-4:3)])
-                end
-                # Calculate log likelihood for that block and add to total likelihood for ch4 AR(1) ice core data. (Do indexing to avoid having to allocate a new residual array for every block).
-                lawdome_ch4_block_llik_ar1[block] = hetero_logl_ar1(lawdome_ch4_ar1_residual[(counter-length(lawdome_ch4_ar1_start_index[block]:lawdome_ch4_ar1_end_index[block])+1):counter], σ_CH₄ice, ρ_CH₄ice, calibration_data[lawdome_ch4_ar1_start_index[block]:lawdome_ch4_ar1_end_index[block], :lawdome_ch4_sigma])
-            end
-        end
-
-        llik_lawdome_ch4_ar1 = sum(lawdome_ch4_block_llik_ar1)
-
-
-        #-----------------------------------------------------------------------
         # Total Log-Likelihood
         #-----------------------------------------------------------------------
 
         # Calculate the total log-likelihood (assuming residual independence across data sets).
-        llik = llik_temperature + llik_ocean_heat + llik_maunaloa_co2 + llik_lawdome_co2 + llik_oceanco2_flux + llik_noaa_ch4 + llik_lawdome_ch4_iid + llik_lawdome_ch4_ar1
+        llik = llik_temperature + llik_ocean_heat + llik_co2 + llik_ch4 + llik_oceanco2_flux
 
         return llik
     end
