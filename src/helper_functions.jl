@@ -74,11 +74,11 @@ function create_update_ch4_function(climate_model::Symbol)
         if climate_model == :sneasy_fair
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0         = params[15]
-                N₂O_0         = params[16]
-                rf_scale_CH₄  = params[20]
-                τ_troposphere = params[25]
-                CH₄_natural   = params[26]
+                CH₄_0         = params[12]
+                N₂O_0         = params[13]
+                rf_scale_CH₄  = params[17]
+                τ_troposphere = params[22]
+                CH₄_natural   = params[23]
 
                 update_param!(m, :natural_emiss_CH₄, ones(length(dim_keys(m, :time))) .* CH₄_natural)
                 update_param!(m, :CH₄_0,             CH₄_0)
@@ -91,10 +91,10 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_fund
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0         = params[15]
-                N₂O_0         = params[16]
-                rf_scale_CH₄  = params[20]
-                τ_troposphere = params[25]
+                CH₄_0         = params[12]
+                N₂O_0         = params[13]
+                rf_scale_CH₄  = params[17]
+                τ_troposphere = params[22]
 
                 update_param!(m, :ch4pre,    CH₄_0)
                 update_param!(m, :acch4_0,   CH₄_0)
@@ -108,13 +108,13 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_hector
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0          = params[15]
-                N₂O_0          = params[16]
-                rf_scale_CH₄   = params[20]
-                τ_troposphere  = params[25]
-                CH₄_natural    = params[26]
-                τ_soil         = params[27]
-                τ_stratosphere = params[28]
+                CH₄_0          = params[12]
+                N₂O_0          = params[13]
+                rf_scale_CH₄   = params[17]
+                τ_troposphere  = params[22]
+                CH₄_natural    = params[23]
+                τ_soil         = params[24]
+                τ_stratosphere = params[25]
 
                 update_param!(m, :TOH0,      τ_troposphere)
                 update_param!(m, :M0,        CH₄_0)
@@ -130,13 +130,13 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_magicc
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0          = params[15]
-                N₂O_0          = params[16]
-                rf_scale_CH₄   = params[20]
-                τ_troposphere  = params[25]
-                CH₄_natural    = params[26]
-                τ_soil         = params[27]
-                τ_stratosphere = params[28]
+                CH₄_0          = params[12]
+                N₂O_0          = params[13]
+                rf_scale_CH₄   = params[17]
+                τ_troposphere  = params[22]
+                CH₄_natural    = params[23]
+                τ_soil         = params[24]
+                τ_stratosphere = params[25]
 
                 update_param!(m, :CH₄_0,       CH₄_0)
                 update_param!(m, :CH4_natural, CH₄_natural)
