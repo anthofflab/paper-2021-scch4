@@ -61,10 +61,15 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
     ar1_co2         = zeros(number_years)
     ar1_ch4         = zeros(number_years)
 
-    # Replicate errors for years without observations over model time horizon (note, CO₂ and CH₄ ice-core have constant error estimates).
+    # Replicate errors for years without observations over model time horizon.
     obs_error_temperature = replicate_errors(1765, end_year, calibration_data.hadcrut_temperature_sigma)
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
-    obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
+    # Use constant Law Dome CH₄ observation errors for start period to 1983 (after which time-varying NOAA flask measurements start).
+    obs_error_ch4 = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
+    obs_error_ch4[1:findfirst(isequal(1983), model_years)] .= unique(skipmissing(calibration_data.lawdome_ch4_sigma))[1]
+    # Set constant CO₂ observations errors for start year-1958 (Law Dome), and 1959-end year (Mauna Loa).
+    obs_error_co2 = ones(number_years) .* unique(skipmissing(calibration_data.maunaloa_co2_sigma))[1]
+    obs_error_co2[1:findfirst(isequal(1958), model_years)] .= unique(skipmissing(calibration_data.lawdome_co2_sigma))[1]
 
     # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
@@ -134,30 +139,27 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
         # For each calibrated parameter sample, run the base and pulse versions of SNEASY+CH4 and store results.
         for i in 1:number_samples
 
-            σ_temperature     = calibrated_parameters[i,1]
-            σ_ocean_heat      = calibrated_parameters[i,2]
-            σ_CO₂inst         = calibrated_parameters[i,3]
-            σ_CO₂ice          = calibrated_parameters[i,4]
-            σ_CH₄inst         = calibrated_parameters[i,5]
-            σ_CH₄ice          = calibrated_parameters[i,6]
-            ρ_temperature     = calibrated_parameters[i,7]
-            ρ_ocean_heat      = calibrated_parameters[i,8]
-            ρ_CO₂inst         = calibrated_parameters[i,9]
-            ρ_CH₄inst         = calibrated_parameters[i,10]
-            ρ_CH₄ice          = calibrated_parameters[i,11]
-            temperature_0     = calibrated_parameters[i,12]
-            ocean_heat_0      = calibrated_parameters[i,13]
-            CO₂_0             = calibrated_parameters[i,14]
-            CH₄_0             = calibrated_parameters[i,15]
-            N₂O_0             = calibrated_parameters[i,16]
-            ECS               = calibrated_parameters[i,17]
-            heat_diffusivity  = calibrated_parameters[i,18]
-            rf_scale_aerosol  = calibrated_parameters[i,19]
-            rf_scale_CH₄      = calibrated_parameters[i,20]
-            F2x_CO₂           = calibrated_parameters[i,21]
-            Q10               = calibrated_parameters[i,22]
-            CO₂_fertilization = calibrated_parameters[i,23]
-            CO₂_diffusivity   = calibrated_parameters[i,24]
+            σ_temperature      = calibrated_parameters[i,1]
+            σ_ocean_heat       = calibrated_parameters[i,2]
+            σ²_white_noise_CO₂ = calibrated_parameters[i,3]
+            σ²_white_noise_CH₄ = calibrated_parameters[i,4]
+            ρ_temperature      = calibrated_parameters[i,5]
+            ρ_ocean_heat       = calibrated_parameters[i,6]
+            α₀_CO₂             = calibrated_parameters[i,7]
+            α₀_CH₄             = calibrated_parameters[i,8]
+            temperature_0      = calibrated_parameters[i,9]
+            ocean_heat_0       = calibrated_parameters[i,10]
+            CO₂_0              = calibrated_parameters[i,11]
+            CH₄_0              = calibrated_parameters[i,12]
+            N₂O_0              = calibrated_parameters[i,13]
+            ECS                = calibrated_parameters[i,14]
+            heat_diffusivity   = calibrated_parameters[i,15]
+            rf_scale_aerosol   = calibrated_parameters[i,16]
+            rf_scale_CH₄       = calibrated_parameters[i,17]
+            F2x_CO₂            = calibrated_parameters[i,18]
+            Q10                = calibrated_parameters[i,19]
+            CO₂_fertilization  = calibrated_parameters[i,20]
+            CO₂_diffusivity    = calibrated_parameters[i,21]
 
             # Set parameters for base version of SNEASY+CH4.
             update_param!(sneasych4_base, :t2co, ECS)
@@ -193,10 +195,12 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
 
             # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: both models use same estimated noise).
             ar1_temperature[:] = ar1_hetero_sim(number_years, ρ_temperature, sqrt.(obs_error_temperature.^2 .+ σ_temperature^2))
-            ar1_co2[:]         = co2_mixed_noise(1765, end_year, σ_CO₂ice, σ_CO₂inst, 1.2, 0.12, ρ_CO₂inst)
-            ar1_ch4[:]         = ch4_mixed_noise(1765, end_year, ρ_CH₄ice, σ_CH₄ice, 15.0, ρ_CH₄inst, σ_CH₄inst, obs_error_noaa_ch4)
             ar1_oceanheat[:]   = ar1_hetero_sim(number_years, ρ_ocean_heat, sqrt.(obs_error_oceanheat.^2 .+ σ_ocean_heat^2))
             norm_oceanco2[:]   = rand(Normal(0,0.4*sqrt(10)), number_years)
+
+            # CO₂ and CH₄ use CAR(1) statistical process parameters.
+            ar1_co2[:] = ar1_hetero_sim(number_years, exp(-α₀_CO₂), sqrt.(obs_error_co2.^2 .+ σ²_white_noise_CO₂))
+            ar1_ch4[:] = ar1_hetero_sim(number_years, exp(-α₀_CH₄), sqrt.(obs_error_ch4.^2 .+ σ²_white_noise_CH₄))
 
             # Store model projections resulting from parameter sample `i` for base model.
             base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .+ ar1_temperature .+ temperature_0

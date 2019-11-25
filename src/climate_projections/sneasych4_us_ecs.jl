@@ -66,7 +66,12 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
     # Replicate errors for years without observations over model time horizon (note, CO₂ and CH₄ ice-core have constant error estimates).
     obs_error_temperature = replicate_errors(1765, end_year, calibration_data.hadcrut_temperature_sigma)
     obs_error_oceanheat   = replicate_errors(1765, end_year, calibration_data.ocean_heat_sigma)
-    obs_error_noaa_ch4    = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
+    # Use constant Law Dome CH₄ observation errors for start period to 1983 (after which time-varying NOAA flask measurements start).
+    obs_error_ch4 = replicate_errors(1765, end_year, calibration_data.noaa_ch4_sigma)
+    obs_error_ch4[1:findfirst(isequal(1983), model_years)] .= unique(skipmissing(calibration_data.lawdome_ch4_sigma))[1]
+    # Set constant CO₂ observations errors for start year-1958 (Law Dome), and 1959-end year (Mauna Loa).
+    obs_error_co2 = ones(number_years) .* unique(skipmissing(calibration_data.maunaloa_co2_sigma))[1]
+    obs_error_co2[1:findfirst(isequal(1958), model_years)] .= unique(skipmissing(calibration_data.lawdome_co2_sigma))[1]
 
     # Set up marginal CH₄ emissions time series to have an extra emission pulse in a user-specified year.
     ch4_emissions_pulse = rcp_emissions.CH4
@@ -134,30 +139,27 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
         pulse_co2         =   zeros(Union{Missing, Float64}, number_samples, number_years)
 
         # Assign names to individual mean posterior parameter sample (for convenience).
-        σ_temperature     = mean_posterior_parameters[1]
-        σ_ocean_heat      = mean_posterior_parameters[2]
-        σ_CO₂inst         = mean_posterior_parameters[3]
-        σ_CO₂ice          = mean_posterior_parameters[4]
-        σ_CH₄inst         = mean_posterior_parameters[5]
-        σ_CH₄ice          = mean_posterior_parameters[6]
-        ρ_temperature     = mean_posterior_parameters[7]
-        ρ_ocean_heat      = mean_posterior_parameters[8]
-        ρ_CO₂inst         = mean_posterior_parameters[9]
-        ρ_CH₄inst         = mean_posterior_parameters[10]
-        ρ_CH₄ice          = mean_posterior_parameters[11]
-        temperature_0     = mean_posterior_parameters[12]
-        ocean_heat_0      = mean_posterior_parameters[13]
-        CO₂_0             = mean_posterior_parameters[14]
-        CH₄_0             = mean_posterior_parameters[15]
-        N₂O_0             = mean_posterior_parameters[16]
-        ECS               = mean_posterior_parameters[17]
-        heat_diffusivity  = mean_posterior_parameters[18]
-        rf_scale_aerosol  = mean_posterior_parameters[19]
-        rf_scale_CH₄      = mean_posterior_parameters[20]
-        F2x_CO₂           = mean_posterior_parameters[21]
-        Q10               = mean_posterior_parameters[22]
-        CO₂_fertilization = mean_posterior_parameters[23]
-        CO₂_diffusivity   = mean_posterior_parameters[24]
+        σ_temperature      = mean_posterior_parameters[1]
+        σ_ocean_heat       = mean_posterior_parameters[2]
+        σ²_white_noise_CO₂ = mean_posterior_parameters[3]
+        σ²_white_noise_CH₄ = mean_posterior_parameters[4]
+        ρ_temperature      = mean_posterior_parameters[5]
+        ρ_ocean_heat       = mean_posterior_parameters[6]
+        α₀_CO₂             = mean_posterior_parameters[7]
+        α₀_CH₄             = mean_posterior_parameters[8]
+        temperature_0      = mean_posterior_parameters[9]
+        ocean_heat_0       = mean_posterior_parameters[10]
+        CO₂_0              = mean_posterior_parameters[11]
+        CH₄_0              = mean_posterior_parameters[12]
+        N₂O_0              = mean_posterior_parameters[13]
+        #ECS               = mean_posterior_parameters[14]
+        heat_diffusivity   = mean_posterior_parameters[15]
+        rf_scale_aerosol   = mean_posterior_parameters[16]
+        rf_scale_CH₄       = mean_posterior_parameters[17]
+        F2x_CO₂            = mean_posterior_parameters[18]
+        Q10                = mean_posterior_parameters[19]
+        CO₂_fertilization  = mean_posterior_parameters[20]
+        CO₂_diffusivity    = mean_posterior_parameters[21]
 
         # Set all uncertain parameters in base model (except for ECS) to mean posterior value.
         update_param!(sneasych4_base, :kappa, heat_diffusivity)
@@ -201,10 +203,12 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
 
                 # Create noise to superimpose on results using mean posterior statistical parameters and measurement noise (note: Both models use same estimated noise).
                 ar1_temperature[:] = ar1_hetero_sim(number_years, ρ_temperature, sqrt.(obs_error_temperature.^2 .+ σ_temperature^2))
-                ar1_co2[:]         = co2_mixed_noise(1765, end_year, σ_CO₂ice, σ_CO₂inst, 1.2, 0.12, ρ_CO₂inst)
-                ar1_ch4[:]         = ch4_mixed_noise(1765, end_year, ρ_CH₄ice, σ_CH₄ice, 15.0, ρ_CH₄inst, σ_CH₄inst, obs_error_noaa_ch4)
                 ar1_oceanheat[:]   = ar1_hetero_sim(number_years, ρ_ocean_heat, sqrt.(obs_error_oceanheat.^2 .+ σ_ocean_heat^2))
                 norm_oceanco2[:]   = rand(Normal(0,0.4*sqrt(10)), number_years)
+
+                # CO₂ and CH₄ use CAR(1) statistical process parameters.
+                ar1_co2[:] = ar1_hetero_sim(number_years, exp(-α₀_CO₂), sqrt.(obs_error_co2.^2 .+ σ²_white_noise_CO₂))
+                ar1_ch4[:] = ar1_hetero_sim(number_years, exp(-α₀_CH₄), sqrt.(obs_error_ch4.^2 .+ σ²_white_noise_CH₄))
 
                 # Store model projections resulting from parameter sample `i` for base model.
                 base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .+ ar1_temperature .+ temperature_0
