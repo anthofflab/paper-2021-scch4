@@ -104,8 +104,8 @@ function construct_log_prior(climate_model::Symbol)
     prior_σ²_white_noise_CO₂ = Uniform(0, 200)
     prior_σ²_white_noise_CH₄ = Uniform(0, 800)
 
-    prior_ρ_temperature      = Uniform(0, 0.99)
-    prior_ρ_ocean_heat       = Uniform(0, 0.99)
+    prior_ρ_temperature      = Uniform(-0.99, 0.99)
+    prior_ρ_ocean_heat       = Uniform(-0.99, 0.99)
     prior_α₀_CO₂             = Uniform(0.01, 11.5)
     prior_α₀_CH₄             = Uniform(0.01, 11.5)
 
