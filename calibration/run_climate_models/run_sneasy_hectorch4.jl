@@ -100,7 +100,7 @@ function construct_run_sneasy_hectorch4(calibration_end_year::Int)
         modeled_temperature[:] = m[:doeclim, :temp] .- mean(m[:doeclim, :temp][index_1861:index_1880]) .+ temperature_0
 
         # Ocean heat content (with initial condition offset).
-        modeled_ocean_heat[:] = m[:doeclim, :heat_interior] .+ ocean_heat_0
+        modeled_ocean_heat[:] = m[:doeclim, :heat_mixed] .+ m[:doeclim, :heat_interior] .+ ocean_heat_0
 
         # Atmospheric concentration of CH₄.
         modeled_CH₄[:] = m[:ch4_cycle, :CH4]
