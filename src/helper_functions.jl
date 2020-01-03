@@ -276,7 +276,7 @@ function ar1_hetero_sim(N, ρ, σ)
     return x
 end
 
-
+=#
 
 #######################################################################################################################
 # REPLICATE TIME-VARYING OBSERVATION ERRORS FOR PERIODS WITHOUT COVERAGE.
@@ -335,6 +335,7 @@ end
 #       err_inst   = Time-varying observation measurement errors for NOAA flask CH₄ data.
 #----------------------------------------------------------------------------------------------------------------------
 
+#=
 
 function ch4_mixed_noise(start_year, end_year, ρ_ice, σ_ice, err_ice, ρ_inst, σ_inst, err_inst)
 
