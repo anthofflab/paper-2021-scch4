@@ -260,6 +260,7 @@ end
 #       σ = Combined time-varying observation errors and calibrated standard deviation.
 #----------------------------------------------------------------------------------------------------------------------
 
+#=
 function ar1_hetero_sim(N, ρ, σ)
 
     x = zeros(N)
@@ -334,6 +335,7 @@ end
 #       err_inst   = Time-varying observation measurement errors for NOAA flask CH₄ data.
 #----------------------------------------------------------------------------------------------------------------------
 
+
 function ch4_mixed_noise(start_year, end_year, ρ_ice, σ_ice, err_ice, ρ_inst, σ_inst, err_inst)
 
     # Allocate vectors for results. Start year-1983 uses calibrated Law Dome statistical process parameters, then NOAA values.
@@ -396,7 +398,7 @@ function co2_mixed_noise(start_year, end_year, σ_ice, σ_inst, err_ice, err_ins
     return noise
 end
 
-
+=#
 
 #######################################################################################################################
 # LINEARLY INTERPOLATE DICE RESULTS TO ANNUAL VALUES
@@ -477,3 +479,44 @@ function get_confidence_interval(years, model_result, conf_1_percent, conf_2_per
 
     return ci_results
 end
+
+#
+
+# Sample CAR(1) noise to superimpose onto model projections.
+function simulate_car1_noise(n, α₀, σ²_white_noise, ϵ)
+
+    # Indices for full time horizon
+    indices = collect(1:n)
+
+    # Initialize covariance matrix for irregularly spaced data with relationships decaying exponentially.
+    H = exp.(-α₀ .* abs.(indices' .- indices))
+
+    # Define the variance of x(t), a continous stochastic time-series.
+    σ² = σ²_white_noise / (2*α₀)
+
+    # Calculate residual covariance matrix (sum of CAR(1) process variance and observation error variances).
+    cov_matrix = σ² .* H + Diagonal(ϵ.^2)
+
+    # Return a mean-zero CAR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
+end
+
+
+
+# Sample AR(1) noise to superimpose onto model projections.
+function simulate_ar1_noise(n::Int, σ::Float64, ρ::Float64, ϵ::Array{Float64,1})
+
+    # Define AR(1) stationary process variance.
+    σ_process = σ^2/(1-ρ^2)
+
+    # Initialize AR(1) covariance matrix (just for convenience).
+    H = abs.(collect(1:n)' .- collect(1:n))
+
+    # Calculate residual covariance matrix (sum of AR(1) process variance and observation error variances).
+    # Note: This follows Supplementary Information Equation (10) in Ruckert et al. (2017).
+    cov_matrix = σ_process * ρ .^ H + Diagonal(ϵ.^2)
+
+    # Return a mean-zero AR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
+end
+
