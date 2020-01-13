@@ -26,31 +26,43 @@ function build_result_folders(results_name::String)
     # Loop over the various IAM and climate model combinations.
     for climate_model in climate_model_names
 
-        # Create folders to store calibrated posterior parameter samples.
+        # Create folders to store calibrated posterior parameter samples for baseline and sensitivity runs.
         mkpath(joinpath("results", results_name, "calibrated_parameters", climate_model))
+        mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "calibrated_parameters", climate_model))
+        mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "calibrated_parameters", climate_model))
 
-        # Create folders to store climate projections for the different scenarios.
+        # Create folders to store climate projections for the different scenarios (and baseline sensitivity runs).
         mkpath(joinpath("results", results_name, "climate_projections", "baseline_run", climate_model))
+        mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "climate_projections", "baseline_run", climate_model))
+        mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "climate_projections", "baseline_run", climate_model))
+
         mkpath(joinpath("results", results_name, "climate_projections", "outdated_forcing", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "remove_correlations", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "us_climate_sensitivity", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "rcp26", climate_model))
 
-        # Create folders to store SC-CH4 estiamtes for DICE and FUND.
+        # Create folders to store SC-CH4 estimates for DICE and FUND for baseline, alternative scenario, and sensitivity climate runs.
         for iam_model in iam_model_names
             mkpath(joinpath("results", results_name, "scch4_estimates", "baseline_run", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "scch4_estimates", "baseline_run", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "scch4_estimates", "baseline_run", iam_model, climate_model))
+
             mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_forcing", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "remove_correlations", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "us_climate_sensitivity", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "rcp26", iam_model, climate_model))
         end
 
-        # Equity-weighted SC-CH4 estimates only uses FUND.
+        # Create folders to save equity-weighted SC-CH4 estimatesfor FUND and RICE.
         mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", climate_model))
+        mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "rice", climate_model))
     end
 
     # Create folder to store Bayesian model averaging (BMA) weights within the calibration folder.
     mkpath(joinpath("results", results_name, "calibrated_parameters", "bma_weights"))
+    mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "calibrated_parameters", "bma_weights"))
+    mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "calibrated_parameters", "bma_weights"))
+
 end
 
 
@@ -147,6 +159,9 @@ function create_update_ch4_function(climate_model::Symbol)
                 update_param!(m, :scale_CH₄,   rf_scale_CH₄)
                 return
             end
+
+        else
+            error("Incorrect climate model selected. Options include :sneasy_fair, :sneasy_fund, :sneasy_hector, or :sneasy_magicc.")
         end
 
     # Return the paramter updated function for the specific version of SNEASY+CH4.
