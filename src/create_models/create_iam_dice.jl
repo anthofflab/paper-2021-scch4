@@ -10,7 +10,7 @@ using MimiDICE2013
 function create_iam_dice(;end_year::Int=2300)
 
     # Create an instance of DICE2013.
-    m = getdiceexcel()
+    m = getdicegams()
 
     # Set model time horizon (note DICE runs on 5-year timesteps).
     set_dimension!(m, :time, 2010:5:end_year)
