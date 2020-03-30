@@ -26,43 +26,38 @@ function build_result_folders(results_name::String)
     # Loop over the various IAM and climate model combinations.
     for climate_model in climate_model_names
 
-        # Create folders to store calibrated posterior parameter samples for baseline and sensitivity runs.
+        # Create folders to store calibrated posterior parameter samples for baseline and wider prior sensitivity runs.
         mkpath(joinpath("results", results_name, "calibrated_parameters", climate_model))
-        mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "calibrated_parameters", climate_model))
-        mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "calibrated_parameters", climate_model))
+        mkpath(joinpath("results", results_name, "calibrated_parameters", "wider_priors", climate_model))
 
-        # Create folders to store climate projections for the different scenarios (and baseline sensitivity runs).
+        # Create folders to store climate projections for the different scenarios.
         mkpath(joinpath("results", results_name, "climate_projections", "baseline_run", climate_model))
-        mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "climate_projections", "baseline_run", climate_model))
-        mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "climate_projections", "baseline_run", climate_model))
-
-        mkpath(joinpath("results", results_name, "climate_projections", "outdated_forcing", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "outdated_ch4_forcing", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "remove_correlations", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "us_climate_sensitivity", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "rcp26", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "wider_priors", climate_model))
 
-        # Create folders to store SC-CH4 estimates for DICE and FUND for baseline, alternative scenario, and sensitivity climate runs.
+        # Create folders to store SC-CH4 estimates for DICE and FUND for baseline and alternative scenario runs.
         for iam_model in iam_model_names
             mkpath(joinpath("results", results_name, "scch4_estimates", "baseline_run", iam_model, climate_model))
-            mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "scch4_estimates", "baseline_run", iam_model, climate_model))
-            mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "scch4_estimates", "baseline_run", iam_model, climate_model))
-
-            mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_forcing", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_ch4_forcing", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "remove_correlations", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "us_climate_sensitivity", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "rcp26", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "wider_priors", iam_model, climate_model))
         end
-
-        # Create folders to save equity-weighted SC-CH4 estimatesfor FUND and RICE.
-        mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", climate_model))
-        mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "rice", climate_model))
     end
 
     # Create folder to store Bayesian model averaging (BMA) weights within the calibration folder.
     mkpath(joinpath("results", results_name, "calibrated_parameters", "bma_weights"))
-    mkpath(joinpath("results", results_name, "sensitivity_results", "wider_priors", "calibrated_parameters", "bma_weights"))
-    mkpath(joinpath("results", results_name, "sensitivity_results", "alternative_ch4_emissions", "calibrated_parameters", "bma_weights"))
 
+    # Create folder to save equity-weighted SC-CH4 estimates for FUND + S-MAGICC.
+    mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc"))
+
+    # Create folder to store .jpg and .pdf figures.
+    mkpath(joinpath("figures", results_name, "jpg_figures"))
+    mkpath(joinpath("figures", results_name, "pdf_figures"))
 end
 
 
