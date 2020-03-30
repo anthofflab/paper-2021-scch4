@@ -170,7 +170,6 @@ end
 
 
 
-
 #######################################################################################################################
 # CREATE A FUNCTION TO ACCESS PROJECTED METHANE CONCENTRATIONS FOR SPECIFIC METHANE CYCLE MODEL.
 #######################################################################################################################
@@ -270,28 +269,63 @@ end
 #
 # Function Arguments:
 #
-#       N = Number of time periods (years) the model is being run for.
+#       n = Number of time periods (years) the model is being run for.
+#       σ = Calibrated standard deviation.
 #       ρ = Calibrated autocorrelation coefficient.
-#       σ = Combined time-varying observation errors and calibrated standard deviation.
+#       ϵ = Time-varying observation errors.
 #----------------------------------------------------------------------------------------------------------------------
 
-#=
-function ar1_hetero_sim(N, ρ, σ)
+function simulate_ar1_noise(n::Int, σ::Float64, ρ::Float64, ϵ::Array{Float64,1})
 
-    x = zeros(N)
+    # Define AR(1) stationary process variance.
+    σ_process = σ^2/(1-ρ^2)
 
-    # Sample value for initial condition.
-    x[1] = rand(Normal(0, (σ[1]/sqrt(1-ρ^2))))
+    # Initialize AR(1) covariance matrix (just for convenience).
+    H = abs.(collect(1:n)' .- collect(1:n))
 
-    # Simulate AR(1) process.
-    for i in 2:N
-        x[i] = ρ * x[i-1] + rand(Normal(0, σ[i]))
-    end
+    # Calculate residual covariance matrix (sum of AR(1) process variance and observation error variances).
+    # Note: This follows Supplementary Information Equation (10) in Ruckert et al. (2017).
+    cov_matrix = σ_process * ρ .^ H + Diagonal(ϵ.^2)
 
-    return x
+    # Return a mean-zero AR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
 end
 
-=#
+
+
+#######################################################################################################################
+# SIMULATE STATIONARY CAR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS.
+#######################################################################################################################
+# Description: This function simulates a stationary CAR(1) process (given time-varying observation errors supplied with
+#              each calibration data set) to superimpose noise onto the climate model projections.
+#
+# Function Arguments:
+#
+#       n              = Number of time periods (years) the model is being run for.
+#       α₀             = Calibrated term describing correlation memory of CAR(1) process.
+#       σ²_white_noise = Calibrated continuous white noise process variance term.
+#       ϵ              = Time-varying observation errors.
+#----------------------------------------------------------------------------------------------------------------------
+
+function simulate_car1_noise(n, α₀, σ²_white_noise, ϵ)
+
+    # Indices for full time horizon.
+    indices = collect(1:n)
+
+    # Initialize covariance matrix for irregularly spaced data with relationships decaying exponentially.
+    H = exp.(-α₀ .* abs.(indices' .- indices))
+
+    # Define the variance of x(t), a continous stochastic time-series.
+    σ² = σ²_white_noise / (2*α₀)
+
+    # Calculate residual covariance matrix (sum of CAR(1) process variance and observation error variances).
+    cov_matrix = σ² .* H + Diagonal(ϵ.^2)
+
+    # Return a mean-zero CAR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
+end
+
+
 
 #######################################################################################################################
 # REPLICATE TIME-VARYING OBSERVATION ERRORS FOR PERIODS WITHOUT COVERAGE.
@@ -331,92 +365,6 @@ end
 
 
 #######################################################################################################################
-# SIMULATE STATIONARY AR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS FOR CH₄ ICE CORE AND FLASK DATA SETS.
-#######################################################################################################################
-# Description: This function simulates a stationary AR(1) process (given time-varying observation errors supplied with
-#              each calibration data set) to superimpose noise onto the methane concentration model projections. It
-#              starts with the statistical process parameters calibrated to the Law Dome ice core data, and in 1984 then
-#              transitions to the calibrated parameters and measurement error estiamtes from the NOAA flask data.
-#
-# Function Arguments:
-#
-#       start_year = The first year to run the climate model.
-#       end_year   = The final year to run the climate model.
-#       ρ_ice      = Calibrated autocorrelation coefficient for Law Dome CH₄ data.
-#       σ_ice      = Calibrated standard deviation for Law Dome CH₄ data.
-#       err_ice    = Observation measurement errors for Law Dome CH₄ data.
-#       ρ_inst     = Calibrated autocorrelation coefficient for NOAA flask CH₄ data.
-#       σ_inst     = Calibrated standard deviation for NOAA flask CH₄ data.
-#       err_inst   = Time-varying observation measurement errors for NOAA flask CH₄ data.
-#----------------------------------------------------------------------------------------------------------------------
-
-#=
-
-function ch4_mixed_noise(start_year, end_year, ρ_ice, σ_ice, err_ice, ρ_inst, σ_inst, err_inst)
-
-    # Allocate vectors for results. Start year-1983 uses calibrated Law Dome statistical process parameters, then NOAA values.
-    n_years = length(start_year:end_year)
-    noise   = zeros(n_years)
-    n_ice   = length(start_year:1983)
-    n_inst  = length(1984:end_year)
-
-    # Simulated AR(1) noise for period covered by Law Dome data.
-    noise[1] = σ_ice/sqrt(1-ρ_ice^2)
-    for t = 2:n_ice
-        noise[t] = ρ_ice * noise[t-1] + rand(Normal(0, sqrt(σ_ice^2 + err_ice^2)))
-    end
-
-    # Simulated AR(1) noise for period covered by instrumental NOAA data.
-    for t = (n_ice+1):n_years
-        noise[t] = ρ_inst * noise[t-1] + rand(Normal(0, sqrt(σ_inst^2 + err_inst[t]^2)))
-    end
-
-    return noise
-end
-
-
-#######################################################################################################################
-# SIMULATE IID and STATIONARY AR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS FOR CO₂ ICE CORE AND FLASK DATA SETS.
-#######################################################################################################################
-# Description: This function simulates iid noise (accounting for observation errors) for the Law Dome CO₂ calibration
-#              data set and then in 1959 transitions to a stationary AR(1) process using the statistical process parameters
-#              calibrated to the Mauna Loa CO₂ data set.
-#
-# Function Arguments:
-#
-#       start_year = The first year to run the climate model.
-#       end_year   = The final year to run the climate model.
-#       σ_ice      = Calibrated standard deviation for Law Dome CO₂ data.
-#       σ_inst     = Calibrated standard deviation for Mauna Loa CO₂ data.
-#       err_ice    = Observation measurement error for Law Dome CO₂ data.
-#       err_inst   = Observation measurement error for Mauna Loa CO₂ data.
-#       ρ_inst     = Calibrated autocorrelation coefficient for Mauna Loa CO₂ data.
-#----------------------------------------------------------------------------------------------------------------------
-
-function co2_mixed_noise(start_year, end_year, σ_ice, σ_inst, err_ice, err_inst, ρ_inst)
-
-    # Allocate vectors for results. Start year-1958 uses calibrated Law Dome statistical process parameters, then Mauna Loa values.
-    n_years = length(start_year:end_year)
-    noise   = zeros(n_years)
-    n_ice   = length(start_year:1958)
-    n_inst  = length(1959:end_year)
-
-    # Simulated iid noise for period covered by Law Dome data.
-    for t = 1:n_ice
-        noise[t] = rand(Normal(0.0, sqrt(σ_ice^2 + err_ice^2)))
-    end
-
-    # Simulated AR(1) noise for period covered by instrumental Mauna Loa data.
-    for t = (n_ice+1):n_years
-        noise[t] = ρ_inst * noise[t-1] + rand(Normal(0.0, sqrt(σ_inst^2 + err_inst^2)))
-    end
-
-    return noise
-end
-
-=#
-
-#######################################################################################################################
 # LINEARLY INTERPOLATE DICE RESULTS TO ANNUAL VALUES
 #######################################################################################################################
 # Description: This function uses linear interpolation to create an annual time series from DICE results (which have
@@ -441,12 +389,6 @@ function dice_interpolate(data, spacing)
 end
 
 
-####################################################################################
-#Function to calculate confidence intervals from mcmc runs
-
-#this assumes each row is a new model run, each column is a year)
-
-#Gives back data in form Year, Chain Mean, Upper1, Lower1, Upper2, Lower2, Confidence for Plotting
 
 #######################################################################################################################
 # CREATE CLIMATE PROJECTION CREDIBLE INTERVALS
@@ -495,44 +437,3 @@ function get_confidence_interval(years, model_result, conf_1_percent, conf_2_per
 
     return ci_results
 end
-
-#
-
-# Sample CAR(1) noise to superimpose onto model projections.
-function simulate_car1_noise(n, α₀, σ²_white_noise, ϵ)
-
-    # Indices for full time horizon
-    indices = collect(1:n)
-
-    # Initialize covariance matrix for irregularly spaced data with relationships decaying exponentially.
-    H = exp.(-α₀ .* abs.(indices' .- indices))
-
-    # Define the variance of x(t), a continous stochastic time-series.
-    σ² = σ²_white_noise / (2*α₀)
-
-    # Calculate residual covariance matrix (sum of CAR(1) process variance and observation error variances).
-    cov_matrix = σ² .* H + Diagonal(ϵ.^2)
-
-    # Return a mean-zero CAR(1) noise sample accounting for time-varying observation error.
-    return rand(MvNormal(cov_matrix))
-end
-
-
-
-# Sample AR(1) noise to superimpose onto model projections.
-function simulate_ar1_noise(n::Int, σ::Float64, ρ::Float64, ϵ::Array{Float64,1})
-
-    # Define AR(1) stationary process variance.
-    σ_process = σ^2/(1-ρ^2)
-
-    # Initialize AR(1) covariance matrix (just for convenience).
-    H = abs.(collect(1:n)' .- collect(1:n))
-
-    # Calculate residual covariance matrix (sum of AR(1) process variance and observation error variances).
-    # Note: This follows Supplementary Information Equation (10) in Ruckert et al. (2017).
-    cov_matrix = σ_process * ρ .^ H + Diagonal(ϵ.^2)
-
-    # Return a mean-zero AR(1) noise sample accounting for time-varying observation error.
-    return rand(MvNormal(cov_matrix))
-end
-
