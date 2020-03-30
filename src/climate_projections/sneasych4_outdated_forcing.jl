@@ -55,12 +55,12 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
     # Load calibration data from 1765-2017 (measurement errors used in simulated noise).
     calibration_data = load_calibration_data(2017)
 
-    # Pre-allocate vectors to hold simulated AR(1) + measurement error noise.
+    # Pre-allocate vectors to hold simulated CAR(1) & AR(1) with measurement error noise.
     norm_oceanco2   = zeros(number_years)
     ar1_temperature = zeros(number_years)
     ar1_oceanheat   = zeros(number_years)
-    ar1_co2         = zeros(number_years)
-    ar1_ch4         = zeros(number_years)
+    car1_co2        = zeros(number_years)
+    car1_ch4        = zeros(number_years)
 
     # Replicate errors for years without observations over model time horizon.
     obs_error_temperature = replicate_errors(1765, end_year, calibration_data.hadcrut_temperature_sigma)
@@ -192,44 +192,56 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
             update_param!(sneasych4_pulse, :α, rf_scale_aerosol)
             update_ch4_params!(sneasych4_pulse, Vector(calibrated_parameters[i,:]))
 
-            # Run both models.
-            run(sneasych4_base)
-            run(sneasych4_pulse)
+            # Add a check for cases where extreme parameter samples cause a model error.
+            try
 
-            # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: Both models use same estimated noise).
-            ar1_temperature[:] = ar1_hetero_sim(number_years, ρ_temperature, sqrt.(obs_error_temperature.^2 .+ σ_temperature^2))
-            ar1_oceanheat[:]   = ar1_hetero_sim(number_years, ρ_ocean_heat, sqrt.(obs_error_oceanheat.^2 .+ σ_ocean_heat^2))
-            norm_oceanco2[:]   = rand(Normal(0,0.4*sqrt(10)), number_years)
+                # Run both models.
+                run(sneasych4_base)
+                run(sneasych4_pulse)
 
-            # CO₂ and CH₄ use CAR(1) statistical process parameters.
-            ar1_co2[:] = ar1_hetero_sim(number_years, exp(-α₀_CO₂), sqrt.(obs_error_co2.^2 .+ σ²_white_noise_CO₂))
-            ar1_ch4[:] = ar1_hetero_sim(number_years, exp(-α₀_CH₄), sqrt.(obs_error_ch4.^2 .+ σ²_white_noise_CH₄))
+                # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: Both models use same estimated noise).
+                ar1_temperature[:] = simulate_ar1_noise(number_years, σ_temperature, ρ_temperature, obs_error_temperature)
+                ar1_oceanheat[:]   = simulate_ar1_noise(number_years, σ_ocean_heat,  ρ_ocean_heat,  obs_error_oceanheat)
+                norm_oceanco2[:]   = rand(Normal(0,0.4*sqrt(10)), number_years)
 
-            # Store model projections resulting from parameter sample `i` for base model.
-            base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .+ ar1_temperature .+ temperature_0
-            base_co2[i,:]          = sneasych4_base[:ccm, :atmco2] .+ ar1_co2
-            base_ocean_heat[i,:]   = sneasych4_base[:doeclim, :heat_interior] .+ ar1_oceanheat .+ ocean_heat_0
-            base_oceanco2[i,:]     = sneasych4_base[:ccm, :atm_oc_flux] .+ norm_oceanco2
-            base_ch4[i,:]          = get_ch4_results!(sneasych4_base) .+ ar1_ch4
+                # CO₂ and CH₄ use CAR(1) statistical process parameters.
+                car1_co2[:] = simulate_car1_noise(number_years, α₀_CO₂, σ²_white_noise_CO₂, obs_error_co2)
+                car1_ch4[:] = simulate_car1_noise(number_years, α₀_CH₄, σ²_white_noise_CH₄, obs_error_ch4)
 
-            # Store tempeature and CO₂ projections resulting from parameter sample `i` for pulse model (used for estimating the SC-CH₄).
-            pulse_temperature[i,:] = sneasych4_pulse[:doeclim, :temp] .+ ar1_temperature
-            pulse_co2[i,:]         = sneasych4_pulse[:ccm, :atmco2] .+ ar1_co2
+                # Store model projections resulting from parameter sample `i` for base model.
+                base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .- mean(sneasych4_base[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
+                base_co2[i,:]          = sneasych4_base[:ccm, :atmco2] .+ car1_co2
+                base_ocean_heat[i,:]   = sneasych4_base[:doeclim, :heat_interior] .+ ar1_oceanheat .+ ocean_heat_0
+                base_oceanco2[i,:]     = sneasych4_base[:ccm, :atm_oc_flux] .+ norm_oceanco2
+                base_ch4[i,:]          = get_ch4_results!(sneasych4_base) .+ car1_ch4
 
-            # Normalize temperatures to be relative to the 1861-1880 mean.
-            base_temperature[i,:]  = base_temperature[i,:] .- mean(base_temperature[i, indices_1861_1880])
-            pulse_temperature[i,:] = pulse_temperature[i,:] .- mean(pulse_temperature[i, indices_1861_1880])
+                # Store tempeature and CO₂ projections resulting from parameter sample `i` for pulse model (used for estimating the SC-CH₄).
+                pulse_temperature[i,:] = sneasych4_pulse[:doeclim, :temp] .- mean(sneasych4_pulse[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
+                pulse_co2[i,:]         = sneasych4_pulse[:ccm, :atmco2] .+ car1_co2
+
+            catch
+
+                # Set values to -99999.99 if non-physical parameter samples produce a model error.
+                base_temperature[i,:]  .= -99999.99
+                base_co2[i,:]          .= -99999.99
+                base_ocean_heat[i,:]   .= -99999.99
+                base_oceanco2[i,:]     .= -99999.99
+                base_ch4[i,:]          .= -99999.99
+                pulse_temperature[i,:] .= -99999.99
+                pulse_co2[i,:]         .= -99999.99
+            end
         end
 
         # Calculate credible intervals for base model projections.
-        ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature, ci_interval_1, ci_interval_2)
-        ci_co2         = get_confidence_interval(collect(1765:end_year), base_co2,         ci_interval_1, ci_interval_2)
-        ci_ocean_heat  = get_confidence_interval(collect(1765:end_year), base_ocean_heat,  ci_interval_1, ci_interval_2)
-        ci_oceanco2    = get_confidence_interval(collect(1765:end_year), base_oceanco2,    ci_interval_1, ci_interval_2)
-        ci_ch4         = get_confidence_interval(collect(1765:end_year), base_ch4,         ci_interval_1, ci_interval_2)
+        ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature[good_indices,:], ci_interval_1, ci_interval_2)
+        ci_co2         = get_confidence_interval(collect(1765:end_year), base_co2[good_indices,:],         ci_interval_1, ci_interval_2)
+        ci_ocean_heat  = get_confidence_interval(collect(1765:end_year), base_ocean_heat[good_indices,:],  ci_interval_1, ci_interval_2)
+        ci_oceanco2    = get_confidence_interval(collect(1765:end_year), base_oceanco2[good_indices,:],    ci_interval_1, ci_interval_2)
+        ci_ch4         = get_confidence_interval(collect(1765:end_year), base_ch4[good_indices,:],         ci_interval_1, ci_interval_2)
 
         return base_temperature, base_co2, base_ch4, base_ocean_heat, base_oceanco2, pulse_temperature, pulse_co2,
-               ci_temperature, ci_co2, ci_ocean_heat, ci_oceanco2, ci_ch4
+               ci_temperature, ci_co2, ci_ocean_heat, ci_oceanco2, ci_ch4,
+               error_indices, good_indices
     end
 
     # Return function with user model specifications.

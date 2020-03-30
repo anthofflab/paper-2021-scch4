@@ -206,19 +206,15 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
                 car1_ch4[:] = simulate_car1_noise(number_years, α₀_CH₄, σ²_white_noise_CH₄, obs_error_ch4)
 
                 # Store model projections resulting from parameter sample `i` for base model.
-                base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .+ ar1_temperature .+ temperature_0
+                base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .- mean(sneasych4_base[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
                 base_co2[i,:]          = sneasych4_base[:ccm, :atmco2] .+ car1_co2
                 base_ocean_heat[i,:]   = sneasych4_base[:doeclim, :heat_mixed] .+ sneasych4_base[:doeclim, :heat_interior] .+ ar1_oceanheat .+ ocean_heat_0
                 base_oceanco2[i,:]     = sneasych4_base[:ccm, :atm_oc_flux] .+ norm_oceanco2
                 base_ch4[i,:]          = get_ch4_results!(sneasych4_base) .+ car1_ch4
 
                 # Store tempeature and CO₂ projections resulting from parameter sample `i` for pulse model (used for estimating the SC-CH₄).
-                pulse_temperature[i,:] = sneasych4_pulse[:doeclim, :temp] .+ ar1_temperature
+                pulse_temperature[i,:] = sneasych4_pulse[:doeclim, :temp] .- mean(sneasych4_pulse[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
                 pulse_co2[i,:]         = sneasych4_pulse[:ccm, :atmco2] .+ car1_co2
-
-                # Normalize temperatures to be relative to the 1861-1880 mean.
-                base_temperature[i,:]  = base_temperature[i,:]  .- mean(base_temperature[i, indices_1861_1880])
-                pulse_temperature[i,:] = pulse_temperature[i,:] .- mean(pulse_temperature[i, indices_1861_1880])
 
             catch
 
