@@ -1,6 +1,6 @@
 # #-------------------------------------------------------------------------------------------------------
 # #-------------------------------------------------------------------------------------------------------
-# # This file contains functions used to calculate the log-posterior.
+# # This file contains functions used to calculate the log-posterior using wider prior distributions.
 # #-------------------------------------------------------------------------------------------------------
 # #-------------------------------------------------------------------------------------------------------
 
@@ -92,7 +92,7 @@ end
 #                       :sneasy_hector, and :sneasy_magicc).
 #----------------------------------------------------------------------------------------------------------------------
 
-function construct_log_prior(climate_model::Symbol)
+function construct_log_prior_wider(climate_model::Symbol)
 
     # Declare all prior distributions for all uncertain parameters found in the four versions of SNEASY+CH4.
 
@@ -184,7 +184,7 @@ function construct_log_prior(climate_model::Symbol)
     # Create function that returns the log-prior of all uncertain model parameters.
     #------------------------------------------------------------------------------------
 
-    function total_log_prior(p::Array{Float64,1})
+    function total_log_prior_wider(p::Array{Float64,1})
 
         # Assign parameter values (common to all four models) names for convenience.
         σ_temperature      = p[1]
@@ -210,18 +210,18 @@ function construct_log_prior(climate_model::Symbol)
         CO₂_diffusivity    = p[21]
 
         # Return total log-prior of all uncertain parameters (using "ch4_model_priors" function to account for different versions of SNEASY+CH4).
-        log_prior = logpdf(prior_σ_temperature, σ_temperature) + logpdf(prior_σ_ocean_heat, σ_ocean_heat) + logpdf(prior_σ²_white_noise_CO₂, σ²_white_noise_CO₂) + logpdf(prior_σ²_white_noise_CH₄, σ²_white_noise_CH₄) +
-                    logpdf(prior_ρ_temperature, ρ_temperature) + logpdf(prior_ρ_ocean_heat, ρ_ocean_heat) + logpdf(prior_α₀_CO₂, α₀_CO₂) + logpdf(prior_α₀_CH₄, α₀_CH₄) +
-                    logpdf(prior_temperature_0, temperature_0) + logpdf(prior_ocean_heat_0, ocean_heat_0) + logpdf(prior_CO₂_0, CO₂_0) + logpdf(prior_CH₄_0, CH₄_0) + logpdf(prior_N₂O_0, N₂O_0) +
-                    logpdf(prior_ECS, ECS) + logpdf(prior_heat_diffusivity, heat_diffusivity) + logpdf(prior_rf_scale_aerosol, rf_scale_aerosol) + logpdf(prior_rf_scale_CH₄, rf_scale_CH₄) + logpdf(prior_F2x_CO₂, F2x_CO₂) +
-                    logpdf(prior_Q10, Q10) + logpdf(prior_CO₂_fertilization, CO₂_fertilization) + logpdf(prior_CO₂_diffusivity, CO₂_diffusivity) +
-                    ch4_model_priors(p)
+        wider_log_prior = logpdf(prior_σ_temperature, σ_temperature) + logpdf(prior_σ_ocean_heat, σ_ocean_heat) + logpdf(prior_σ²_white_noise_CO₂, σ²_white_noise_CO₂) + logpdf(prior_σ²_white_noise_CH₄, σ²_white_noise_CH₄) +
+                          logpdf(prior_ρ_temperature, ρ_temperature) + logpdf(prior_ρ_ocean_heat, ρ_ocean_heat) + logpdf(prior_α₀_CO₂, α₀_CO₂) + logpdf(prior_α₀_CH₄, α₀_CH₄) +
+                          logpdf(prior_temperature_0, temperature_0) + logpdf(prior_ocean_heat_0, ocean_heat_0) + logpdf(prior_CO₂_0, CO₂_0) + logpdf(prior_CH₄_0, CH₄_0) + logpdf(prior_N₂O_0, N₂O_0) +
+                          logpdf(prior_ECS, ECS) + logpdf(prior_heat_diffusivity, heat_diffusivity) + logpdf(prior_rf_scale_aerosol, rf_scale_aerosol) + logpdf(prior_rf_scale_CH₄, rf_scale_CH₄) + logpdf(prior_F2x_CO₂, F2x_CO₂) +
+                          logpdf(prior_Q10, Q10) + logpdf(prior_CO₂_fertilization, CO₂_fertilization) + logpdf(prior_CO₂_diffusivity, CO₂_diffusivity) +
+                          ch4_model_priors(p)
 
-        return log_prior
+        return wider_log_prior
     end
 
     # Return total log-prior function for specified version of SNEASY+CH4.
-    return total_log_prior
+    return total_log_prior_wider
 end
 
 
@@ -240,13 +240,13 @@ end
 #       end_year      = The final year to run the model calibration (defaults to 2017).
 #----------------------------------------------------------------------------------------------------------------------
 
-function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::Int=2017)
+function construct_log_posterior_wider(f_run_model, climate_model::Symbol; end_year::Int=2017)
 
     # Initialize model to start in 1765.
     start_year = 1765
 
     # Get log-prior function based on version of SNEASY+CH4 being used.
-    total_log_prior = construct_log_prior(climate_model)
+    total_log_prior_wider = construct_log_prior_wider(climate_model)
 
     # Create a vector of calibration years and calculate total number of years to run model.
     calibration_years = collect(start_year:end_year)
@@ -300,7 +300,7 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     # Create a function to calculate the log-likelihood for the observations, assuming residual independence across calibration data sets.
     #---------------------------------------------------------------------------------------------------------------------------------------
 
-    function total_log_likelihood(p::Array{Float64,1})
+    function total_log_likelihood_wider(p::Array{Float64,1})
 
         # Assign names to uncertain statistical process parameters used in log-likelihood calculations.
         σ_temperature      = p[1]
@@ -416,19 +416,19 @@ function construct_log_posterior(f_run_model, climate_model::Symbol; end_year::I
     # Create a function to calculate the log-posterior of uncertain parameters 'p' (posterior ∝ likelihood * prior)
     #---------------------------------------------------------------------------------------------------------------
 
-    function log_posterior(p)
+    function log_posterior_wider(p)
 
         # Calculate log-prior
-        log_prior = total_log_prior(p)
+        log_prior_wider = total_log_prior_wider(p)
 
         # In case a parameter sample leads to non-physical model outcomes, return -Inf rather than erroring out.
         try
-            log_post = isfinite(log_prior) ? total_log_likelihood(p) + log_prior : -Inf
+            log_post_wider = isfinite(log_prior_wider) ? total_log_likelihood_wider(p) + log_prior_wider : -Inf
         catch
-            log_post = - Inf
+            log_post_wider = - Inf
         end
     end
 
     # Return log posterior function given user specifications.
-    return log_posterior
+    return log_posterior_wider
 end
