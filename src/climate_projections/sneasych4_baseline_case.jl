@@ -240,7 +240,7 @@ function construct_sneasych4_baseline_case(climate_model::Symbol, rcp::String,  
         ci_oceanco2    = get_confidence_interval(collect(1765:end_year), base_oceanco2[good_indices,:],    ci_interval_1, ci_interval_2)
         ci_ch4         = get_confidence_interval(collect(1765:end_year), base_ch4[good_indices,:],         ci_interval_1, ci_interval_2)
 
-        return base_temperature, base_co2, base_ch4, base_ocean_heat, base_oceanco2, pulse_temperature, pulse_co2,
+        return base_temperature[good_indices,:], base_co2[good_indices,:], base_ch4[good_indices,:], base_ocean_heat[good_indices,:], base_oceanco2[good_indices,:], pulse_temperature[good_indices,:], pulse_co2[good_indices,:],
                ci_temperature, ci_co2, ci_ocean_heat, ci_oceanco2, ci_ch4,
                error_indices, good_indices
     end

@@ -241,9 +241,9 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
             end
         end
 
-        # Distinguish between model indices that caused a model error and those that did not.
-        error_indices = findall(x-> x == -99999.99, base_temperature[:,1])
-        good_indices  = findall(x-> x != -99999.99, base_temperature[:,1])
+        # Identify model indices that caused a model error or yield non-physical outcomes (i.e. strongly negative temperatures in 2300 under RCP 8.5).
+        error_indices = findall(x-> x < -10.0, base_temperature[:,end])
+        good_indices  = findall(!in(error_indices), collect(1:number_samples))
 
         # Calculate credible intervals for base model projections using model indices that did not cause errors.
         ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature[good_indices,:], ci_interval_1, ci_interval_2)
@@ -252,7 +252,7 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
         ci_oceanco2    = get_confidence_interval(collect(1765:end_year), base_oceanco2[good_indices,:],    ci_interval_1, ci_interval_2)
         ci_ch4         = get_confidence_interval(collect(1765:end_year), base_ch4[good_indices,:],         ci_interval_1, ci_interval_2)
 
-        return base_temperature, base_co2, base_ch4, base_ocean_heat, base_oceanco2, pulse_temperature, pulse_co2,
+        return base_temperature[good_indices,:], base_co2[good_indices,:], base_ch4[good_indices,:], base_ocean_heat[good_indices,:], base_oceanco2[good_indices,:], pulse_temperature[good_indices,:], pulse_co2[good_indices,:],
                ci_temperature, ci_co2, ci_ocean_heat, ci_oceanco2, ci_ch4,
                error_indices, good_indices, random_indices
 
