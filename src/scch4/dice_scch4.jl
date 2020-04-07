@@ -86,7 +86,7 @@ function dice_damages(base_temp::Array{Float64,2}, pulse_temp::Array{Float64,2},
     good_indices  = findall(!in(error_indices), collect(1:number_samples))
 
     # Return results.
-    return annual_marginal_damages, pc_consumption_base, error_indices, good_indices
+    return annual_marginal_damages[good_indices,:], pc_consumption_base[good_indices,:], error_indices, good_indices
 end
 
 
