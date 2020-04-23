@@ -232,9 +232,9 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
             end
         end
 
-        # Calculate indices for runs that produce a model error.
-        error_indices = findall(x-> x == -99999.99, base_temperature[:,1])
-        good_indices  = findall(x-> x != -99999.99, base_temperature[:,1])
+        # Identify model indices that caused a model error or yield non-physical outcomes (i.e. strongly negative temperatures in 2300 under RCP 8.5).
+        error_indices = findall(x-> x < -10.0, base_temperature[:,end])
+        good_indices  = findall(!in(error_indices), collect(1:number_samples))
 
         # Calculate credible intervals for base model projections using model indices that did not cause errors.
         ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature[good_indices,:], ci_interval_1, ci_interval_2)

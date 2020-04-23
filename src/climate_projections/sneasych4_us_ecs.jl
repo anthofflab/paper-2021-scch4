@@ -233,9 +233,9 @@ function construct_sneasych4_ecs(climate_model::Symbol, rcp::String,  pulse_year
             end
         end
 
-        # Distinguish between model indices that caused a model error and those that did not.
-        error_indices = findall(x-> x == -99999.99, base_temperature[:,1])
-        good_indices  = findall(x-> x != -99999.99, base_temperature[:,1])
+        # Identify model indices that caused a model error or yield non-physical outcomes (i.e. strongly negative temperatures in 2300 under RCP 8.5).
+        error_indices = findall(x-> x < -10.0, base_temperature[:,end])
+        good_indices  = findall(!in(error_indices), collect(1:number_samples))
 
         # Calculate credible intervals for base model projections using model indices that did not cause errors.
         ci_temperature = get_confidence_interval(collect(1765:end_year), base_temperature[good_indices,:], ci_interval_1, ci_interval_2)
