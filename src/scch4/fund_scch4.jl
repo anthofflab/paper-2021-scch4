@@ -88,7 +88,7 @@ function fund_damages(base_temp::Array{Float64,2}, base_co2::Array{Float64,2}, p
         end
     end
 
-    # Distinguish between FUND model indices that caused a model error and those that did not.
+    # Check if any samples caused a model error.
     error_indices = findall(x-> x == -99999.99, marginal_damages[1,1,:])
     good_indices  = findall(x-> x != -99999.99, marginal_damages[1,1,:])
 

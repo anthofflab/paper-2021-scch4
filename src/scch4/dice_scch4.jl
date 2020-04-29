@@ -81,7 +81,7 @@ function dice_damages(base_temp::Array{Float64,2}, pulse_temp::Array{Float64,2},
         end
     end
 
-    # Distinguish between DICE model indices that caused a model error or yield non-plausible outcomes and those that did not.
+    # Check if any samples caused a model error.
     error_indices = findall(x-> x <= -99999.99 || x > 1_000_000, annual_marginal_damages[:,end])
     good_indices  = findall(!in(error_indices), collect(1:number_samples))
 
