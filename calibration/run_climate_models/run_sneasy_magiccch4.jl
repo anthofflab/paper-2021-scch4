@@ -24,23 +24,23 @@ function construct_run_sneasy_magiccch4(calibration_end_year::Int)
 
         # Assign names to uncertain model and initial condition parameters for convenience.
         # Note: This assumes "params" is the full vector of uncertain parameters with the same ordering as in "create_log_posterior.jl".
-        temperature_0     = params[12]
-        ocean_heat_0      = params[13]
-        CO₂_0             = params[14]
-        CH₄_0             = params[15]
-        N₂O_0             = params[16]
-        ECS               = params[17]
-        heat_diffusivity  = params[18]
-        rf_scale_aerosol  = params[19]
-        rf_scale_CH₄      = params[20]
-        F2x_CO₂           = params[21]
-        Q10               = params[22]
-        CO₂_fertilization = params[23]
-        CO₂_diffusivity   = params[24]
-        τ_troposphere     = params[25]
-        CH₄_natural       = params[26]
-        τ_soil            = params[27]
-        τ_stratosphere    = params[28]
+        temperature_0     = params[9]
+        ocean_heat_0      = params[10]
+        CO₂_0             = params[11]
+        CH₄_0             = params[12]
+        N₂O_0             = params[13]
+        ECS               = params[14]
+        heat_diffusivity  = params[15]
+        rf_scale_aerosol  = params[16]
+        rf_scale_CH₄      = params[17]
+        F2x_CO₂           = params[18]
+        Q10               = params[19]
+        CO₂_fertilization = params[20]
+        CO₂_diffusivity   = params[21]
+        τ_troposphere     = params[22]
+        CH₄_natural       = params[23]
+        τ_soil            = params[24]
+        τ_stratosphere    = params[25]
 
         #----------------------------------------------------------
         # Set SNEASY-MAGICC with sampled parameter values.
@@ -97,7 +97,7 @@ function construct_run_sneasy_magiccch4(calibration_end_year::Int)
         modeled_temperature[:] = m[:doeclim, :temp] .- mean(m[:doeclim, :temp][index_1861:index_1880]) .+ temperature_0
 
         # Ocean heat content (with initial condition offset).
-        modeled_ocean_heat[:] = m[:doeclim, :heat_interior] .+ ocean_heat_0
+        modeled_ocean_heat[:] = m[:doeclim, :heat_mixed] .+ m[:doeclim, :heat_interior] .+ ocean_heat_0
 
         # Atmospheric concentration of CH₄ (exclude first 'missing' value not used in calibration).
         modeled_CH₄[2:end] = m[:ch4_cycle, :CH₄][2:end]

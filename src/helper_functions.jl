@@ -26,31 +26,38 @@ function build_result_folders(results_name::String)
     # Loop over the various IAM and climate model combinations.
     for climate_model in climate_model_names
 
-        # Create folders to store calibrated posterior parameter samples.
+        # Create folders to store calibrated posterior parameter samples for baseline and wider prior sensitivity runs.
         mkpath(joinpath("results", results_name, "calibrated_parameters", climate_model))
+        mkpath(joinpath("results", results_name, "calibrated_parameters", "wider_priors", climate_model))
 
         # Create folders to store climate projections for the different scenarios.
         mkpath(joinpath("results", results_name, "climate_projections", "baseline_run", climate_model))
-        mkpath(joinpath("results", results_name, "climate_projections", "outdated_forcing", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "outdated_ch4_forcing", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "remove_correlations", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "us_climate_sensitivity", climate_model))
         mkpath(joinpath("results", results_name, "climate_projections", "rcp26", climate_model))
+        mkpath(joinpath("results", results_name, "climate_projections", "wider_priors", climate_model))
 
-        # Create folders to store SC-CH4 estiamtes for DICE and FUND.
+        # Create folders to store SC-CH4 estimates for DICE and FUND for baseline and alternative scenario runs.
         for iam_model in iam_model_names
             mkpath(joinpath("results", results_name, "scch4_estimates", "baseline_run", iam_model, climate_model))
-            mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_forcing", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "outdated_ch4_forcing", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "remove_correlations", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "us_climate_sensitivity", iam_model, climate_model))
             mkpath(joinpath("results", results_name, "scch4_estimates", "rcp26", iam_model, climate_model))
+            mkpath(joinpath("results", results_name, "scch4_estimates", "wider_priors", iam_model, climate_model))
         end
-
-        # Equity-weighted SC-CH4 estimates only uses FUND.
-        mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", climate_model))
     end
 
     # Create folder to store Bayesian model averaging (BMA) weights within the calibration folder.
     mkpath(joinpath("results", results_name, "calibrated_parameters", "bma_weights"))
+
+    # Create folder to save equity-weighted SC-CH4 estimates for FUND + S-MAGICC.
+    mkpath(joinpath("results", results_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc"))
+
+    # Create folder to store .jpg and .pdf figures.
+    mkpath(joinpath("figures", results_name, "jpg_figures"))
+    mkpath(joinpath("figures", results_name, "pdf_figures"))
 end
 
 
@@ -74,11 +81,11 @@ function create_update_ch4_function(climate_model::Symbol)
         if climate_model == :sneasy_fair
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0         = params[15]
-                N₂O_0         = params[16]
-                rf_scale_CH₄  = params[20]
-                τ_troposphere = params[25]
-                CH₄_natural   = params[26]
+                CH₄_0         = params[12]
+                N₂O_0         = params[13]
+                rf_scale_CH₄  = params[17]
+                τ_troposphere = params[22]
+                CH₄_natural   = params[23]
 
                 update_param!(m, :natural_emiss_CH₄, ones(length(dim_keys(m, :time))) .* CH₄_natural)
                 update_param!(m, :CH₄_0,             CH₄_0)
@@ -91,10 +98,10 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_fund
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0         = params[15]
-                N₂O_0         = params[16]
-                rf_scale_CH₄  = params[20]
-                τ_troposphere = params[25]
+                CH₄_0         = params[12]
+                N₂O_0         = params[13]
+                rf_scale_CH₄  = params[17]
+                τ_troposphere = params[22]
 
                 update_param!(m, :ch4pre,    CH₄_0)
                 update_param!(m, :acch4_0,   CH₄_0)
@@ -108,13 +115,13 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_hector
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0          = params[15]
-                N₂O_0          = params[16]
-                rf_scale_CH₄   = params[20]
-                τ_troposphere  = params[25]
-                CH₄_natural    = params[26]
-                τ_soil         = params[27]
-                τ_stratosphere = params[28]
+                CH₄_0          = params[12]
+                N₂O_0          = params[13]
+                rf_scale_CH₄   = params[17]
+                τ_troposphere  = params[22]
+                CH₄_natural    = params[23]
+                τ_soil         = params[24]
+                τ_stratosphere = params[25]
 
                 update_param!(m, :TOH0,      τ_troposphere)
                 update_param!(m, :M0,        CH₄_0)
@@ -130,13 +137,13 @@ function create_update_ch4_function(climate_model::Symbol)
         elseif climate_model == :sneasy_magicc
 
             function(m::Model, params::Array{Float64,1})
-                CH₄_0          = params[15]
-                N₂O_0          = params[16]
-                rf_scale_CH₄   = params[20]
-                τ_troposphere  = params[25]
-                CH₄_natural    = params[26]
-                τ_soil         = params[27]
-                τ_stratosphere = params[28]
+                CH₄_0          = params[12]
+                N₂O_0          = params[13]
+                rf_scale_CH₄   = params[17]
+                τ_troposphere  = params[22]
+                CH₄_natural    = params[23]
+                τ_soil         = params[24]
+                τ_stratosphere = params[25]
 
                 update_param!(m, :CH₄_0,       CH₄_0)
                 update_param!(m, :CH4_natural, CH₄_natural)
@@ -147,12 +154,14 @@ function create_update_ch4_function(climate_model::Symbol)
                 update_param!(m, :scale_CH₄,   rf_scale_CH₄)
                 return
             end
+
+        else
+            error("Incorrect climate model selected. Options include :sneasy_fair, :sneasy_fund, :sneasy_hector, or :sneasy_magicc.")
         end
 
     # Return the paramter updated function for the specific version of SNEASY+CH4.
     return update_ch4_params!
 end
-
 
 
 
@@ -255,24 +264,60 @@ end
 #
 # Function Arguments:
 #
-#       N = Number of time periods (years) the model is being run for.
+#       n = Number of time periods (years) the model is being run for.
+#       σ = Calibrated standard deviation.
 #       ρ = Calibrated autocorrelation coefficient.
-#       σ = Combined time-varying observation errors and calibrated standard deviation.
+#       ϵ = Time-varying observation errors.
 #----------------------------------------------------------------------------------------------------------------------
 
-function ar1_hetero_sim(N, ρ, σ)
+function simulate_ar1_noise(n::Int, σ::Float64, ρ::Float64, ϵ::Array{Float64,1})
 
-    x = zeros(N)
+    # Define AR(1) stationary process variance.
+    σ_process = σ^2/(1-ρ^2)
 
-    # Sample value for initial condition.
-    x[1] = rand(Normal(0, (σ[1]/sqrt(1-ρ^2))))
+    # Initialize AR(1) covariance matrix (just for convenience).
+    H = abs.(collect(1:n)' .- collect(1:n))
 
-    # Simulate AR(1) process.
-    for i in 2:N
-        x[i] = ρ * x[i-1] + rand(Normal(0, σ[i]))
-    end
+    # Calculate residual covariance matrix (sum of AR(1) process variance and observation error variances).
+    # Note: This follows Supplementary Information Equation (10) in Ruckert et al. (2017).
+    cov_matrix = σ_process * ρ .^ H + Diagonal(ϵ.^2)
 
-    return x
+    # Return a mean-zero AR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
+end
+
+
+
+#######################################################################################################################
+# SIMULATE STATIONARY CAR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS.
+#######################################################################################################################
+# Description: This function simulates a stationary CAR(1) process (given time-varying observation errors supplied with
+#              each calibration data set) to superimpose noise onto the climate model projections.
+#
+# Function Arguments:
+#
+#       n              = Number of time periods (years) the model is being run for.
+#       α₀             = Calibrated term describing correlation memory of CAR(1) process.
+#       σ²_white_noise = Calibrated continuous white noise process variance term.
+#       ϵ              = Time-varying observation errors.
+#----------------------------------------------------------------------------------------------------------------------
+
+function simulate_car1_noise(n, α₀, σ²_white_noise, ϵ)
+
+    # Indices for full time horizon.
+    indices = collect(1:n)
+
+    # Initialize covariance matrix for irregularly spaced data with relationships decaying exponentially.
+    H = exp.(-α₀ .* abs.(indices' .- indices))
+
+    # Define the variance of x(t), a continous stochastic time-series.
+    σ² = σ²_white_noise / (2*α₀)
+
+    # Calculate residual covariance matrix (sum of CAR(1) process variance and observation error variances).
+    cov_matrix = σ² .* H + Diagonal(ϵ.^2)
+
+    # Return a mean-zero CAR(1) noise sample accounting for time-varying observation error.
+    return rand(MvNormal(cov_matrix))
 end
 
 
@@ -315,90 +360,6 @@ end
 
 
 #######################################################################################################################
-# SIMULATE STATIONARY AR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS FOR CH₄ ICE CORE AND FLASK DATA SETS.
-#######################################################################################################################
-# Description: This function simulates a stationary AR(1) process (given time-varying observation errors supplied with
-#              each calibration data set) to superimpose noise onto the methane concentration model projections. It
-#              starts with the statistical process parameters calibrated to the Law Dome ice core data, and in 1984 then
-#              transitions to the calibrated parameters and measurement error estiamtes from the NOAA flask data.
-#
-# Function Arguments:
-#
-#       start_year = The first year to run the climate model.
-#       end_year   = The final year to run the climate model.
-#       ρ_ice      = Calibrated autocorrelation coefficient for Law Dome CH₄ data.
-#       σ_ice      = Calibrated standard deviation for Law Dome CH₄ data.
-#       err_ice    = Observation measurement errors for Law Dome CH₄ data.
-#       ρ_inst     = Calibrated autocorrelation coefficient for NOAA flask CH₄ data.
-#       σ_inst     = Calibrated standard deviation for NOAA flask CH₄ data.
-#       err_inst   = Time-varying observation measurement errors for NOAA flask CH₄ data.
-#----------------------------------------------------------------------------------------------------------------------
-
-function ch4_mixed_noise(start_year, end_year, ρ_ice, σ_ice, err_ice, ρ_inst, σ_inst, err_inst)
-
-    # Allocate vectors for results. Start year-1983 uses calibrated Law Dome statistical process parameters, then NOAA values.
-    n_years = length(start_year:end_year)
-    noise   = zeros(n_years)
-    n_ice   = length(start_year:1983)
-    n_inst  = length(1984:end_year)
-
-    # Simulated AR(1) noise for period covered by Law Dome data.
-    noise[1] = σ_ice/sqrt(1-ρ_ice^2)
-    for t = 2:n_ice
-        noise[t] = ρ_ice * noise[t-1] + rand(Normal(0, sqrt(σ_ice^2 + err_ice^2)))
-    end
-
-    # Simulated AR(1) noise for period covered by instrumental NOAA data.
-    for t = (n_ice+1):n_years
-        noise[t] = ρ_inst * noise[t-1] + rand(Normal(0, sqrt(σ_inst^2 + err_inst[t]^2)))
-    end
-
-    return noise
-end
-
-
-#######################################################################################################################
-# SIMULATE IID and STATIONARY AR(1) PROCESS WITH TIME VARYING OBSERVATION ERRORS FOR CO₂ ICE CORE AND FLASK DATA SETS.
-#######################################################################################################################
-# Description: This function simulates iid noise (accounting for observation errors) for the Law Dome CO₂ calibration
-#              data set and then in 1959 transitions to a stationary AR(1) process using the statistical process parameters
-#              calibrated to the Mauna Loa CO₂ data set.
-#
-# Function Arguments:
-#
-#       start_year = The first year to run the climate model.
-#       end_year   = The final year to run the climate model.
-#       σ_ice      = Calibrated standard deviation for Law Dome CO₂ data.
-#       σ_inst     = Calibrated standard deviation for Mauna Loa CO₂ data.
-#       err_ice    = Observation measurement error for Law Dome CO₂ data.
-#       err_inst   = Observation measurement error for Mauna Loa CO₂ data.
-#       ρ_inst     = Calibrated autocorrelation coefficient for Mauna Loa CO₂ data.
-#----------------------------------------------------------------------------------------------------------------------
-
-function co2_mixed_noise(start_year, end_year, σ_ice, σ_inst, err_ice, err_inst, ρ_inst)
-
-    # Allocate vectors for results. Start year-1958 uses calibrated Law Dome statistical process parameters, then Mauna Loa values.
-    n_years = length(start_year:end_year)
-    noise   = zeros(n_years)
-    n_ice   = length(start_year:1958)
-    n_inst  = length(1959:end_year)
-
-    # Simulated iid noise for period covered by Law Dome data.
-    for t = 1:n_ice
-        noise[t] = rand(Normal(0.0, sqrt(σ_ice^2 + err_ice^2)))
-    end
-
-    # Simulated AR(1) noise for period covered by instrumental Mauna Loa data.
-    for t = (n_ice+1):n_years
-        noise[t] = ρ_inst * noise[t-1] + rand(Normal(0.0, sqrt(σ_inst^2 + err_inst^2)))
-    end
-
-    return noise
-end
-
-
-
-#######################################################################################################################
 # LINEARLY INTERPOLATE DICE RESULTS TO ANNUAL VALUES
 #######################################################################################################################
 # Description: This function uses linear interpolation to create an annual time series from DICE results (which have
@@ -423,12 +384,6 @@ function dice_interpolate(data, spacing)
 end
 
 
-####################################################################################
-#Function to calculate confidence intervals from mcmc runs
-
-#this assumes each row is a new model run, each column is a year)
-
-#Gives back data in form Year, Chain Mean, Upper1, Lower1, Upper2, Lower2, Confidence for Plotting
 
 #######################################################################################################################
 # CREATE CLIMATE PROJECTION CREDIBLE INTERVALS

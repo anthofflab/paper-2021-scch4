@@ -1,0 +1,8 @@
+# Keep this folder and figure code files, but do not track the actual figure output.
+*
+
+# Files to track
+!.gitignore
+!create_figures.r
+!create_figures_test.r
+!figure_helper_functions.r
