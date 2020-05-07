@@ -5,4 +5,4 @@
 !.gitignore
 !create_figures.r
 !create_figures_test.r
-!plot_helper_functions.r
+!figure_helper_functions.r

@@ -26,7 +26,7 @@ results_folder_name = "my_results"
 #####################################################################################################
 
 # Load generic helper functions file.
-source(file.path("figures", "plot_helper_functions.r"))
+source(file.path("figures", "figure_helper_functions.r"))
 
 # Load calibration observations for hindcasts.
 obs = read.csv(file.path("data", "calibration_data", "calibration_data_combined.csv"))
