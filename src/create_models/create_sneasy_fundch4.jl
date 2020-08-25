@@ -80,7 +80,7 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
 
     # ---- Carbon Cycle ---- #
     set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
-    set_param!(m, :ccm, :atmco20, CO₂_0)
+    update_param!(m, :atmco20, CO₂_0)
 
     # ---- Methane Cycle ---- #
     set_param!(m, :climatech4cycle, :lifech4, 12.0)

@@ -52,7 +52,7 @@ function construct_run_sneasy_fundch4(calibration_end_year::Int)
         set_param!(m, :ccm, :Q10, Q10)
         set_param!(m, :ccm, :Beta, CO₂_fertilization)
         set_param!(m, :ccm, :Eta, CO₂_diffusivity)
-        set_param!(m, :ccm, :atmco20, CO₂_0)
+        update_param!(m, :atmco20, CO₂_0)
 
         # ---- Methane Cycle ---- #
         set_param!(m, :climatech4cycle, :ch4pre, CH₄_0)

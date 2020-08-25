@@ -83,7 +83,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # ---------------------------------------------
 
     # ---- Carbon Cycle ---- #
-    set_param!(m, :ccm, :atmco20, CO₂_0)
+    update_param!(m, :atmco20, CO₂_0)
 
     # ---- Methane Cycle ---- #
     set_param!(m, :ch4_cycle, :fossil_emiss_CH₄, rcp_emissions.CH4[rcp_indices])

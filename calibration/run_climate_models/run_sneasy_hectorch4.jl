@@ -55,7 +55,7 @@ function construct_run_sneasy_hectorch4(calibration_end_year::Int)
         set_param!(m, :ccm, :Q10, Q10)
         set_param!(m, :ccm, :Beta, CO₂_fertilization)
         set_param!(m, :ccm, :Eta, CO₂_diffusivity)
-        set_param!(m, :ccm, :atmco20, CO₂_0)
+        update_param!(m, :atmco20, CO₂_0)
 
         # ---- Tropospheric Sink (OH) Lifetime ---- #
         set_param!(m, :oh_cycle, :TOH0, τ_troposphere)
