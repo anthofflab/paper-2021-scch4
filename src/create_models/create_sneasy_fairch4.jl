@@ -56,7 +56,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # ------------------------------------------------------------
 
     # Get an instance of Mimi-SNEASY.
-    m = MimiSNEASY.getsneasy(start_year=start_year, end_year=end_year)
+    m = MimiSNEASY.get_model(start_year=start_year, end_year=end_year)
 
     # Remove old radiative forcing components.
     delete!(m, :rfco2)
