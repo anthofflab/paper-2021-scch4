@@ -198,7 +198,7 @@ function load_calibration_data(model_end::Int)
     #---------------------------------------------------------------------------------
 
     # Sort all calibration data by year.
-    sort!(df, cols=[:year])
+    sort!(df, :year)
 
     # Crop data to appropriate calibration years and return.
     return df[model_calibration_indices, :]
