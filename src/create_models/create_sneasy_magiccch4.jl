@@ -95,7 +95,7 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :ch4_cycle, :GAM, -1.0)
     set_param!(m, :ch4_cycle, :CH4_natural, 266.5)
     set_param!(m, :ch4_cycle, :fffrac, 0.18)
-    set_param!(m, :ch4_cycle, :CH₄_0, CH₄_0)
+    
     set_param!(m, :ch4_cycle, :CH4_emissions, rcp_emissions.CH4[rcp_indices])
     set_param!(m, :ch4_cycle, :NOX_emissions, rcp_emissions.NOx[rcp_indices])
     set_param!(m, :ch4_cycle, :CO_emissions, rcp_emissions.CO[rcp_indices])
@@ -106,24 +106,17 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
 
     # ---- Methane Radiative Forcing ---- #
     if etminan_ch4_forcing == true
-        set_param!(m, :rf_ch4_etminan, :CH₄_0, CH₄_0)
-        set_param!(m, :rf_ch4_etminan, :N₂O_0, N₂O_0)
         set_param!(m, :rf_ch4_etminan, :scale_CH₄, 1.0)
         set_param!(m, :rf_ch4_etminan, :a₃, -1.3e-6)
         set_param!(m, :rf_ch4_etminan, :b₃, -8.2e-6)
-        set_param!(m, :rf_ch4_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
     else
-        set_param!(m, :rf_ch4, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4, :CH₄_0, CH₄_0)
         set_param!(m, :rf_ch4, :scale_CH₄, 1.0)
     end
 
     # ---- Straospheric Water Vapor From Oxidized Methane Radiative Forcing ---- #
-    set_param!(m, :rf_ch4h2o, :CH₄_0, CH₄_0)
     set_param!(m, :rf_ch4h2o, :STRATH2O, 0.15)
 
     # ---- Tropospheric Ozone Radiative Forcing ---- #
-    set_param!(m, :rf_o3, :CH₄_0, CH₄_0)
     set_param!(m, :rf_o3, :OZ00CH4, 0.161)
     set_param!(m, :rf_o3, :TROZSENS, 0.042)
     set_param!(m, :rf_o3, :OZNOX, 0.125)
@@ -142,8 +135,6 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :rf_co2_etminan, :b₁, 7.2e-4)
     set_param!(m, :rf_co2_etminan, :c₁, -2.1e-4)
     set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
-    set_param!(m, :rf_co2_etminan, :N₂O_0, N₂O_0)
-    set_param!(m, :rf_co2_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
@@ -151,6 +142,10 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
 
+    # ---- Common parameters ----
+    set_param!(m, :CH₄_0, CH₄_0)
+    set_param!(m, :N₂O_0, N₂O_0)
+    set_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices])
 
     # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.

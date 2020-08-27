@@ -87,8 +87,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
 
     # ---- Methane Cycle ---- #
     set_param!(m, :ch4_cycle, :fossil_emiss_CH₄, rcp_emissions.CH4[rcp_indices])
-    set_param!(m, :ch4_cycle, :natural_emiss_CH₄, ones(length(start_year:end_year)).*190.5807)
-    set_param!(m, :ch4_cycle, :CH₄_0, CH₄_0)
+    set_param!(m, :ch4_cycle, :natural_emiss_CH₄, ones(length(start_year:end_year)).*190.5807)    
     set_param!(m, :ch4_cycle, :τ_CH₄, 9.3)
     set_param!(m, :ch4_cycle, :fossil_frac, rcp_fossil_ch4_frac[rcp_indices])
     set_param!(m, :ch4_cycle, :oxidation_frac, 0.61)
@@ -101,16 +100,11 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
 
     # ---- Methane Radiative Forcing ---- #
     if etminan_ch4_forcing == true
-        set_param!(m, :ch4_rf, :CH₄_0, CH₄_0)
-        set_param!(m, :ch4_rf, :N₂O_0, N₂O_0)
         set_param!(m, :ch4_rf, :scale_CH₄, 1.0)
         set_param!(m, :ch4_rf, :a₃, -1.3e-6)
         set_param!(m, :ch4_rf, :b₃, -8.2e-6)
-        set_param!(m, :ch4_rf, :N₂O, rcp_concentrations.N2O[rcp_indices])
         set_param!(m, :ch4_rf, :H₂O_share, 0.12)
     else
-        set_param!(m, :rf_ch4_myhre_fair, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4_myhre_fair, :CH₄_0, CH₄_0)
         set_param!(m, :rf_ch4_myhre_fair, :scale_CH₄, 1.0)
         set_param!(m, :rf_ch4_myhre_fair, :H₂O_share, 0.15)
     end
@@ -121,7 +115,6 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :trop_o3_rf, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices])
     set_param!(m, :trop_o3_rf, :mol_weight_N, fair_ghg_data[fair_ghg_data.gas .== "N", :mol_weight][1])
     set_param!(m, :trop_o3_rf, :mol_weight_NO, fair_ghg_data[fair_ghg_data.gas .== "NO", :mol_weight][1])
-    set_param!(m, :trop_o3_rf, :CH₄_0, CH₄_0)
     set_param!(m, :trop_o3_rf, :T0, 0.0)
     set_param!(m, :trop_o3_rf, :fix_pre1850_RCP, true)
 
@@ -130,14 +123,17 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :rf_co2_etminan, :b₁, 7.2e-4)
     set_param!(m, :rf_co2_etminan, :c₁, -2.1e-4)
     set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
-    set_param!(m, :rf_co2_etminan, :N₂O_0, N₂O_0)
-    set_param!(m, :rf_co2_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
     set_param!(m, :rf_total, :α, 1.0)
     set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
+
+    # ---- Common parameters ----
+    set_param!(m, :CH₄_0, CH₄_0)
+    set_param!(m, :N₂O_0, N₂O_0)
+    set_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices])
 
     # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.
