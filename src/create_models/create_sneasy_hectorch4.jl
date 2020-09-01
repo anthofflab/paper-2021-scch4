@@ -4,7 +4,7 @@
 
 # Load required packages.
 using Mimi
-using MimiHECTOR
+using MimiHector
 using MimiSNEASY
 using DataFrames
 using CSVFiles
@@ -54,17 +54,17 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Add in new components.
     add_comp!(m, rf_total, before = :doeclim)
     add_comp!(m, rf_co2_etminan, before = :rf_total)
-    add_comp!(m, MimiHECTOR.rf_ch4h2o, before = :rf_co2_etminan)
-    add_comp!(m, MimiHECTOR.rf_o3, before = :rf_ch4h2o)
-    add_comp!(m, MimiHECTOR.ch4_cycle, before = :rf_o3)
-    add_comp!(m, MimiHECTOR.oh_cycle, before = :ch4_cycle)
+    add_comp!(m, MimiHector.rf_ch4h2o, before = :rf_co2_etminan)
+    add_comp!(m, MimiHector.rf_o3, before = :rf_ch4h2o)
+    add_comp!(m, MimiHector.ch4_cycle, before = :rf_o3)
+    add_comp!(m, MimiHector.oh_cycle, before = :ch4_cycle)
 
     # Add in user-specified CH₄ radiative forcing component.
     # Note: If not using Etminan et al. equations, use original forcing equations from parent CH₄ model.
     if etminan_ch4_forcing == true
         add_comp!(m, rf_ch4_etminan, before = :rf_ch4h2o)
     else
-        add_comp!(m, MimiHECTOR.rf_ch4, before = :rf_ch4h2o)
+        add_comp!(m, MimiHector.rf_ch4, before = :rf_ch4h2o)
     end
 
 
