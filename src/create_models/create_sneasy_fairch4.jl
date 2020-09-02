@@ -127,7 +127,8 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
 
     # ---- Total Radiative Forcing ---- #
     set_param!(m, :rf_total, :α, 1.0)
-    set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    connect_param!(m, :rf_total, :rf_aerosol, :rf_aerosol)
+    update_param!(m, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
 
     # ---- Common parameters ----
