@@ -101,7 +101,7 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :ch4_cycle, :fffrac, 0.18)
     connect_param!(m, :ch4_cycle, :CH₄_0, :CH₄_0)
     set_param!(m, :ch4_cycle, :CH4_emissions, rcp_emissions.CH4[rcp_indices])
-    connect_param!(m, :ch4_cycle, :NOX_emissions, :NOX_emissions)
+    connect_param!(m, :ch4_cycle, :NOx_emissions, :NOx_emissions)
     connect_param!(m, :ch4_cycle, :CO_emissions, :CO_emissions)
     connect_param!(m, :ch4_cycle, :NMVOC_emissions, :NMVOC_emissions)
 
