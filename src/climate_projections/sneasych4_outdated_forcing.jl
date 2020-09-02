@@ -107,6 +107,11 @@ function construct_sneasych4_outdated_forcing(climate_model::Symbol, rcp::String
         error("Incorrect climate model selected. Options include :sneasy_fair, :sneasy_fund, :sneasy_hector, or :sneasy_magicc.")
     end
 
+    # F2x_CO₂ has a default value in the component definition and therefore no
+    # parameter in the model is created. The following line creates a parameter
+    # in the model that can then be updated with update_param! in the inner loop.
+    set_param!(sneasych4_base, :doeclim, :F2x_CO₂, 3.7)
+    set_param!(sneasych4_pulse, :doeclim, :F2x_CO₂, 3.7)
 
     #---------------------------------------------------------------------------------------------------------------------
     # Create functions to set parameters and return results that differ across the four methane cycle models.
