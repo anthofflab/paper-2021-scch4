@@ -107,7 +107,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # ---- Methane Radiative Forcing ---- #
     if etminan_ch4_forcing == true
         connect_param!(m, :ch4_rf, :CH₄_0, :CH₄_0)
-        connect_param!(m, :ch4_rf, :N₂O_0, :N₂O_0)        
+        connect_param!(m, :ch4_rf, :N₂O_0, :N₂O_0)
         set_param!(m, :ch4_rf, :scale_CH₄, 1.0)
         set_param!(m, :ch4_rf, :a₃, -1.3e-6)
         set_param!(m, :ch4_rf, :b₃, -8.2e-6)
@@ -136,7 +136,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :rf_co2_etminan, :c₁, -2.1e-4)
     set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
     connect_param!(m, :rf_co2_etminan, :N₂O_0, :N₂O_0)
-    connect_param!(m, :rf_co2_etminan, :N₂O, :N₂O)    
+    connect_param!(m, :rf_co2_etminan, :N₂O, :N₂O)
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
