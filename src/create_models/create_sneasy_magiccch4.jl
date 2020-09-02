@@ -92,7 +92,6 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :ch4_cycle, :CH4_natural, 266.5)
     set_param!(m, :ch4_cycle, :fffrac, 0.18)
     set_param!(m, :ch4_cycle, :CH4_emissions, rcp_emissions.CH4[rcp_indices])
-    set_param!(m, :ch4_cycle, :NOx_emissions, rcp_emissions.NOx[rcp_indices])
 
     # ---- Total Carbon Dioxide Emissions ---- #
     set_param!(m, :total_co2_emissions, :exogenous_CO₂_emissions, rcp_co2_emissions[rcp_indices])
@@ -114,7 +113,6 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :rf_o3, :OZNOX, 0.125)
     set_param!(m, :rf_o3, :OZCO, 0.0011)
     set_param!(m, :rf_o3, :OZVOC, 0.0033)
-    set_param!(m, :rf_o3, :NOx_emissions, rcp_emissions.NOx[rcp_indices])
     set_param!(m, :rf_o3, :FOSSHIST, foss_hist_for_O₃.EFOSS[rcp_indices])
     set_param!(m, :rf_o3, :TROZSENS, 0.042)
     set_param!(m, :rf_o3, :OZCH4, 5.0)
@@ -138,6 +136,7 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices])
     set_param!(m, :CO_emissions, rcp_emissions.CO[rcp_indices])
     set_param!(m, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices])
+    set_param!(m, :NOx_emissions, rcp_emissions.NOx[rcp_indices])
 
     # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.
