@@ -75,10 +75,10 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # ---- Common parameters ----
     Mimi.set_external_param!(m, :CH₄_0, CH₄_0)
     Mimi.set_external_param!(m, :N₂O_0, N₂O_0)
-    Mimi.set_external_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices])
+    Mimi.set_external_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices], param_dims=[:time])
     Mimi.set_external_param!(m, :M0, CH₄_0)
-    Mimi.set_external_param!(m, :CO_emissions, rcp_emissions.CO[rcp_indices])
-    Mimi.set_external_param!(m, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices])    
+    Mimi.set_external_param!(m, :CO_emissions, rcp_emissions.CO[rcp_indices], param_dims=[:time])
+    Mimi.set_external_param!(m, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices], param_dims=[:time])    
 
     # ---- Carbon Cycle ---- #
     update_param!(m, :CO2_emissions, rcp_co2_emissions[rcp_indices])
