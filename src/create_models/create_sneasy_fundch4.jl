@@ -76,7 +76,7 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # ---------------------------------------------
 
     # ---- Carbon Cycle ---- #
-    set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
+    update_param!(m, :CO2_emissions, rcp_co2_emissions[rcp_indices])
     update_param!(m, :atmco20, CO₂_0)
 
     # ---- Methane Cycle ---- #
@@ -105,8 +105,9 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
-    set_param!(m, :rf_total, :α, 1.0)
-    set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    set_param!(m, :rf_total, :α, 1.0)   
+    connect_param!(m, :rf_total, :rf_aerosol, :rf_aerosol)
+    update_param!(m, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_O₃, zeros(length(start_year:end_year)))
     set_param!(m, :rf_total, :rf_CH₄_H₂O, zeros(length(start_year:end_year)))
