@@ -34,9 +34,6 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # Find start and end year indices to crop RCP scenario data to correct model time horizon.
     rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS)
 
-    # Get index for year 2000 given model time horizon.
-    index_2000 = findall(x -> x == 2000, start_year:end_year)[1]
-
     # Set pre-industrial atmospheric CO₂, CH₄, and N₂O concentrations to RCP values in 1765.
     CO₂_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CO2][1]
     CH₄_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CH4][1]

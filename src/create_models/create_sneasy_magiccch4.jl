@@ -33,9 +33,6 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Find start and end year indices to crop RCP scenario data to correct model time horizon.
     rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS)
 
-    # Get index for year 2000 given model time horizon.
-    index_2000 = findall(x -> x == 2000, start_year:end_year)[1]
-
     # Set pre-industrial atmospheric CO₂, CH₄, and N₂O concentrations to RCP values in 1765.
     CO₂_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CO2][1]
     CH₄_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CH4][1]
@@ -83,7 +80,6 @@ function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=
     update_param!(m, :atmco20, CO₂_0)
 
     # ---- Methane Cycle ---- #
-    set_param!(m, :ch4_cycle, :index_2000, index_2000)
     set_param!(m, :ch4_cycle, :BBCH4, 2.78)
     set_param!(m, :ch4_cycle, :ANOX, 0.0042)
     set_param!(m, :ch4_cycle, :ACO, -0.000105)
