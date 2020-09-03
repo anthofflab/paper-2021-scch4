@@ -59,11 +59,9 @@ function fund_damages(base_temp::Array{Float64,2}, base_co2::Array{Float64,2}, p
             end
 
             # Assign SNEASY+CH4 projections for temperature and CO₂ concentrations to relevant FUND components.
-            update_param!(fund_base, :inputtemp, base_temp[i, :])
             update_param!(fund_base, :temp, base_temp[i, :])
             update_param!(fund_base, :acco2, base_co2[i, :])
 
-            update_param!(fund_pulse, :inputtemp, pulse_temp[i, :])
             update_param!(fund_pulse, :temp, pulse_temp[i, :])
             update_param!(fund_pulse, :acco2, pulse_co2[i, :])
 

@@ -30,9 +30,10 @@ function create_iam_fund(;end_year::Int=2300)
     connect_param!(m, :impactforests, :acco2, :acco2)
 
     # Set placeholder values for global temperature anomalies.
-    set_param!(m, :climateregional, :inputtemp, zeros(n_steps))
-    set_param!(m, :biodiversity, :temp, zeros(n_steps))
-    set_param!(m, :ocean, :temp, zeros(n_steps))
+    Mimi.set_external_param!(m, :temp, zeros(n_steps), param_dims=[:time])
+    connect_param!(m, :climateregional, :inputtemp, :temp)
+    connect_param!(m, :biodiversity, :temp, :temp)
+    connect_param!(m, :ocean, :temp, :temp)
 
     # Return modified version of FUND.
     return m
