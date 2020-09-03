@@ -24,7 +24,7 @@ function create_iam_fund(;end_year::Int=2300)
     delete!(m, :climatedynamics)
 
     # Set placeholder values for atmospheric CO₂ concentration.
-    Mimi.set_external_param!(m, :acco2, zeros(n_steps))
+    Mimi.set_external_param!(m, :acco2, zeros(n_steps), param_dims=[:time])
     connect_param!(m, :impactagriculture, :acco2, :acco2)
     connect_param!(m, :impactextratropicalstorms, :acco2, :acco2)
     connect_param!(m, :impactforests, :acco2, :acco2)
