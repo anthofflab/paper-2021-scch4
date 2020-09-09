@@ -34,9 +34,6 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # Find start and end year indices to crop RCP scenario data to correct model time horizon.
     rcp_indices = findall((in)(collect(start_year:end_year)), rcp_emissions.YEARS)
 
-    # Get index for year 2000 given model time horizon.
-    index_2000 = findall(x -> x == 2000, start_year:end_year)[1]
-
     # Set pre-industrial atmospheric CO₂, CH₄, and N₂O concentrations to RCP values in 1765.
     CO₂_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CO2][1]
     CH₄_0 = rcp_concentrations[rcp_concentrations.YEARS .== 1765, :CH4][1]
@@ -53,7 +50,7 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # ------------------------------------------------------------
 
     # Get an instance of Mimi-SNEASY.
-    m = MimiSNEASY.getsneasy(start_year=start_year, end_year=end_year)
+    m = MimiSNEASY.get_model(start_year=start_year, end_year=end_year)
 
     # Remove old radiative forcing components.
     delete!(m, :rfco2)
@@ -78,9 +75,14 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # Set component parameters.
     # ---------------------------------------------
 
+    # ---- Common parameters ---
+    Mimi.set_external_param!(m, :CH₄_0, CH₄_0)
+    Mimi.set_external_param!(m, :N₂O_0, N₂O_0)
+    Mimi.set_external_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices], param_dims=[:time])
+
     # ---- Carbon Cycle ---- #
-    set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
-    set_param!(m, :ccm, :atmco20, CO₂_0)
+    update_param!(m, :CO2_emissions, rcp_co2_emissions[rcp_indices])
+    update_param!(m, :atmco20, CO₂_0)
 
     # ---- Methane Cycle ---- #
     set_param!(m, :climatech4cycle, :lifech4, 12.0)
@@ -90,20 +92,20 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
 
     # ---- Direct Methane Radiative Forcing ---- #
     if etminan_ch4_forcing == true
-        set_param!(m, :rf_ch4_etminan, :CH₄_0, CH₄_0)
-        set_param!(m, :rf_ch4_etminan, :N₂O_0, N₂O_0)
+        connect_param!(m, :rf_ch4_etminan, :CH₄_0, :CH₄_0)
+        connect_param!(m, :rf_ch4_etminan, :N₂O_0, :N₂O_0)
         set_param!(m, :rf_ch4_etminan, :scale_CH₄, 1.0)
         set_param!(m, :rf_ch4_etminan, :a₃, -1.3e-6)
         set_param!(m, :rf_ch4_etminan, :b₃, -8.2e-6)
-        set_param!(m, :rf_ch4_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
+        connect_param!(m, :rf_ch4_etminan, :N₂O, :N₂O)
     else
-        set_param!(m, :rf_ch4_direct_fund, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4_direct_fund, :CH₄_0, CH₄_0)
+        connect_param!(m, :rf_ch4_direct_fund, :N₂O_0, :N₂O_0)
+        connect_param!(m, :rf_ch4_direct_fund, :CH₄_0, :CH₄_0)
         set_param!(m, :rf_ch4_direct_fund, :scale_CH₄, 1.0)
     end
 
     # ---- Total Methane Radiative Forcing (including indirect effects) ---- #
-    set_param!(m, :rf_ch4_total_fund, :CH₄_0, CH₄_0)
+    connect_param!(m, :rf_ch4_total_fund, :CH₄_0, :CH₄_0)
     set_param!(m, :rf_ch4_total_fund, :ϕ, 0.4)
 
     # ---- Carbon Dioxide Radiative Forcing ---- #
@@ -111,17 +113,19 @@ function create_sneasy_fundch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :rf_co2_etminan, :b₁, 7.2e-4)
     set_param!(m, :rf_co2_etminan, :c₁, -2.1e-4)
     set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
-    set_param!(m, :rf_co2_etminan, :N₂O_0, N₂O_0)
-    set_param!(m, :rf_co2_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
+    connect_param!(m, :rf_co2_etminan, :N₂O_0, :N₂O_0)
+    connect_param!(m, :rf_co2_etminan, :N₂O, :N₂O)
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
     set_param!(m, :rf_total, :α, 1.0)
-    set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    # TODO It would be nice if `rf_aerosol` didn't exist as an external parameter
+    # at this point
+    connect_param!(m, :rf_total, :rf_aerosol, :rf_aerosol)
+    update_param!(m, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
     set_param!(m, :rf_total, :rf_O₃, zeros(length(start_year:end_year)))
-    set_param!(m, :rf_total, :rf_CH₄_H₂O, zeros(length(start_year:end_year)))
-
+    set_param!(m, :rf_total, :rf_CH₄_H₂O, zeros(length(start_year:end_year)))    
 
     # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.

@@ -29,7 +29,7 @@ function create_iam_dice(;end_year::Int=2300)
     set_param!(m, :damages, :TATM, zeros(n_steps))
 
     # Set CO₂ abatement costs to zero.
-    set_param!(m, :neteconomy, :MIU, zeros(n_steps))
+    update_param!(m, :MIU, zeros(n_steps+1))
 
     # Return modified version of DICE2013.
     return m

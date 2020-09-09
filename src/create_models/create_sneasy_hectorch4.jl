@@ -4,7 +4,7 @@
 
 # Load required packages.
 using Mimi
-using MimiHECTOR
+using MimiHector
 using MimiSNEASY
 using DataFrames
 using CSVFiles
@@ -45,7 +45,7 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # ------------------------------------------------------------
 
     # Get an instance of Mimi-SNEASY.
-    m = MimiSNEASY.getsneasy(start_year=start_year, end_year=end_year)
+    m = MimiSNEASY.get_model(start_year=start_year, end_year=end_year)
 
     # Remove old radiative forcing components.
     delete!(m, :rfco2)
@@ -54,17 +54,17 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Add in new components.
     add_comp!(m, rf_total, before = :doeclim)
     add_comp!(m, rf_co2_etminan, before = :rf_total)
-    add_comp!(m, MimiHECTOR.rf_ch4h2o, before = :rf_co2_etminan)
-    add_comp!(m, MimiHECTOR.rf_o3, before = :rf_ch4h2o)
-    add_comp!(m, MimiHECTOR.ch4_cycle, before = :rf_o3)
-    add_comp!(m, MimiHECTOR.oh_cycle, before = :ch4_cycle)
+    add_comp!(m, MimiHector.rf_ch4h2o, before = :rf_co2_etminan)
+    add_comp!(m, MimiHector.rf_o3, before = :rf_ch4h2o)
+    add_comp!(m, MimiHector.ch4_cycle, before = :rf_o3)
+    add_comp!(m, MimiHector.oh_cycle, before = :ch4_cycle)
 
     # Add in user-specified CH₄ radiative forcing component.
     # Note: If not using Etminan et al. equations, use original forcing equations from parent CH₄ model.
     if etminan_ch4_forcing == true
         add_comp!(m, rf_ch4_etminan, before = :rf_ch4h2o)
     else
-        add_comp!(m, MimiHECTOR.rf_ch4, before = :rf_ch4h2o)
+        add_comp!(m, MimiHector.rf_ch4, before = :rf_ch4h2o)
     end
 
 
@@ -72,9 +72,17 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     # Set component parameters.
     # ---------------------------------------------
 
+    # ---- Common parameters ----
+    Mimi.set_external_param!(m, :CH₄_0, CH₄_0)
+    Mimi.set_external_param!(m, :N₂O_0, N₂O_0)
+    Mimi.set_external_param!(m, :N₂O, rcp_concentrations.N2O[rcp_indices], param_dims=[:time])
+    Mimi.set_external_param!(m, :M0, CH₄_0)
+    Mimi.set_external_param!(m, :CO_emissions, rcp_emissions.CO[rcp_indices], param_dims=[:time])
+    Mimi.set_external_param!(m, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices], param_dims=[:time])    
+
     # ---- Carbon Cycle ---- #
-    set_param!(m, :ccm, :CO2_emissions, rcp_co2_emissions[rcp_indices])
-    set_param!(m, :ccm, :atmco20, CO₂_0)
+    update_param!(m, :CO2_emissions, rcp_co2_emissions[rcp_indices])
+    update_param!(m, :atmco20, CO₂_0)
 
     # ---- Tropospheric Sink (OH) Lifetime ---- #
     set_param!(m, :oh_cycle, :CNOX, 0.0042)
@@ -82,57 +90,59 @@ function create_sneasy_hectorch4(;rcp_scenario::String="RCP85", start_year::Int=
     set_param!(m, :oh_cycle, :CNMVOC, -0.000315)
     set_param!(m, :oh_cycle, :CCH4, -0.32)
     set_param!(m, :oh_cycle, :NOX_emissions, rcp_emissions.NOx[rcp_indices])
-    set_param!(m, :oh_cycle, :CO_emissions, rcp_emissions.CO[rcp_indices])
-    set_param!(m, :oh_cycle, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices])
+    connect_param!(m, :oh_cycle, :CO_emissions, :CO_emissions)
+    connect_param!(m, :oh_cycle, :NMVOC_emissions, :NMVOC_emissions)
     set_param!(m, :oh_cycle, :TOH0, 6.586)
-    set_param!(m, :oh_cycle, :M0, CH₄_0)
+    connect_param!(m, :oh_cycle, :M0, :M0)
 
     # ---- Methane Cycle ---- #
     set_param!(m, :ch4_cycle, :UC_CH4, 2.78)
     set_param!(m, :ch4_cycle, :CH4N, 300.)
     set_param!(m, :ch4_cycle, :Tsoil, 160.)
     set_param!(m, :ch4_cycle, :Tstrat, 120.)
-    set_param!(m, :ch4_cycle, :M0, CH₄_0)
+    connect_param!(m, :ch4_cycle, :M0, :M0)
     set_param!(m, :ch4_cycle, :CH4_emissions, rcp_emissions.CH4[rcp_indices])
 
     # ---- Methane Radiative Forcing ---- #
     if etminan_ch4_forcing == true
-        set_param!(m, :rf_ch4_etminan, :CH₄_0, CH₄_0)
-        set_param!(m, :rf_ch4_etminan, :N₂O_0, N₂O_0)
+        connect_param!(m, :rf_ch4_etminan, :CH₄_0, :CH₄_0)
+        connect_param!(m, :rf_ch4_etminan, :N₂O_0, :N₂O_0)
         set_param!(m, :rf_ch4_etminan, :scale_CH₄, 1.0)
         set_param!(m, :rf_ch4_etminan, :a₃, -1.3e-6)
         set_param!(m, :rf_ch4_etminan, :b₃, -8.2e-6)
-        set_param!(m, :rf_ch4_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
+        connect_param!(m, :rf_ch4_etminan, :N₂O, :N₂O)
     else
-        set_param!(m, :rf_ch4, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4, :CH₄_0, CH₄_0)
+        connect_param!(m, :rf_ch4, :N₂O_0, :N₂O_0)
+        connect_param!(m, :rf_ch4, :CH₄_0, :CH₄_0)
         set_param!(m, :rf_ch4, :scale_CH₄, 1.0)
     end
 
     # ---- Straospheric Water Vapor From Methane Radiative Forcing ---- #
-    set_param!(m, :rf_ch4h2o, :M0, CH₄_0)
+    connect_param!(m, :rf_ch4h2o, :M0, :M0)
     set_param!(m, :rf_ch4h2o, :H₂O_share, 0.05)
 
     # ---- Tropospheric Ozone Radiative Forcing ---- #
     set_param!(m, :rf_o3, :O₃_0, 32.38)
     set_param!(m, :rf_o3, :NOx_emissions, rcp_emissions.NOx[rcp_indices])
-    set_param!(m, :rf_o3, :CO_emissions, rcp_emissions.CO[rcp_indices])
-    set_param!(m, :rf_o3, :NMVOC_emissions, rcp_emissions.NMVOC[rcp_indices])
+    connect_param!(m, :rf_o3, :CO_emissions, :CO_emissions)
+    connect_param!(m, :rf_o3, :NMVOC_emissions, :NMVOC_emissions)
 
     # ---- Carbon Dioxide Radiative Forcing ---- #
     set_param!(m, :rf_co2_etminan, :a₁, -2.4e-7)
     set_param!(m, :rf_co2_etminan, :b₁, 7.2e-4)
     set_param!(m, :rf_co2_etminan, :c₁, -2.1e-4)
     set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
-    set_param!(m, :rf_co2_etminan, :N₂O_0, N₂O_0)
-    set_param!(m, :rf_co2_etminan, :N₂O, rcp_concentrations.N2O[rcp_indices])
+    connect_param!(m, :rf_co2_etminan, :N₂O_0, :N₂O_0)
+    connect_param!(m, :rf_co2_etminan, :N₂O, :N₂O)
     set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(3.7, CO₂_0, N₂O_0))
 
     # ---- Total Radiative Forcing ---- #
     set_param!(m, :rf_total, :α, 1.0)
-    set_param!(m, :rf_total, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    # TODO It would be nice if `rf_aerosol` wouldn't be a model
+    # parameter at this point
+    update_param!(m, :rf_aerosol, rcp_aerosol_forcing[rcp_indices])
+    connect_param!(m, :rf_total, :rf_aerosol, :rf_aerosol)    
     set_param!(m, :rf_total, :rf_exogenous, rcp_exogenous_forcing[rcp_indices])
-
 
     # ----------------------------------------------------------
     # Create connections between Mimi SNEASY+Hector components.

@@ -10,6 +10,11 @@ function construct_run_sneasy_magiccch4(calibration_end_year::Int)
     # Load an instance of SNEASY-MAGICC.
     m = create_sneasy_magiccch4(start_year=1765, end_year=calibration_end_year, etminan_ch4_forcing=true)
 
+    # F2x_CO₂ has a default value in the component definition and therefore no
+    # parameter in the model is created. The following line creates a parameter
+    # in the model that can then be updated with update_param! in the inner loop.
+    set_param!(m, :doeclim, :F2x_CO₂, 3.7)
+
     # Get indices needed to normalize temperature anomalies relative to 1861-1880 mean.
     index_1861, index_1880 = findall((in)([1861, 1880]), collect(1765:calibration_end_year))
 
@@ -47,38 +52,35 @@ function construct_run_sneasy_magiccch4(calibration_end_year::Int)
         #----------------------------------------------------------
 
         # ---- Diffusion Ocean Energy balance CLIMate model (DOECLIM) ---- #
-        set_param!(m, :doeclim, :t2co, ECS)
-        set_param!(m, :doeclim, :kappa, heat_diffusivity)
-        set_param!(m, :doeclim, :F2x_CO₂, F2x_CO₂)
+        update_param!(m, :t2co, ECS)
+        update_param!(m, :kappa, heat_diffusivity)
+        update_param!(m, :F2x_CO₂, F2x_CO₂)
 
         # ---- Carbon Cycle ---- #
-        set_param!(m, :ccm, :Q10, Q10)
-        set_param!(m, :ccm, :Beta, CO₂_fertilization)
-        set_param!(m, :ccm, :Eta, CO₂_diffusivity)
-        set_param!(m, :ccm, :atmco20, CO₂_0)
+        update_param!(m, :Q10, Q10)
+        update_param!(m, :Beta, CO₂_fertilization)
+        update_param!(m, :Eta, CO₂_diffusivity)
+        update_param!(m, :atmco20, CO₂_0)
 
         # ---- Methane Cycle ---- #
-        set_param!(m, :ch4_cycle, :CH₄_0, CH₄_0)
-        set_param!(m, :ch4_cycle, :CH4_natural, CH₄_natural)
-        set_param!(m, :ch4_cycle, :TAUSOIL, τ_soil)
-        set_param!(m, :ch4_cycle, :TAUSTRAT, τ_stratosphere)
-        set_param!(m, :ch4_cycle, :TAUINIT, τ_troposphere)
+        update_param!(m, :CH4_natural, CH₄_natural)
+        update_param!(m, :TAUSOIL, τ_soil)
+        update_param!(m, :TAUSTRAT, τ_stratosphere)
+        update_param!(m, :TAUINIT, τ_troposphere)
 
         # ---- Methane Radiative Forcing ---- #
-        set_param!(m, :rf_ch4_etminan, :CH₄_0, CH₄_0)
-        set_param!(m, :rf_ch4_etminan, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_ch4_etminan, :scale_CH₄, rf_scale_CH₄)
-
-        # ---- Straospheric Water Vapor From Oxidized Methane Radiative Forcing ---- #
-        set_param!(m, :rf_ch4h2o, :CH₄_0, CH₄_0)
+        update_param!(m, :scale_CH₄, rf_scale_CH₄)
 
         # ---- Carbon Dioxide Radiative Forcing ---- #
-        set_param!(m, :rf_co2_etminan, :CO₂_0, CO₂_0)
-        set_param!(m, :rf_co2_etminan, :N₂O_0, N₂O_0)
-        set_param!(m, :rf_co2_etminan, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
+        update_param!(m, :CO₂_0, CO₂_0)
+        update_param!(m, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
 
         # ---- Total Radiative Forcing ---- #
-        set_param!(m, :rf_total, :α, rf_scale_aerosol)
+        update_param!(m, :α, rf_scale_aerosol)
+
+        # ---- Shared parameters ---- #
+        update_param!(m, :CH₄_0, CH₄_0)
+        update_param!(m, :N₂O_0, N₂O_0)
 
         # Run model.
         run(m)
