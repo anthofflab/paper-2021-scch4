@@ -4,6 +4,11 @@
 # #-------------------------------------------------------------------------------------------------------
 # #-------------------------------------------------------------------------------------------------------
 
+# Install required Julia packages if they are not already installed
+using Pkg
+Pkg.activate(joinpath(@__DIR__, ".."))
+Pkg.instantiate()
+
 # Load required Julia packages.
 using CSVFiles
 using DataFrames
