@@ -18,8 +18,12 @@ using LinearAlgebra
 using Mimi
 using RobustAdaptiveMetropolisSampler
 
+test_run = "--testrun" in ARGS ? true : false
+
+@info "Doing a $(test_run ? "test" : "normal") run."
+
 # A folder with this name will be created to store all of the replication results.
-results_folder_name = "my_results"
+results_folder_name = test_run ? "my_results_test" : "my_results"
 
 #####################################################################################################
 #####################################################################################################
@@ -53,10 +57,10 @@ include(joinpath("..", "calibration", "create_log_posterior_wide_priors.jl"))
 calibration_end_year = 2017
 
 # The length of the final chain (i.e. number of samples from joint posterior pdf after discarding burn-in period values).
-final_chain_length = 5_000_000
+final_chain_length = test_run ? 10_000 : 5_000_000
 
 # Length of burn-in period (i.e. number of initial MCMC samples to discard).
-burn_in_length = final_chain_length * 0.2
+burn_in_length = test_run ? 5_000 : final_chain_length * 0.2
 
 # Load inital conditions for all models.
 initial_parameters = DataFrame(load(joinpath(@__DIR__, "..", "data", "calibration_data", "calibration_initial_values.csv"), skiplines_begin=7))
@@ -68,8 +72,8 @@ mcmc_step_size = (initial_parameters[:, :upper_bound] .- initial_parameters[:, :
 n_mcmc_samples = Int(final_chain_length + burn_in_length)
 
 # Create equally-spaced indices to thin chains down to 10,000 and 100,000 samples.
-thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=100_000)))
-thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=10_000)))
+thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 100: 100_000)))
+thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 10 : 10_000)))
 
 
 #-------------------------------#
@@ -380,10 +384,14 @@ save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magi
 #------ Calculate and Save BMA Weights. ------#
 # --------------------------------------------#
 #---------------------------------------------#
-println("Calculating BMA Weights for baseline calibration.\n")
+if !test_run
+    println("Calculating BMA Weights for baseline calibration.\n")
 
-bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
-save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
+    bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
+    save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
+else
+    println("Not Calculating BMA Weights for test run.\n")
+end
 
 
 
@@ -898,7 +906,7 @@ magicc_ecs_climate = construct_sneasych4_ecs(:sneasy_magicc, rcp_scenario, pulse
 
 # Create an ECS sample from the Roe & Baker equilibrium climate sensitivty distribution using the U.S. calibration settings.
 norm_dist = Truncated(Normal(0.6198, 0.1841), -0.2, 0.88)
-ecs_sample = 1.2 ./ (1 .- rand(norm_dist, 100_000))
+ecs_sample = 1.2 ./ (1 .- rand(norm_dist, test_run ? 100 : 100_000))
 
 # SNEASY-FAIR
 println("Begin climate projections for SNEASY+FAIR-CH4 while sampling the U.S. climate sensitivity distribution.\n")
