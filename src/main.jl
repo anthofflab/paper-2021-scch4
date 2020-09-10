@@ -67,7 +67,7 @@ mcmc_step_size = (initial_parameters[:, :upper_bound] .- initial_parameters[:, :
 n_mcmc_samples = Int(final_chain_length + burn_in_length)
 
 # Create equally-spaced indices to thin chains down to 10,000 and 100,000 samples.
-thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 100: 100_000)))
+thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 100 : 100_000)))
 thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 10 : 10_000)))
 
 
