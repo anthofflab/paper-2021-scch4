@@ -4,17 +4,6 @@ using Distributions
 using Mimi
 using Statistics
 
-# Load files with additional functions needed for analysis.
-include(joinpath("..", "helper_functions.jl"))
-include(joinpath("..", "..", "calibration", "calibration_helper_functions.jl"))
-
-# Load the four versions of SNEASY-CH4.
-include(joinpath("..", "create_models", "create_sneasy_fairch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_fundch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
-
-
 #############################################################################################################################
 # RUN BASELINE VERSION OF SNEASY+CH4.
 #############################################################################################################################

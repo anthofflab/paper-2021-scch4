@@ -2,9 +2,6 @@
 # Create a function to run SNEASY-FAIR and return model output used in calibration.
 #-------------------------------------------------------------------------------------
 
-# Load model file.
-include("../../src/create_models/create_sneasy_fairch4.jl")
-
 function construct_run_sneasy_fairch4(calibration_end_year::Int)
 
     # Load an instance of SNEASY-FAIR.

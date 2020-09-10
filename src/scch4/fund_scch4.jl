@@ -1,6 +1,3 @@
-# Load file to run version of FUND that can incorporate SNEASY+CH4 results.
-include("../create_models/create_iam_fund.jl")
-
 #######################################################################################################################
 # CALCULATE MARGINAL DAMAGES FROM A CH₄ EMISSION PULSE WITH FUND.
 #######################################################################################################################

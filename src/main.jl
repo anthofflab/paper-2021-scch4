@@ -22,6 +22,9 @@ test_run = "--testrun" in ARGS ? true : false
 
 @info "Doing a $(test_run ? "test" : "normal") run."
 
+central_include_filepath = joinpath(@__DIR__, "central_includes.jl")
+@everywhere include($central_include_filepath)
+
 # A folder with this name will be created to store all of the replication results.
 results_folder_name = test_run ? "my_results_test" : "my_results"
 
@@ -30,9 +33,6 @@ results_folder_name = test_run ? "my_results_test" : "my_results"
 #                           Run Social Cost of Methane Replication Code                             #
 #####################################################################################################
 #####################################################################################################
-
-# Load generic helper functions file.
-include("helper_functions.jl")
 
 # Create folder structure to save results.
 build_result_folders(results_folder_name)
@@ -47,11 +47,6 @@ output = joinpath("..", "results", results_folder_name)
 #######################################################################
 
 println("BEGIN CALIBRATING MODELS.\n")
-
-# Load required calibration files common to all models as well as BMA weights file.
-include(joinpath("..", "calibration", "calibration_helper_functions.jl"))
-include(joinpath("..", "calibration", "create_log_posterior.jl"))
-include(joinpath("..", "calibration", "create_log_posterior_wide_priors.jl"))
 
 # Set final year for model calibration.
 calibration_end_year = 2017
@@ -82,8 +77,7 @@ thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, leng
 #-------------------------------#
 #-------------------------------#
 
-# Load model file.
-include(joinpath(@__DIR__, "..", "calibration", "run_climate_models", "run_sneasy_fairch4.jl"))
+
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
 n_params = sum(initial_parameters.sneasy_fair .!== missing)
@@ -147,8 +141,8 @@ names!(thin10k_chain_fairch4_wider,  [Symbol(initial_parameters.parameter[i]) fo
 #-------------------------------#
 #-------------------------------#
 
-# Load model file.
-include(joinpath(@__DIR__, "..", "calibration", "run_climate_models", "run_sneasy_fundch4.jl"))
+
+
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
 n_params = sum(initial_parameters.sneasy_fund .!== missing)
@@ -212,8 +206,7 @@ names!(thin10k_chain_fundch4_wider,  [Symbol(initial_parameters.parameter[i]) fo
 #-------------------------------#
 #-------------------------------#
 
-# Load model file.
-include(joinpath("..", "calibration", "run_climate_models", "run_sneasy_hectorch4.jl"))
+
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
 n_params = sum(initial_parameters.sneasy_hector .!== missing)
@@ -277,8 +270,7 @@ names!(thin10k_chain_hectorch4_wider,  [Symbol(initial_parameters.parameter[i]) 
 #-------------------------------#
 #-------------------------------#
 
-# Load model file.
-include(joinpath("..", "calibration", "run_climate_models", "run_sneasy_magiccch4.jl"))
+
 
 # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
 n_params = sum(initial_parameters.sneasy_magicc .!== missing)
@@ -429,9 +421,6 @@ magicc_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@_
 # Set RCP scenario.
 rcp_scenario = "RCP85"
 
-# Load file to create baseline projection functions for each climate model.
-include(joinpath("climate_projections", "sneasych4_baseline_case.jl"))
-
 # Create a function for each climate model to make baseline projections.
 fair_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
 fund_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
@@ -542,9 +531,6 @@ save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc
 
 # Set RCP scenario.
 rcp_scenario = "RCP26"
-
-# Load file to create baseline projection functions for each climate model.
-include(joinpath("climate_projections", "sneasych4_baseline_case.jl"))
 
 # Create a function for each climate model to make RCP2.6 projections.
 fair_rcp26_climate   = construct_sneasych4_baseline_case(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
@@ -657,9 +643,6 @@ save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "goo
 # Set RCP scenario.
 rcp_scenario = "RCP85"
 
-# Load file to create outdated CH₄ forcing projection functions for each climate model.
-include(joinpath("climate_projections", "sneasych4_outdated_forcing.jl"))
-
 # Create a function for each climate model to make outdated CH₄ climate projections.
 fair_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
 fund_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
@@ -770,9 +753,6 @@ save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "
 
 # Set RCP scenario.
 rcp_scenario = "RCP85"
-
-# Load file to create projection functions for each climate model that remove posterior parameter correlations.
-include(joinpath("climate_projections", "sneasych4_remove_correlations.jl"))
 
 # Create a function for each climate model to make climate projections without posterior parameter correlations.
 fair_remove_correlations_climate   = construct_sneasych4_remove_correlations(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
@@ -888,9 +868,6 @@ save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s
 
 # Set RCP scenario.
 rcp_scenario = "RCP85"
-
-# Load file to create projection functions for each climate model while sampling ECS values from the U.S. ECS distribution.
-include(joinpath("climate_projections", "sneasych4_us_ecs.jl"))
 
 # Load mean posterior parameter values.
 fair_posterior_means   = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"))).fair_mean
@@ -1017,9 +994,6 @@ save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity",
 # Set RCP scenario.
 rcp_scenario = "RCP85"
 
-# Load file to create projection functions for each climate model using wider prior distributions.
-include(joinpath("climate_projections", "sneasych4_baseline_case.jl"))
-
 # Load calibrated parameters for each climate model using wider prior parameter distributions.
 fair_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"))))
 fund_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"))))
@@ -1140,10 +1114,6 @@ println("BEGIN ESTIMATING THE SC-CH4.\n")
 #----------------------------------------------------------------------
 # Load Data and Settings Common to All SC-CH4 Scenarios.
 #----------------------------------------------------------------------
-
-# Load functions to calculate marginal damages and SC-CH4 for DICE and FUND.
-include(joinpath("scch4", "dice_scch4.jl"))
-include(joinpath("scch4", "fund_scch4.jl"))
 
 # Scenario settings.
 pulse_year             = 2020
