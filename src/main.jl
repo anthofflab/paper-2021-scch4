@@ -10,13 +10,17 @@ Pkg.activate(joinpath(@__DIR__, ".."))
 Pkg.instantiate()
 
 # Load required Julia packages.
-using CSVFiles
-using DataFrames
-using Distributions
-using Interpolations
-using LinearAlgebra
-using Mimi
-using RobustAdaptiveMetropolisSampler
+@everywhere begin
+    using CSVFiles
+    using DataFrames
+    using Distributions
+    using Interpolations
+    using LinearAlgebra
+    using Statistics
+    using Mimi
+    using RobustAdaptiveMetropolisSampler
+    using Distributed
+end
 
 test_run = "--testrun" in ARGS ? true : false
 
@@ -70,306 +74,347 @@ n_mcmc_samples = Int(final_chain_length + burn_in_length)
 thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 100 : 100_000)))
 thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 10 : 10_000)))
 
+@sync begin
 
-#-------------------------------#
-#-------------------------------#
-#------- SNEASY+FAIR-CH4 -------#
-#-------------------------------#
-#-------------------------------#
+    #-------------------------------#
+    #-------------------------------#
+    #------- SNEASY+FAIR-CH4 -------#
+    #-------------------------------#
+    #-------------------------------#
 
 
 
-# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
-n_params = sum(initial_parameters.sneasy_fair .!== missing)
-initial_params_fair = convert(Array{Float64,1}, initial_parameters.sneasy_fair[1:n_params])
+    @spawnat :any begin
+        #----------------------------------#
+        #------ Baseline Calibration ------#
+        #----------------------------------#
 
-# Create `run_sneasy_fairch4` function used in log-posterior calculations.
-run_sneasy_fairch4! = construct_run_sneasy_fairch4(calibration_end_year)
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_fair .!== missing)
+        initial_params_fair = convert(Array{Float64,1}, initial_parameters.sneasy_fair[1:n_params])
 
-#----------------------------------#
-#------ Baseline Calibration ------#
-#----------------------------------#
+        # Create `run_sneasy_fairch4` function used in log-posterior calculations.
+        run_sneasy_fairch4! = construct_run_sneasy_fairch4(calibration_end_year)
 
-println("Begin SNEASY+FAIR-CH4 baseline calibration.\n")
+        println("Begin SNEASY+FAIR-CH4 baseline calibration.\n")
 
-# Create log-posterior function for S-FAIR.
-log_posterior_fairch4 = construct_log_posterior(run_sneasy_fairch4!, :sneasy_fair, end_year=calibration_end_year)
+        # Create log-posterior function for S-FAIR.
+        log_posterior_fairch4 = construct_log_posterior(run_sneasy_fairch4!, :sneasy_fair, end_year=calibration_end_year)
 
-# Carry out Bayesian calibration of S-FAIR using robust adaptive metropolis MCMC algorithm.
-chain_fairch4, accept_rate_fairch4, cov_matrix_fairch4 = RAM_sample(log_posterior_fairch4, initial_params_fair, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+        # Carry out Bayesian calibration of S-FAIR using robust adaptive metropolis MCMC algorithm.
+        chain_fairch4, accept_rate_fairch4, cov_matrix_fairch4 = RAM_sample(log_posterior_fairch4, initial_params_fair, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-# Discard burn-in values.
-burned_chain_fairch4 = chain_fairch4[Int(burn_in_length+1):end, :]
+        # Discard burn-in values.
+        burned_chain_fairch4 = chain_fairch4[Int(burn_in_length+1):end, :]
 
-# Calculate mean posterior parameter values.
-mean_fairch4 = vec(mean(burned_chain_fairch4, dims=1))
+        # Calculate mean posterior parameter values.
+        mean_fairch4 = vec(mean(burned_chain_fairch4, dims=1))
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_fairch4 = DataFrame(burned_chain_fairch4[thin_indices_100k, :])
-thin10k_chain_fairch4  = DataFrame(burned_chain_fairch4[thin_indices_10k, :])
-names!(thin100k_chain_fairch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
-names!(thin10k_chain_fairch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_fairch4 = DataFrame(burned_chain_fairch4[thin_indices_100k, :])
+        thin10k_chain_fairch4  = DataFrame(burned_chain_fairch4[thin_indices_10k, :])
+        names!(thin100k_chain_fairch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
+        names!(thin10k_chain_fairch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
 
-#-------------------------------------#
-#------ Wider Prior Calibration ------#
-#-------------------------------------#
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mcmc_acceptance_rate.csv"), DataFrame(fair_acceptance=accept_rate_fairch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4)], fair_mean=mean_fairch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_10k.csv"), DataFrame(thin10k_chain_fairch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"), DataFrame(thin100k_chain_fairch4))    
+    end
 
-println("Begin SNEASY+FAIR-CH4 calibration with wider priors.\n")
+    @spawnat :any begin
+        #-------------------------------------#
+        #------ Wider Prior Calibration ------#
+        #-------------------------------------#
 
-# Create log-posterior function for S-FAIR.
-log_posterior_fairch4_wider = construct_log_posterior_wider(run_sneasy_fairch4!, :sneasy_fair, end_year=calibration_end_year)
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_fair .!== missing)
+        initial_params_fair = convert(Array{Float64,1}, initial_parameters.sneasy_fair[1:n_params])
 
-# Carry out Bayesian calibration of S-FAIR using robust adaptive metropolis MCMC algorithm.
-chain_fairch4_wider, accept_rate_fairch4_wider, cov_matrix_fairch4_wider = RAM_sample(log_posterior_fairch4_wider, initial_params_fair, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+        # Create `run_sneasy_fairch4` function used in log-posterior calculations.
+        run_sneasy_fairch4! = construct_run_sneasy_fairch4(calibration_end_year)
 
-# Discard burn-in values.
-burned_chain_fairch4_wider = chain_fairch4_wider[Int(burn_in_length+1):end, :]
+        println("Begin SNEASY+FAIR-CH4 calibration with wider priors.\n")
 
-# Calculate mean posterior parameter values.
-mean_fairch4_wider = vec(mean(burned_chain_fairch4_wider, dims=1))
+        # Create log-posterior function for S-FAIR.
+        log_posterior_fairch4_wider = construct_log_posterior_wider(run_sneasy_fairch4!, :sneasy_fair, end_year=calibration_end_year)
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_fairch4_wider = DataFrame(burned_chain_fairch4_wider[thin_indices_100k, :])
-thin10k_chain_fairch4_wider  = DataFrame(burned_chain_fairch4_wider[thin_indices_10k, :])
-names!(thin100k_chain_fairch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
-names!(thin10k_chain_fairch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
+        # Carry out Bayesian calibration of S-FAIR using robust adaptive metropolis MCMC algorithm.
+        chain_fairch4_wider, accept_rate_fairch4_wider, cov_matrix_fairch4_wider = RAM_sample(log_posterior_fairch4_wider, initial_params_fair, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
+        # Discard burn-in values.
+        burned_chain_fairch4_wider = chain_fairch4_wider[Int(burn_in_length+1):end, :]
 
-#-------------------------------#
-#-------------------------------#
-#------- SNEASY+FUND-CH4 -------#
-#-------------------------------#
-#-------------------------------#
+        # Calculate mean posterior parameter values.
+        mean_fairch4_wider = vec(mean(burned_chain_fairch4_wider, dims=1))
 
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_fairch4_wider = DataFrame(burned_chain_fairch4_wider[thin_indices_100k, :])
+        thin10k_chain_fairch4_wider  = DataFrame(burned_chain_fairch4_wider[thin_indices_10k, :])
+        names!(thin100k_chain_fairch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4_wider)])
+        names!(thin10k_chain_fairch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4_wider)])
 
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mcmc_acceptance_rate.csv"), DataFrame(fair_acceptance=accept_rate_fairch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4_wider)], fair_mean=mean_fairch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_10k.csv"), DataFrame(thin10k_chain_fairch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"), DataFrame(thin100k_chain_fairch4_wider))
+    end
 
+    #-------------------------------#
+    #-------------------------------#
+    #------- SNEASY+FUND-CH4 -------#
+    #-------------------------------#
+    #-------------------------------#
 
-# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
-n_params = sum(initial_parameters.sneasy_fund .!== missing)
-initial_params_fund = convert(Array{Float64,1}, initial_parameters.sneasy_fund[1:n_params])
 
-# Create `run_sneasy_fundch4` function used in log-posterior calculations.
-run_sneasy_fundch4! = construct_run_sneasy_fundch4(calibration_end_year)
 
-#----------------------------------#
-#------ Baseline Calibration ------#
-#----------------------------------#
+    @spawnat :any begin
+        #----------------------------------#
+        #------ Baseline Calibration ------#
+        #----------------------------------#
 
-println("Begin SNEASY+FUND-CH4 baseline calibration.\n")
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_fund .!== missing)
+        initial_params_fund = convert(Array{Float64,1}, initial_parameters.sneasy_fund[1:n_params])
 
-# Create log-posterior function for S-fund.
-log_posterior_fundch4 = construct_log_posterior(run_sneasy_fundch4!, :sneasy_fund, end_year=calibration_end_year)
+        # Create `run_sneasy_fundch4` function used in log-posterior calculations.
+        run_sneasy_fundch4! = construct_run_sneasy_fundch4(calibration_end_year)
 
-# Carry out Bayesian calibration of S-fund using robust adaptive metropolis MCMC algorithm.
-chain_fundch4, accept_rate_fundch4, cov_matrix_fundch4 = RAM_sample(log_posterior_fundch4, initial_params_fund, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+        println("Begin SNEASY+FUND-CH4 baseline calibration.\n")
 
-# Discard burn-in values.
-burned_chain_fundch4 = chain_fundch4[Int(burn_in_length+1):end, :]
+        # Create log-posterior function for S-fund.
+        log_posterior_fundch4 = construct_log_posterior(run_sneasy_fundch4!, :sneasy_fund, end_year=calibration_end_year)
 
-# Calculate mean posterior parameter values.
-mean_fundch4 = vec(mean(burned_chain_fundch4, dims=1))
+        # Carry out Bayesian calibration of S-fund using robust adaptive metropolis MCMC algorithm.
+        chain_fundch4, accept_rate_fundch4, cov_matrix_fundch4 = RAM_sample(log_posterior_fundch4, initial_params_fund, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_fundch4 = DataFrame(burned_chain_fundch4[thin_indices_100k, :])
-thin10k_chain_fundch4  = DataFrame(burned_chain_fundch4[thin_indices_10k, :])
-names!(thin100k_chain_fundch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
-names!(thin10k_chain_fundch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
+        # Discard burn-in values.
+        burned_chain_fundch4 = chain_fundch4[Int(burn_in_length+1):end, :]
 
-#-------------------------------------#
-#------ Wider Prior Calibration ------#
-#-------------------------------------#
+        # Calculate mean posterior parameter values.
+        mean_fundch4 = vec(mean(burned_chain_fundch4, dims=1))
 
-println("Begin SNEASY+FUND-CH4 calibration with wider priors.\n")
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_fundch4 = DataFrame(burned_chain_fundch4[thin_indices_100k, :])
+        thin10k_chain_fundch4  = DataFrame(burned_chain_fundch4[thin_indices_10k, :])
+        names!(thin100k_chain_fundch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
+        names!(thin10k_chain_fundch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
 
-# Create log-posterior function for S-FUND.
-log_posterior_fundch4_wider = construct_log_posterior_wider(run_sneasy_fundch4!, :sneasy_fund, end_year=calibration_end_year)
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mcmc_acceptance_rate.csv"), DataFrame(fund_acceptance=accept_rate_fundch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4)], fund_mean=mean_fundch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_10k.csv"), DataFrame(thin10k_chain_fundch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"), DataFrame(thin100k_chain_fundch4))
+    end
 
-# Carry out Bayesian calibration of S-FUND using robust adaptive metropolis MCMC algorithm.
-chain_fundch4_wider, accept_rate_fundch4_wider, cov_matrix_fundch4_wider = RAM_sample(log_posterior_fundch4_wider, initial_params_fund, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+    @spawnat :any begin
+        #-------------------------------------#
+        #------ Wider Prior Calibration ------#
+        #-------------------------------------#
 
-# Discard burn-in values.
-burned_chain_fundch4_wider = chain_fundch4_wider[Int(burn_in_length+1):end, :]
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_fund .!== missing)
+        initial_params_fund = convert(Array{Float64,1}, initial_parameters.sneasy_fund[1:n_params])
 
-# Calculate mean posterior parameter values.
-mean_fundch4_wider = vec(mean(burned_chain_fundch4_wider, dims=1))
+        # Create `run_sneasy_fundch4` function used in log-posterior calculations.
+        run_sneasy_fundch4! = construct_run_sneasy_fundch4(calibration_end_year)
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_fundch4_wider = DataFrame(burned_chain_fundch4_wider[thin_indices_100k, :])
-thin10k_chain_fundch4_wider  = DataFrame(burned_chain_fundch4_wider[thin_indices_10k, :])
-names!(thin100k_chain_fundch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
-names!(thin10k_chain_fundch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
+        println("Begin SNEASY+FUND-CH4 calibration with wider priors.\n")
 
+        # Create log-posterior function for S-FUND.
+        log_posterior_fundch4_wider = construct_log_posterior_wider(run_sneasy_fundch4!, :sneasy_fund, end_year=calibration_end_year)
 
-#-------------------------------#
-#-------------------------------#
-#------ SNEASY+Hector-CH4 ------#
-#-------------------------------#
-#-------------------------------#
+        # Carry out Bayesian calibration of S-FUND using robust adaptive metropolis MCMC algorithm.
+        chain_fundch4_wider, accept_rate_fundch4_wider, cov_matrix_fundch4_wider = RAM_sample(log_posterior_fundch4_wider, initial_params_fund, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
+        # Discard burn-in values.
+        burned_chain_fundch4_wider = chain_fundch4_wider[Int(burn_in_length+1):end, :]
 
+        # Calculate mean posterior parameter values.
+        mean_fundch4_wider = vec(mean(burned_chain_fundch4_wider, dims=1))
 
-# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
-n_params = sum(initial_parameters.sneasy_hector .!== missing)
-initial_params_hector = convert(Array{Float64,1}, initial_parameters.sneasy_hector[1:n_params])
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_fundch4_wider = DataFrame(burned_chain_fundch4_wider[thin_indices_100k, :])
+        thin10k_chain_fundch4_wider  = DataFrame(burned_chain_fundch4_wider[thin_indices_10k, :])
+        names!(thin100k_chain_fundch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4_wider)])
+        names!(thin10k_chain_fundch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4_wider)])
 
-# Create `run_sneasy_hectorch4` function used in log-posterior calculations.
-run_sneasy_hectorch4! = construct_run_sneasy_hectorch4(calibration_end_year)
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mcmc_acceptance_rate.csv"), DataFrame(fund_acceptance=accept_rate_fundch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4_wider)], fund_mean=mean_fundch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_10k.csv"), DataFrame(thin10k_chain_fundch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"), DataFrame(thin100k_chain_fundch4_wider))
+    end
 
-#----------------------------------#
-#------ Baseline Calibration ------#
-#----------------------------------#
+    #-------------------------------#
+    #-------------------------------#
+    #------ SNEASY+Hector-CH4 ------#
+    #-------------------------------#
+    #-------------------------------#
 
-println("Begin SNEASY+Hector-CH4 baseline calibration.\n")
 
-# Create log-posterior function for S-Hector.
-log_posterior_hectorch4 = construct_log_posterior(run_sneasy_hectorch4!, :sneasy_hector, end_year=calibration_end_year)
 
-# Carry out Bayesian calibration of S-Hector using robust adaptive metropolis MCMC algorithm.
-chain_hectorch4, accept_rate_hectorch4, cov_matrix_hectorch4 = RAM_sample(log_posterior_hectorch4, initial_params_hector, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+    @spawnat :any begin
+        #----------------------------------#
+        #------ Baseline Calibration ------#
+        #----------------------------------#
 
-# Discard burn-in values.
-burned_chain_hectorch4 = chain_hectorch4[Int(burn_in_length+1):end, :]
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_hector .!== missing)
+        initial_params_hector = convert(Array{Float64,1}, initial_parameters.sneasy_hector[1:n_params])
 
-# Calculate mean posterior parameter values.
-mean_hectorch4 = vec(mean(burned_chain_hectorch4, dims=1))
+        # Create `run_sneasy_hectorch4` function used in log-posterior calculations.
+        run_sneasy_hectorch4! = construct_run_sneasy_hectorch4(calibration_end_year)
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_hectorch4 = DataFrame(burned_chain_hectorch4[thin_indices_100k, :])
-thin10k_chain_hectorch4  = DataFrame(burned_chain_hectorch4[thin_indices_10k, :])
-names!(thin100k_chain_hectorch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
-names!(thin10k_chain_hectorch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
+        println("Begin SNEASY+Hector-CH4 baseline calibration.\n")
 
-#-------------------------------------#
-#------ Wider Prior Calibration ------#
-#-------------------------------------#
+        # Create log-posterior function for S-Hector.
+        log_posterior_hectorch4 = construct_log_posterior(run_sneasy_hectorch4!, :sneasy_hector, end_year=calibration_end_year)
 
-println("Begin SNEASY+Hector-CH4 calibration with wider priors.\n")
+        # Carry out Bayesian calibration of S-Hector using robust adaptive metropolis MCMC algorithm.
+        chain_hectorch4, accept_rate_hectorch4, cov_matrix_hectorch4 = RAM_sample(log_posterior_hectorch4, initial_params_hector, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-# Create log-posterior function for S-Hector.
-log_posterior_hectorch4_wider = construct_log_posterior_wider(run_sneasy_hectorch4!, :sneasy_hector, end_year=calibration_end_year)
+        # Discard burn-in values.
+        burned_chain_hectorch4 = chain_hectorch4[Int(burn_in_length+1):end, :]
 
-# Carry out Bayesian calibration of S-Hector using robust adaptive metropolis MCMC algorithm.
-chain_hectorch4_wider, accept_rate_hectorch4_wider, cov_matrix_hectorch4_wider = RAM_sample(log_posterior_hectorch4_wider, initial_params_hector, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+        # Calculate mean posterior parameter values.
+        mean_hectorch4 = vec(mean(burned_chain_hectorch4, dims=1))
 
-# Discard burn-in values.
-burned_chain_hectorch4_wider = chain_hectorch4_wider[Int(burn_in_length+1):end, :]
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_hectorch4 = DataFrame(burned_chain_hectorch4[thin_indices_100k, :])
+        thin10k_chain_hectorch4  = DataFrame(burned_chain_hectorch4[thin_indices_10k, :])
+        names!(thin100k_chain_hectorch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
+        names!(thin10k_chain_hectorch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
 
-# Calculate mean posterior parameter values.
-mean_hectorch4_wider = vec(mean(burned_chain_hectorch4_wider, dims=1))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mcmc_acceptance_rate.csv"), DataFrame(hector_acceptance=accept_rate_hectorch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4)], hector_mean=mean_hectorch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_10k.csv"), DataFrame(thin10k_chain_hectorch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"), DataFrame(thin100k_chain_hectorch4))
+    end
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_hectorch4_wider = DataFrame(burned_chain_hectorch4_wider[thin_indices_100k, :])
-thin10k_chain_hectorch4_wider  = DataFrame(burned_chain_hectorch4_wider[thin_indices_10k, :])
-names!(thin100k_chain_hectorch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
-names!(thin10k_chain_hectorch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
+    @spawnat :any begin
+        #-------------------------------------#
+        #------ Wider Prior Calibration ------#
+        #-------------------------------------#
 
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_hector .!== missing)
+        initial_params_hector = convert(Array{Float64,1}, initial_parameters.sneasy_hector[1:n_params])
 
-#-------------------------------#
-#-------------------------------#
-#------ SNEASY+MAGICC-CH4 ------#
-#-------------------------------#
-#-------------------------------#
+        # Create `run_sneasy_hectorch4` function used in log-posterior calculations.
+        run_sneasy_hectorch4! = construct_run_sneasy_hectorch4(calibration_end_year)
 
+        println("Begin SNEASY+Hector-CH4 calibration with wider priors.\n")
 
+        # Create log-posterior function for S-Hector.
+        log_posterior_hectorch4_wider = construct_log_posterior_wider(run_sneasy_hectorch4!, :sneasy_hector, end_year=calibration_end_year)
 
-# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
-n_params = sum(initial_parameters.sneasy_magicc .!== missing)
-initial_params_magicc = convert(Array{Float64,1}, initial_parameters.sneasy_magicc[1:n_params])
+        # Carry out Bayesian calibration of S-Hector using robust adaptive metropolis MCMC algorithm.
+        chain_hectorch4_wider, accept_rate_hectorch4_wider, cov_matrix_hectorch4_wider = RAM_sample(log_posterior_hectorch4_wider, initial_params_hector, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-# Create `run_sneasy_magiccch4` function used in log-posterior calculations.
-run_sneasy_magiccch4! = construct_run_sneasy_magiccch4(calibration_end_year)
+        # Discard burn-in values.
+        burned_chain_hectorch4_wider = chain_hectorch4_wider[Int(burn_in_length+1):end, :]
 
-#----------------------------------#
-#------ Baseline Calibration ------#
-#----------------------------------#
+        # Calculate mean posterior parameter values.
+        mean_hectorch4_wider = vec(mean(burned_chain_hectorch4_wider, dims=1))
 
-println("Begin SNEASY+MAGICC-CH4 baseline calibration.\n")
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_hectorch4_wider = DataFrame(burned_chain_hectorch4_wider[thin_indices_100k, :])
+        thin10k_chain_hectorch4_wider  = DataFrame(burned_chain_hectorch4_wider[thin_indices_10k, :])
+        names!(thin100k_chain_hectorch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4_wider)])
+        names!(thin10k_chain_hectorch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4_wider)])
 
-# Create log-posterior function for S-MAGICC.
-log_posterior_magiccch4 = construct_log_posterior(run_sneasy_magiccch4!, :sneasy_magicc, end_year=calibration_end_year)
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mcmc_acceptance_rate.csv"), DataFrame(hector_acceptance=accept_rate_hectorch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4_wider)], hector_mean=mean_hectorch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_10k.csv"), DataFrame(thin10k_chain_hectorch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"), DataFrame(thin100k_chain_hectorch4_wider))
+    end
 
-# Carry out Bayesian calibration of S-MAGICC using robust adaptive metropolis MCMC algorithm.
-chain_magiccch4, accept_rate_magiccch4, cov_matrix_magiccch4 = RAM_sample(log_posterior_magiccch4, initial_params_magicc, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+    #-------------------------------#
+    #-------------------------------#
+    #------ SNEASY+MAGICC-CH4 ------#
+    #-------------------------------#
+    #-------------------------------#
 
-# Discard burn-in values.
-burned_chain_magiccch4 = chain_magiccch4[Int(burn_in_length+1):end, :]
 
-# Calculate mean posterior parameter values.
-mean_magiccch4 = vec(mean(burned_chain_magiccch4, dims=1))
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_magiccch4 = DataFrame(burned_chain_magiccch4[thin_indices_100k, :])
-thin10k_chain_magiccch4  = DataFrame(burned_chain_magiccch4[thin_indices_10k, :])
-names!(thin100k_chain_magiccch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
-names!(thin10k_chain_magiccch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
+    @spawnat :any begin
+        #----------------------------------#
+        #------ Baseline Calibration ------#
+        #----------------------------------#
 
-#-------------------------------------#
-#------ Wider Prior Calibration ------#
-#-------------------------------------#
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_magicc .!== missing)
+        initial_params_magicc = convert(Array{Float64,1}, initial_parameters.sneasy_magicc[1:n_params])
 
-println("Begin SNEASY+MAGICC-CH4 calibration with wider priors.\n")
+        # Create `run_sneasy_magiccch4` function used in log-posterior calculations.
+        run_sneasy_magiccch4! = construct_run_sneasy_magiccch4(calibration_end_year)
 
-# Create log-posterior function for S-MAGICC.
-log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccch4!, :sneasy_magicc, end_year=calibration_end_year)
+        println("Begin SNEASY+MAGICC-CH4 baseline calibration.\n")
 
-# Carry out Bayesian calibration of S-HMAGICC using robust adaptive metropolis MCMC algorithm.
-chain_magiccch4_wider, accept_rate_magiccch4_wider, cov_matrix_magiccch4_wider = RAM_sample(log_posterior_magiccch4_wider, initial_params_magicc, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
+        # Create log-posterior function for S-MAGICC.
+        log_posterior_magiccch4 = construct_log_posterior(run_sneasy_magiccch4!, :sneasy_magicc, end_year=calibration_end_year)
 
-# Discard burn-in values.
-burned_chain_magiccch4_wider = chain_magiccch4_wider[Int(burn_in_length+1):end, :]
+        # Carry out Bayesian calibration of S-MAGICC using robust adaptive metropolis MCMC algorithm.
+        chain_magiccch4, accept_rate_magiccch4, cov_matrix_magiccch4 = RAM_sample(log_posterior_magiccch4, initial_params_magicc, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-# Calculate mean posterior parameter values.
-mean_magiccch4_wider = vec(mean(burned_chain_magiccch4_wider, dims=1))
+        # Discard burn-in values.
+        burned_chain_magiccch4 = chain_magiccch4[Int(burn_in_length+1):end, :]
 
-# Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
-thin100k_chain_magiccch4_wider = DataFrame(burned_chain_magiccch4_wider[thin_indices_100k, :])
-thin10k_chain_magiccch4_wider  = DataFrame(burned_chain_magiccch4_wider[thin_indices_10k, :])
-names!(thin100k_chain_magiccch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
-names!(thin10k_chain_magiccch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
+        # Calculate mean posterior parameter values.
+        mean_magiccch4 = vec(mean(burned_chain_magiccch4, dims=1))
 
-# Save calibrated parameter samples
-println("Saving calibrated parameters.\n")
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_magiccch4 = DataFrame(burned_chain_magiccch4[thin_indices_100k, :])
+        thin10k_chain_magiccch4  = DataFrame(burned_chain_magiccch4[thin_indices_10k, :])
+        names!(thin100k_chain_magiccch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
+        names!(thin10k_chain_magiccch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mcmc_acceptance_rate.csv"), DataFrame(fair_acceptance=accept_rate_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4)], fair_mean=mean_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_10k.csv"), DataFrame(thin10k_chain_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"), DataFrame(thin100k_chain_fairch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mcmc_acceptance_rate.csv"), DataFrame(magicc_acceptance=accept_rate_magiccch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4)], magicc_mean=mean_magiccch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_10k.csv"), DataFrame(thin10k_chain_magiccch4))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), DataFrame(thin100k_chain_magiccch4))
+    end
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mcmc_acceptance_rate.csv"), DataFrame(fund_acceptance=accept_rate_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4)], fund_mean=mean_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_10k.csv"), DataFrame(thin10k_chain_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"), DataFrame(thin100k_chain_fundch4))
+    @spawnat :any begin
+        #-------------------------------------#
+        #------ Wider Prior Calibration ------#
+        #-------------------------------------#
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mcmc_acceptance_rate.csv"), DataFrame(hector_acceptance=accept_rate_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4)], hector_mean=mean_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_10k.csv"), DataFrame(thin10k_chain_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"), DataFrame(thin100k_chain_hectorch4))
+        # Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+        n_params = sum(initial_parameters.sneasy_magicc .!== missing)
+        initial_params_magicc = convert(Array{Float64,1}, initial_parameters.sneasy_magicc[1:n_params])
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mcmc_acceptance_rate.csv"), DataFrame(magicc_acceptance=accept_rate_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4)], magicc_mean=mean_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_10k.csv"), DataFrame(thin10k_chain_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), DataFrame(thin100k_chain_magiccch4))
+        # Create `run_sneasy_magiccch4` function used in log-posterior calculations.
+        run_sneasy_magiccch4! = construct_run_sneasy_magiccch4(calibration_end_year)
 
-# Wider priors.
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mcmc_acceptance_rate.csv"), DataFrame(fair_acceptance=accept_rate_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4)], fair_mean=mean_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_10k.csv"), DataFrame(thin10k_chain_fairch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"), DataFrame(thin100k_chain_fairch4))
+        println("Begin SNEASY+MAGICC-CH4 calibration with wider priors.\n")
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mcmc_acceptance_rate.csv"), DataFrame(fund_acceptance=accept_rate_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4)], fund_mean=mean_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_10k.csv"), DataFrame(thin10k_chain_fundch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"), DataFrame(thin100k_chain_fundch4))
+        # Create log-posterior function for S-MAGICC.
+        log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccch4!, :sneasy_magicc, end_year=calibration_end_year)
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mcmc_acceptance_rate.csv"), DataFrame(hector_acceptance=accept_rate_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4)], hector_mean=mean_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_10k.csv"), DataFrame(thin10k_chain_hectorch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"), DataFrame(thin100k_chain_hectorch4))
+        # Carry out Bayesian calibration of S-HMAGICC using robust adaptive metropolis MCMC algorithm.
+        chain_magiccch4_wider, accept_rate_magiccch4_wider, cov_matrix_magiccch4_wider = RAM_sample(log_posterior_magiccch4_wider, initial_params_magicc, Diagonal(mcmc_step_size[1:n_params]), n_mcmc_samples, opt_α=0.234)
 
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mcmc_acceptance_rate.csv"), DataFrame(magicc_acceptance=accept_rate_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4)], magicc_mean=mean_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_10k.csv"), DataFrame(thin10k_chain_magiccch4))
-save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"), DataFrame(thin100k_chain_magiccch4))
+        # Discard burn-in values.
+        burned_chain_magiccch4_wider = chain_magiccch4_wider[Int(burn_in_length+1):end, :]
+
+        # Calculate mean posterior parameter values.
+        mean_magiccch4_wider = vec(mean(burned_chain_magiccch4_wider, dims=1))
+
+        # Create thinned chains (after burn-in period) with 10,000 and 100,000 samples and assign parameter names to each column.
+        thin100k_chain_magiccch4_wider = DataFrame(burned_chain_magiccch4_wider[thin_indices_100k, :])
+        thin10k_chain_magiccch4_wider  = DataFrame(burned_chain_magiccch4_wider[thin_indices_10k, :])
+        names!(thin100k_chain_magiccch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4_wider)])
+        names!(thin10k_chain_magiccch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4_wider)])
+
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mcmc_acceptance_rate.csv"), DataFrame(magicc_acceptance=accept_rate_magiccch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mean_parameters.csv"), DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4_wider)], magicc_mean=mean_magiccch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_10k.csv"), DataFrame(thin10k_chain_magiccch4_wider))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"), DataFrame(thin100k_chain_magiccch4_wider))
+    end
+
+end
+
+@info "Done with calibration."
 
 #---------------------------------------------#
 #---------------------------------------------#
