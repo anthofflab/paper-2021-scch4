@@ -18,6 +18,8 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
     # Calculate number of time periods to run model for.
     n_steps = length(1765:calibration_end_year)
 
+    mi = Mimi.build(m)
+
     # Given user settings, create a function to run SNEASY-FAIR and return model output used for calibration.
     function run_sneasy_fairch4!(
         params::Array{Float64,1},
@@ -50,55 +52,55 @@ function construct_run_sneasy_fairch4(calibration_end_year::Int)
         #----------------------------------------------------------
 
         # ---- Diffusion Ocean Energy balance CLIMate model (DOECLIM) ---- #
-        update_param!(m, :t2co, ECS)
-        update_param!(m, :kappa, heat_diffusivity)
-        update_param!(m, :F2x_CO₂, F2x_CO₂)
+        update_param!(mi, :t2co, ECS)
+        update_param!(mi, :kappa, heat_diffusivity)
+        update_param!(mi, :F2x_CO₂, F2x_CO₂)
 
         # ---- Carbon Cycle ---- #
-        update_param!(m, :Q10, Q10)
-        update_param!(m, :Beta, CO₂_fertilization)
-        update_param!(m, :Eta, CO₂_diffusivity)
-        update_param!(m, :atmco20, CO₂_0)
+        update_param!(mi, :Q10, Q10)
+        update_param!(mi, :Beta, CO₂_fertilization)
+        update_param!(mi, :Eta, CO₂_diffusivity)
+        update_param!(mi, :atmco20, CO₂_0)
 
         # ---- Methane Cycle ---- #
-        update_param!(m, :natural_emiss_CH₄, ones(n_steps) .* CH₄_natural)
-        update_param!(m, :τ_CH₄, τ_troposphere)
+        update_param!(mi, :natural_emiss_CH₄, ones(n_steps) .* CH₄_natural)
+        update_param!(mi, :τ_CH₄, τ_troposphere)
 
         # ---- Methane Radiative Forcing ---- #
-        update_param!(m, :scale_CH₄, rf_scale_CH₄)
+        update_param!(mi, :scale_CH₄, rf_scale_CH₄)
 
         # ---- Carbon Dioxide Radiative Forcing ---- #
-        update_param!(m, :CO₂_0, CO₂_0)
-        update_param!(m, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
+        update_param!(mi, :CO₂_0, CO₂_0)
+        update_param!(mi, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
 
         # ---- Total Radiative Forcing ---- #
-        update_param!(m, :α, rf_scale_aerosol)
+        update_param!(mi, :α, rf_scale_aerosol)
 
         # ---- Shared parameters ---- #
-        update_param!(m, :CH₄_0, CH₄_0)
-        update_param!(m, :N₂O_0, N₂O_0)
+        update_param!(mi, :CH₄_0, CH₄_0)
+        update_param!(mi, :N₂O_0, N₂O_0)
 
         # Run model.
-        run(m)
+        run(mi)
 
         #----------------------------------------------------------
         # Calculate model output being compared to observations.
         #----------------------------------------------------------
 
         # Atmospheric concentration of CO₂.
-        modeled_CO₂[:] = m[:ccm, :atmco2]
+        modeled_CO₂[:] = mi[:ccm, :atmco2]
 
         # Ocean carbon flux (Note: timesteps cause last `atm_oc_flux` value to equal `missing`, so exclude it here).
-        modeled_oceanCO₂_flux[1:end-1] = m[:ccm, :atm_oc_flux][1:end-1]
+        modeled_oceanCO₂_flux[1:end-1] = mi[:ccm, :atm_oc_flux][1:end-1]
 
         # Global surface temperature anomaly (normalized to 1861-1880 mean with initial condition offset).
-        modeled_temperature[:] = m[:doeclim, :temp] .- mean(m[:doeclim, :temp][index_1861:index_1880]) .+ temperature_0
+        modeled_temperature[:] = mi[:doeclim, :temp] .- mean(mi[:doeclim, :temp][index_1861:index_1880]) .+ temperature_0
 
         # Ocean heat content (with initial condition offset).
-        modeled_ocean_heat[:] = m[:doeclim, :heat_mixed] .+ m[:doeclim, :heat_interior] .+ ocean_heat_0
+        modeled_ocean_heat[:] = mi[:doeclim, :heat_mixed] .+ mi[:doeclim, :heat_interior] .+ ocean_heat_0
 
         # Atmospheric concentration of CH₄.
-        modeled_CH₄[:] = m[:ch4_cycle, :CH₄]
+        modeled_CH₄[:] = mi[:ch4_cycle, :CH₄]
 
         return
     end
