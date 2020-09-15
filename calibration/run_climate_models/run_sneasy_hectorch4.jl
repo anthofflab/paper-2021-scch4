@@ -62,7 +62,7 @@ function construct_run_sneasy_hectorch4(calibration_end_year::Int)
         update_param!(mi, :atmco20, CO₂_0)
 
         # ---- Tropospheric Sink (OH) Lifetime ---- #
-        update_param!(m, :TOH0, τ_troposphere)
+        update_param!(mi, :TOH0, τ_troposphere)
 
         # ---- Methane Cycle ---- #
         update_param!(mi, :CH4N, CH₄_natural)
