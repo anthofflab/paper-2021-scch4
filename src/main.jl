@@ -90,6 +90,104 @@ n_mcmc_samples = Int(final_chain_length + burn_in_length)
 thin_indices_100k = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 100 : 100_000)))
 thin_indices_10k  = trunc.(Int64, collect(range(1, stop=final_chain_length, length=test_run ? 10 : 10_000)))
 
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_fair = sum(initial_parameters.sneasy_fair .!== missing)
+initial_params_fair = convert(Array{Float64,1}, initial_parameters.sneasy_fair[1:n_params_fair])
+
+# Create `run_sneasy_fairch4` function used in log-posterior calculations.
+run_sneasy_fairch4! = construct_run_sneasy_fairch4(calibration_end_year)
+
+println("Begin SNEASY+FAIR-CH4 baseline calibration.\n")
+
+# Create log-posterior function for S-FAIR.
+log_posterior_fairch4 = construct_log_posterior(run_sneasy_fairch4!, :sneasy_fair, end_year=calibration_end_year)
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_fairch4_wider = sum(initial_parameters.sneasy_fair .!== missing)
+initial_params_fair_wider = convert(Array{Float64,1}, initial_parameters.sneasy_fair[1:n_params_fairch4_wider])
+
+# Create `run_sneasy_fairch4` function used in log-posterior calculations.
+run_sneasy_fairch4_wider! = construct_run_sneasy_fairch4(calibration_end_year)
+
+println("Begin SNEASY+FAIR-CH4 calibration with wider priors.\n")
+
+# Create log-posterior function for S-FAIR.
+log_posterior_fairch4_wider = construct_log_posterior_wider(run_sneasy_fairch4_wider!, :sneasy_fair, end_year=calibration_end_year)
+
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_fundch4 = sum(initial_parameters.sneasy_fund .!== missing)
+initial_params_fundch4 = convert(Array{Float64,1}, initial_parameters.sneasy_fund[1:n_params_fundch4])
+
+# Create `run_sneasy_fundch4` function used in log-posterior calculations.
+run_sneasy_fundch4! = construct_run_sneasy_fundch4(calibration_end_year)
+
+println("Begin SNEASY+FUND-CH4 baseline calibration.\n")
+
+# Create log-posterior function for S-fund.
+log_posterior_fundch4 = construct_log_posterior(run_sneasy_fundch4!, :sneasy_fund, end_year=calibration_end_year)
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_fundch4_wider = sum(initial_parameters.sneasy_fund .!== missing)
+initial_params_fund_wider = convert(Array{Float64,1}, initial_parameters.sneasy_fund[1:n_params_fundch4_wider])
+
+# Create `run_sneasy_fundch4` function used in log-posterior calculations.
+run_sneasy_fundch4_wider! = construct_run_sneasy_fundch4(calibration_end_year)
+
+println("Begin SNEASY+FUND-CH4 calibration with wider priors.\n")
+
+# Create log-posterior function for S-FUND.
+log_posterior_fundch4_wider = construct_log_posterior_wider(run_sneasy_fundch4_wider!, :sneasy_fund, end_year=calibration_end_year)
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_hectorch4 = sum(initial_parameters.sneasy_hector .!== missing)
+initial_params_hectorch4 = convert(Array{Float64,1}, initial_parameters.sneasy_hector[1:n_params_hectorch4])
+
+# Create `run_sneasy_hectorch4` function used in log-posterior calculations.
+run_sneasy_hectorch4! = construct_run_sneasy_hectorch4(calibration_end_year)
+
+println("Begin SNEASY+Hector-CH4 baseline calibration.\n")
+
+# Create log-posterior function for S-Hector.
+log_posterior_hectorch4 = construct_log_posterior(run_sneasy_hectorch4!, :sneasy_hector, end_year=calibration_end_year)
+        
+                
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_hectorch4_wider = sum(initial_parameters.sneasy_hector .!== missing)
+initial_params_hectorch4_wider = convert(Array{Float64,1}, initial_parameters.sneasy_hector[1:n_params_hectorch4_wider])
+
+# Create `run_sneasy_hectorch4` function used in log-posterior calculations.
+run_sneasy_hectorch4_wider! = construct_run_sneasy_hectorch4(calibration_end_year)
+
+println("Begin SNEASY+Hector-CH4 calibration with wider priors.\n")
+
+# Create log-posterior function for S-Hector.
+log_posterior_hectorch4_wider = construct_log_posterior_wider(run_sneasy_hectorch4_wider!, :sneasy_hector, end_year=calibration_end_year)
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_magiccch4 = sum(initial_parameters.sneasy_magicc .!== missing)
+initial_params_magiccch4 = convert(Array{Float64,1}, initial_parameters.sneasy_magicc[1:n_params_magiccch4])
+
+# Create `run_sneasy_magiccch4` function used in log-posterior calculations.
+run_sneasy_magiccch4! = construct_run_sneasy_magiccch4(calibration_end_year)
+
+println("Begin SNEASY+MAGICC-CH4 baseline calibration.\n")
+
+# Create log-posterior function for S-MAGICC.
+log_posterior_magiccch4 = construct_log_posterior(run_sneasy_magiccch4!, :sneasy_magicc, end_year=calibration_end_year)
+
+# Calculate number of uncertain parameters and remove "missing" values from initial parameters.
+n_params_magiccch4_wider = sum(initial_parameters.sneasy_magicc .!== missing)
+initial_params_magiccch4_wider = convert(Array{Float64,1}, initial_parameters.sneasy_magicc[1:n_params_magiccch4_wider])
+
+# Create `run_sneasy_magiccch4` function used in log-posterior calculations.
+run_sneasy_magiccch4_wider! = construct_run_sneasy_magiccch4(calibration_end_year)
+
+println("Begin SNEASY+MAGICC-CH4 calibration with wider priors.\n")
+
+# Create log-posterior function for S-MAGICC.
+log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccch4_wider!, :sneasy_magicc, end_year=calibration_end_year)
+   
 @sync begin
 
     #-------------------------------#
