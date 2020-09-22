@@ -555,7 +555,7 @@ if !test_run
     println("Calculating BMA Weights for baseline calibration.\n")
 
     bma_weights = calculate_bma_weights(Matrix(fetch(thin100k_chain_fairch4)), Matrix(fetch(thin100k_chain_fundch4)), Matrix(fetch(thin100k_chain_hectorch4)), Matrix(fetch(thin100k_chain_magiccch4)), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)
-    save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(bma_weights))
+    save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(col1=bma_weights))
 else
     println("Not Calculating BMA Weights for test run.\n")
 end
