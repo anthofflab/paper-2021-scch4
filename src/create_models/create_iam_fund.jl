@@ -36,5 +36,5 @@ function create_iam_fund(;end_year::Int=2300)
     connect_param!(m, :ocean, :temp, :temp)
 
     # Return modified version of FUND.
-    return m
+    return Mimi.build(m)
 end

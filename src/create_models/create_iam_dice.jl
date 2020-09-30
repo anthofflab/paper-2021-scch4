@@ -32,5 +32,5 @@ function create_iam_dice(;end_year::Int=2300)
     update_param!(m, :MIU, zeros(n_steps+1))
 
     # Return modified version of DICE2013.
-    return m
+    return Mimi.build(m)
 end
