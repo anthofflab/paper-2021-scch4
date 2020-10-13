@@ -1326,800 +1326,809 @@ fund_dollar_conversion = 1.35
 low_ci_interval        = 0.95
 high_ci_interval       = 0.98
 
-#---------------------------------------------------------------#
-#---------------------------------------------------------------#
-#------ Calculate SC-CH4 for Baseline Scenario (RCP 8.5). ------#
-#---------------------------------------------------------------#
-#---------------------------------------------------------------#
-
-# Load scenario temperature and CO₂ projections for each climate model.
-temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
-temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
-co2_base_fairch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
-co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
-
-temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
-temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
-co2_base_fundch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
-co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
-
-temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
-temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
-co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
-co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
-
-temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
-temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
-co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
-co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for baseline scenario.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(temperature_base_fairch4, temperature_pulse_fairch4, end_year)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(temperature_base_fundch4, temperature_pulse_fundch4, end_year)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(temperature_base_hectorch4, temperature_pulse_hectorch4, end_year)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(temperature_base_magiccch4, temperature_pulse_magiccch4, end_year)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for baseline scenario.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(temperature_base_fairch4, co2_base_fairch4, temperature_pulse_fairch4, co2_pulse_fairch4, end_year)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(temperature_base_fundch4, co2_base_fundch4, temperature_pulse_fundch4, co2_pulse_fundch4, end_year)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(temperature_base_hectorch4, co2_base_hectorch4, temperature_pulse_hectorch4, co2_pulse_hectorch4, end_year)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(temperature_base_magiccch4, co2_base_magiccch4, temperature_pulse_magiccch4, co2_pulse_magiccch4, end_year)
-
-# Calculate the SC-CH4 for DICE under multiple constant and Ramsey discount rates.
-println("Begin calculating SC-CH4 estimates using DICE for baseline scenario.\n")
-
-dice_scch4_fairch4_const25,   dice_discounted_damages_fairch4_const25     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fairch4_const50,   dice_discounted_damages_fairch4_const50     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fairch4_const70,   dice_discounted_damages_fairch4_const70     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fairch4_ramsey_10, dice_discounted_damages_fairch4_ramsey_10     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fairch4_ramsey_15, dice_discounted_damages_fairch4_ramsey_15     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-
-dice_scch4_fundch4_const25,   dice_discounted_damages_fundch4_const25     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const50,   dice_discounted_damages_fundch4_const50     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const70,   dice_discounted_damages_fundch4_const70     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_ramsey_10, dice_discounted_damages_fundch4_ramsey_10     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_ramsey_15, dice_discounted_damages_fundch4_ramsey_15     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-
-dice_scch4_hectorch4_const25,   dice_discounted_damages_hectorch4_const25 	= dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30,   dice_discounted_damages_hectorch4_const30   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const50,   dice_discounted_damages_hectorch4_const50   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const70,   dice_discounted_damages_hectorch4_const70   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_ramsey_10, dice_discounted_damages_hectorch4_ramsey_10 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_ramsey_15, dice_discounted_damages_hectorch4_ramsey_15 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-
-dice_scch4_magiccch4_const25,   dice_discounted_damages_magiccch4_const25 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30,   dice_discounted_damages_magiccch4_const30 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const50,   dice_discounted_damages_magiccch4_const50 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const70,   dice_discounted_damages_magiccch4_const70   = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_ramsey_10, dice_discounted_damages_magiccch4_ramsey_10 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_ramsey_15, dice_discounted_damages_magiccch4_ramsey_15 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under multiple constant and Ramsey discount rates.
-println("Begin calculating SC-CH4 estimates using FUND for baseline scenario.\n")
-
-fund_scch4_fairch4_const25,   fund_discounted_damages_fairch4_const25       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fairch4_const50,   fund_discounted_damages_fairch4_const50       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fairch4_const70,   fund_discounted_damages_fairch4_const70       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fairch4_ramsey_10, fund_discounted_damages_fairch4_ramsey_10     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fairch4_ramsey_15, fund_discounted_damages_fairch4_ramsey_15     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-fund_scch4_fundch4_const25,   fund_discounted_damages_fundch4_const25       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const50,   fund_discounted_damages_fundch4_const50       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const70,   fund_discounted_damages_fundch4_const70       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_ramsey_10, fund_discounted_damages_fundch4_ramsey_10     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_ramsey_15, fund_discounted_damages_fundch4_ramsey_15     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-fund_scch4_hectorch4_const25,   fund_discounted_damages_hectorch4_const25   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30,   fund_discounted_damages_hectorch4_const30   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const50,   fund_discounted_damages_hectorch4_const50   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const70,   fund_discounted_damages_hectorch4_const70   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_ramsey_10, fund_discounted_damages_hectorch4_ramsey_10 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_ramsey_15, fund_discounted_damages_hectorch4_ramsey_15 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-fund_scch4_magiccch4_const25,   fund_discounted_damages_magiccch4_const25 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30,   fund_discounted_damages_magiccch4_const30 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const50,   fund_discounted_damages_magiccch4_const50 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const70,   fund_discounted_damages_magiccch4_const70 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_ramsey_10, fund_discounted_damages_magiccch4_ramsey_10 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_ramsey_15, fund_discounted_damages_magiccch4_ramsey_15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Calculate equity-weighted SC-CH4 estimates for S-MAGICC under multiple η values.
-println("Begin calculating equity-weighted SC-CH4 estimates using FUND for baseline scenario.\n")
-
-fund_scch4_magiccch4_equity00 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity01 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.1, γ=0.1, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity02 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.2, γ=0.2, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity03 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.3, γ=0.3, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity04 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.4, γ=0.4, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity05 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.5, γ=0.5, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity06 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.6, γ=0.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity07 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.7, γ=0.7, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity08 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.8, γ=0.8, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity09 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.9, γ=0.9, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity10 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1+1e-12, γ=1+1e-12, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity11 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.1, γ=1.1, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity12 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.2, γ=1.2, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity13 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.3, γ=1.3, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity14 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.4, γ=1.4, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.5, γ=1.5, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-fund_scch4_magiccch4_equity16 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.6, γ=1.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
-
-# Calculate regional confidence intervals for equity weighted SC-CH4 estimates across different η.
-fund_region_names = ["USA", "Canada", "Western Europe", "Japan and South Korea", "Australia and New Zealand", "Central and Eastern Europe", "Former Soviet Union", "Middle East", "Central America", "South America", "South Asia", "Southeast Asia", "China plus", "North Africa", "Sub Saharan Africa", "Small Island States"]
-
-fund_scch4_magiccch4_equity00_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity00, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity00_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity01_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity01, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity01_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity02_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity02, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity02_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity03_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity03, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity03_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity04_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity04, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity04_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity05_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity05, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity05_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity06_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity06, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity06_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity07_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity07, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity07_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity08_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity08, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity08_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity09_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity09, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity09_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity10_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity10, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity10_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity11_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity11, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity11_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity12_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity12, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity12_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity13_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity13, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity13_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity14_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity14, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity14_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity15_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity15, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity15_ci, :Year => :FUND_region)
-fund_scch4_magiccch4_equity16_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity16, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity16_ci, :Year => :FUND_region)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for baseline scenario.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_25.csv"), DataFrame(scch4=dice_scch4_fairch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_50.csv"), DataFrame(scch4=dice_scch4_fairch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_70.csv"), DataFrame(scch4=dice_scch4_fairch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_fairch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_fairch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_fairch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_fairch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_fairch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_25.csv"), DataFrame(scch4=dice_scch4_fundch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_50.csv"), DataFrame(scch4=dice_scch4_fundch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_70.csv"), DataFrame(scch4=dice_scch4_fundch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_fundch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_fundch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_fundch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_fundch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_fundch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_25.csv"), DataFrame(scch4=dice_scch4_hectorch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_50.csv"), DataFrame(scch4=dice_scch4_hectorch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_70.csv"), DataFrame(scch4=dice_scch4_hectorch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_hectorch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_hectorch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_hectorch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_hectorch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_hectorch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_25.csv"), DataFrame(scch4=dice_scch4_magiccch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_50.csv"), DataFrame(scch4=dice_scch4_magiccch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_70.csv"), DataFrame(scch4=dice_scch4_magiccch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_magiccch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_magiccch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_magiccch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_magiccch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_magiccch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_25.csv"), DataFrame(scch4=fund_scch4_fairch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_50.csv"), DataFrame(scch4=fund_scch4_fairch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_70.csv"), DataFrame(scch4=fund_scch4_fairch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_fairch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_fairch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_fairch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_fairch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_fairch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_25.csv"), DataFrame(scch4=fund_scch4_fundch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_50.csv"), DataFrame(scch4=fund_scch4_fundch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_70.csv"), DataFrame(scch4=fund_scch4_fundch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_fundch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_fundch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_fundch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_fundch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_fundch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_25.csv"), DataFrame(scch4=fund_scch4_hectorch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_50.csv"), DataFrame(scch4=fund_scch4_hectorch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_70.csv"), DataFrame(scch4=fund_scch4_hectorch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_hectorch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_hectorch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_hectorch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_hectorch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_hectorch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_25.csv"), DataFrame(scch4=fund_scch4_magiccch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_50.csv"), DataFrame(scch4=fund_scch4_magiccch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_70.csv"), DataFrame(scch4=fund_scch4_magiccch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_magiccch4_ramsey_10))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_magiccch4_ramsey_15))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_magiccch4_const25))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_magiccch4_const50))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_magiccch4_const70))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
-
-# Save equity-weighted SC-CH4 estimates.
-println("Saving equity-weighted SC-CH4 estimates for baseline scenario.\n")
-
-# FUND region names.
-col_names = Symbol.(["usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states"])
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_00.csv"), DataFrame(fund_scch4_magiccch4_equity00, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_01.csv"), DataFrame(fund_scch4_magiccch4_equity01, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_02.csv"), DataFrame(fund_scch4_magiccch4_equity02, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_03.csv"), DataFrame(fund_scch4_magiccch4_equity03, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_04.csv"), DataFrame(fund_scch4_magiccch4_equity04, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_05.csv"), DataFrame(fund_scch4_magiccch4_equity05, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_06.csv"), DataFrame(fund_scch4_magiccch4_equity06, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_07.csv"), DataFrame(fund_scch4_magiccch4_equity07, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_08.csv"), DataFrame(fund_scch4_magiccch4_equity08, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_09.csv"), DataFrame(fund_scch4_magiccch4_equity09, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_10.csv"), DataFrame(fund_scch4_magiccch4_equity10, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_11.csv"), DataFrame(fund_scch4_magiccch4_equity11, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_12.csv"), DataFrame(fund_scch4_magiccch4_equity12, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_13.csv"), DataFrame(fund_scch4_magiccch4_equity13, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_14.csv"), DataFrame(fund_scch4_magiccch4_equity14, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_15.csv"), DataFrame(fund_scch4_magiccch4_equity15, Symbol.(col_names)))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_16.csv"), DataFrame(fund_scch4_magiccch4_equity16, Symbol.(col_names)))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_00.csv"), DataFrame(fund_scch4_magiccch4_equity00_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_01.csv"), DataFrame(fund_scch4_magiccch4_equity01_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_02.csv"), DataFrame(fund_scch4_magiccch4_equity02_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_03.csv"), DataFrame(fund_scch4_magiccch4_equity03_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_04.csv"), DataFrame(fund_scch4_magiccch4_equity04_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_05.csv"), DataFrame(fund_scch4_magiccch4_equity05_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_06.csv"), DataFrame(fund_scch4_magiccch4_equity06_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_07.csv"), DataFrame(fund_scch4_magiccch4_equity07_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_08.csv"), DataFrame(fund_scch4_magiccch4_equity08_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_09.csv"), DataFrame(fund_scch4_magiccch4_equity09_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_10.csv"), DataFrame(fund_scch4_magiccch4_equity10_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_11.csv"), DataFrame(fund_scch4_magiccch4_equity11_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_12.csv"), DataFrame(fund_scch4_magiccch4_equity12_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_13.csv"), DataFrame(fund_scch4_magiccch4_equity13_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"), DataFrame(fund_scch4_magiccch4_equity14_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"), DataFrame(fund_scch4_magiccch4_equity15_ci))
-save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_16.csv"), DataFrame(fund_scch4_magiccch4_equity16_ci))
-
-
-
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-# Calculate SC-CH4 for RCP 2.6 Scenario.
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-
-println("Calculate the SC-CH4 for the RCP2.6 scenario.\n")
-
-# Load temperature and CO₂ projections for each climate model.
-fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
-fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
-fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
-fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
-
-fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
-fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
-fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
-fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
-
-hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
-hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
-hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
-hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
-
-magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
-magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
-magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
-magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for RCP2.6 scenario.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for RCP2.6 scenario.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
-
-# Calculate the SC-CH4 for DICE under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using DICE for RCP2.6 scenario.\n")
-
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using FUND for RCP2.6 scenario.\n")
-
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for RCP2.6 scenario.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
-
-
-
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-# Calculate SC-CH4 for Outdated CH₄ Forcing Scenario.
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-
-println("Calculate the SC-CH4 for the outdated CH₄ radiative forcing scenario.\n")
-
-# Load temperature and CO₂ projections for each climate model.
-fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
-fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
-fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
-fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
-
-fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
-fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
-fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
-fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
-
-hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
-hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
-hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
-hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
-
-magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
-magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
-magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
-magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for outdated CH₄ radiative forcing scenario.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for outdated CH₄ radiative forcing scenario.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
-
-# Calculate the SC-CH4 for DICE under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using DICE for outdated CH₄ radiative forcing scenario.\n")
-
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using FUND for outdated CH₄ radiative forcing scenario.\n")
-
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for outdated CH₄ radiative forcing scenario.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
-
-
-
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-# Calculate SC-CH4 for Scenario That Removes Posterior Parameter Correlations.
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-
-println("Calculate the SC-CH4 for scenario that removes posterior parameter correlations.\n")
-
-# Load temperature and CO₂ projections for each climate model.
-fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
-fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
-fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
-fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
-
-fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
-fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
-fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
-fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
-
-hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
-hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
-hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
-hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
-
-magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
-magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
-magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
-magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for scenario that removes posterior parameter correlations.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for scenario that removes posterior parameter correlations.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
-
-# Calculate the SC-CH4 for DICE under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using DICE for scenario that removes posterior parameter correlations.\n")
-
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using FUND for scenario that removes posterior parameter correlations.\n")
-
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
-fund_non_extreme_indicies_fairch4   = findall(x-> abs(x) < 100000, fund_scch4_fairch4_const30)
-fund_non_extreme_indicies_fundch4   = findall(x-> abs(x) < 100000, fund_scch4_fundch4_const30)
-fund_non_extreme_indicies_hectorch4 = findall(x-> abs(x) < 100000, fund_scch4_hectorch4_const30)
-fund_non_extreme_indicies_magiccch4 = findall(x-> abs(x) < 100000, fund_scch4_magiccch4_const30)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for scenario that removes posterior parameter correlations.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30[fund_non_extreme_indicies_fairch4]))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30[fund_non_extreme_indicies_fairch4]))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30[fund_non_extreme_indicies_fairch4]))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30[fund_non_extreme_indicies_fairch4]))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_magiccch4))
-
-
-
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-# Calculate SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution.
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-
-println("Calculate the SC-CH4 for scenario that uses U.S. climate sensitivity distribution.\n")
-
-# Load temperature and CO₂ projections for each climate model.
-fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
-fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
-fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
-fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
-
-fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
-fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
-fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
-fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
-
-hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
-hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
-hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
-hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
-
-magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
-magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
-magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
-magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for scenario that uses U.S. climate sensitivity distribution.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for scenario that uses U.S. climate sensitivity distribution.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
-
-# Calculate the SC-CH4 for DICE under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using DICE for scenario that uses U.S. climate sensitivity distribution.\n")
-
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using FUND for scenario that uses U.S. climate sensitivity distribution.\n")
-
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for scenario that uses U.S. climate sensitivity distribution.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
-
-
-
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-# Calculate SC-CH4 for Scenario Using Wider Prior Parameter Distributions.
-#---------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------
-
-println("Calculate the SC-CH4 for scenario that uses wider prior parameter distributions.\n")
-
-# Load temperature and CO₂ projections for each climate model.
-fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
-fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
-fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
-fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
-
-fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
-fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
-fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
-fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
-
-hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
-hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
-hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
-hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
-
-magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
-magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
-magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
-magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
-
-# Calculate marginal damages for DICE.
-println("Begin calculating marginal climate damages using DICE for scenario that uses wider prior parameter distributions.\n")
-
-dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
-dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
-dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
-dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
-
-# Calculate marginal damages for FUND.
-println("Begin calculating marginal climate damages using FUND for scenario that uses wider prior parameter distributions.\n")
-
-fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
-fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
-fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
-fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
-
-# Calculate the SC-CH4 for DICE under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using DICE for scenario that uses wider prior parameter distributions.\n")
-
-dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
-
-# Calculate the SC-CH4 for FUND under a constant 3% discount rate.
-println("Begin calculating SC-CH4 estimates using FUND for scenario that uses wider prior parameter distributions.\n")
-
-fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
-
-# Save SC-CH4 estimates.
-println("Saving SC-CH4 estimates for scenario that uses wider prior parameter distributions.\n")
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
-
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
-save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+@sync begin
+
+    @spawnat :any begin
+        
+        #---------------------------------------------------------------#
+        #---------------------------------------------------------------#
+        #------ Calculate SC-CH4 for Baseline Scenario (RCP 8.5). ------#
+        #---------------------------------------------------------------#
+        #---------------------------------------------------------------#
+
+        # Load scenario temperature and CO₂ projections for each climate model.
+        temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
+        temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
+        co2_base_fairch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
+        co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
+
+        temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
+        temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
+        co2_base_fundch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
+        co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
+
+        temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
+        temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
+        co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
+        co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
+
+        temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
+        temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
+        co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
+        co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for baseline scenario.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(temperature_base_fairch4, temperature_pulse_fairch4, end_year)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(temperature_base_fundch4, temperature_pulse_fundch4, end_year)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(temperature_base_hectorch4, temperature_pulse_hectorch4, end_year)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(temperature_base_magiccch4, temperature_pulse_magiccch4, end_year)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for baseline scenario.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(temperature_base_fairch4, co2_base_fairch4, temperature_pulse_fairch4, co2_pulse_fairch4, end_year)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(temperature_base_fundch4, co2_base_fundch4, temperature_pulse_fundch4, co2_pulse_fundch4, end_year)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(temperature_base_hectorch4, co2_base_hectorch4, temperature_pulse_hectorch4, co2_pulse_hectorch4, end_year)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(temperature_base_magiccch4, co2_base_magiccch4, temperature_pulse_magiccch4, co2_pulse_magiccch4, end_year)
+
+        # Calculate the SC-CH4 for DICE under multiple constant and Ramsey discount rates.
+        println("Begin calculating SC-CH4 estimates using DICE for baseline scenario.\n")
+
+        dice_scch4_fairch4_const25,   dice_discounted_damages_fairch4_const25     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fairch4_const50,   dice_discounted_damages_fairch4_const50     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fairch4_const70,   dice_discounted_damages_fairch4_const70     	= dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fairch4_ramsey_10, dice_discounted_damages_fairch4_ramsey_10     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fairch4_ramsey_15, dice_discounted_damages_fairch4_ramsey_15     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+
+        dice_scch4_fundch4_const25,   dice_discounted_damages_fundch4_const25     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const50,   dice_discounted_damages_fundch4_const50     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const70,   dice_discounted_damages_fundch4_const70     	= dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_ramsey_10, dice_discounted_damages_fundch4_ramsey_10     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_ramsey_15, dice_discounted_damages_fundch4_ramsey_15     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+
+        dice_scch4_hectorch4_const25,   dice_discounted_damages_hectorch4_const25 	= dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30,   dice_discounted_damages_hectorch4_const30   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const50,   dice_discounted_damages_hectorch4_const50   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const70,   dice_discounted_damages_hectorch4_const70   = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_ramsey_10, dice_discounted_damages_hectorch4_ramsey_10 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_ramsey_15, dice_discounted_damages_hectorch4_ramsey_15 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+
+        dice_scch4_magiccch4_const25,   dice_discounted_damages_magiccch4_const25 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.025, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30,   dice_discounted_damages_magiccch4_const30 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const50,   dice_discounted_damages_magiccch4_const50 	= dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.05, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const70,   dice_discounted_damages_magiccch4_const70   = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=true, η=0.0, ρ=0.07, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_ramsey_10, dice_discounted_damages_magiccch4_ramsey_10 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_ramsey_15, dice_discounted_damages_magiccch4_ramsey_15 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under multiple constant and Ramsey discount rates.
+        println("Begin calculating SC-CH4 estimates using FUND for baseline scenario.\n")
+
+        fund_scch4_fairch4_const25,   fund_discounted_damages_fairch4_const25       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fairch4_const50,   fund_discounted_damages_fairch4_const50       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fairch4_const70,   fund_discounted_damages_fairch4_const70       = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fairch4_ramsey_10, fund_discounted_damages_fairch4_ramsey_10     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fairch4_ramsey_15, fund_discounted_damages_fairch4_ramsey_15     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        fund_scch4_fundch4_const25,   fund_discounted_damages_fundch4_const25       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const50,   fund_discounted_damages_fundch4_const50       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const70,   fund_discounted_damages_fundch4_const70       = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_ramsey_10, fund_discounted_damages_fundch4_ramsey_10     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_ramsey_15, fund_discounted_damages_fundch4_ramsey_15     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        fund_scch4_hectorch4_const25,   fund_discounted_damages_hectorch4_const25   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30,   fund_discounted_damages_hectorch4_const30   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const50,   fund_discounted_damages_hectorch4_const50   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const70,   fund_discounted_damages_hectorch4_const70   = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_ramsey_10, fund_discounted_damages_hectorch4_ramsey_10 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_ramsey_15, fund_discounted_damages_hectorch4_ramsey_15 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        fund_scch4_magiccch4_const25,   fund_discounted_damages_magiccch4_const25 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.025, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30,   fund_discounted_damages_magiccch4_const30 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const50,   fund_discounted_damages_magiccch4_const50 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.05, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const70,   fund_discounted_damages_magiccch4_const70 	= fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.07, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_ramsey_10, fund_discounted_damages_magiccch4_ramsey_10 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_ramsey_15, fund_discounted_damages_magiccch4_ramsey_15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Calculate equity-weighted SC-CH4 estimates for S-MAGICC under multiple η values.
+        println("Begin calculating equity-weighted SC-CH4 estimates using FUND for baseline scenario.\n")
+
+        fund_scch4_magiccch4_equity00 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.0, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity01 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.1, γ=0.1, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity02 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.2, γ=0.2, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity03 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.3, γ=0.3, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity04 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.4, γ=0.4, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity05 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.5, γ=0.5, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity06 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.6, γ=0.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity07 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.7, γ=0.7, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity08 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.8, γ=0.8, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity09 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.9, γ=0.9, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity10 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1+1e-12, γ=1+1e-12, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity11 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.1, γ=1.1, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity12 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.2, γ=1.2, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity13 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.3, γ=1.3, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity14 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.4, γ=1.4, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.5, γ=1.5, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_equity16 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.6, γ=1.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+
+        # Calculate regional confidence intervals for equity weighted SC-CH4 estimates across different η.
+        fund_region_names = ["USA", "Canada", "Western Europe", "Japan and South Korea", "Australia and New Zealand", "Central and Eastern Europe", "Former Soviet Union", "Middle East", "Central America", "South America", "South Asia", "Southeast Asia", "China plus", "North Africa", "Sub Saharan Africa", "Small Island States"]
+
+        fund_scch4_magiccch4_equity00_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity00, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity00_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity01_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity01, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity01_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity02_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity02, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity02_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity03_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity03, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity03_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity04_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity04, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity04_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity05_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity05, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity05_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity06_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity06, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity06_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity07_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity07, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity07_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity08_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity08, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity08_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity09_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity09, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity09_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity10_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity10, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity10_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity11_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity11, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity11_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity12_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity12, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity12_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity13_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity13, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity13_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity14_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity14, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity14_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity15_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity15, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity15_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_equity16_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity16, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity16_ci, :Year => :FUND_region)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for baseline scenario.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_25.csv"), DataFrame(scch4=dice_scch4_fairch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_50.csv"), DataFrame(scch4=dice_scch4_fairch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_70.csv"), DataFrame(scch4=dice_scch4_fairch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_fairch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_fairch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_fairch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_fairch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_fairch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_25.csv"), DataFrame(scch4=dice_scch4_fundch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_50.csv"), DataFrame(scch4=dice_scch4_fundch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_70.csv"), DataFrame(scch4=dice_scch4_fundch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_fundch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_fundch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_fundch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_fundch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_fundch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_25.csv"), DataFrame(scch4=dice_scch4_hectorch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_50.csv"), DataFrame(scch4=dice_scch4_hectorch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_70.csv"), DataFrame(scch4=dice_scch4_hectorch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_hectorch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_hectorch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_hectorch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_hectorch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_hectorch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_25.csv"), DataFrame(scch4=dice_scch4_magiccch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_50.csv"), DataFrame(scch4=dice_scch4_magiccch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_70.csv"), DataFrame(scch4=dice_scch4_magiccch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_10.csv"), DataFrame(scch4=dice_scch4_magiccch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_15.csv"), DataFrame(scch4=dice_scch4_magiccch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_25.csv"), DataFrame(dice_discounted_damages_magiccch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_30.csv"), DataFrame(dice_discounted_damages_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_50.csv"), DataFrame(dice_discounted_damages_magiccch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_70.csv"), DataFrame(dice_discounted_damages_magiccch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_25.csv"), DataFrame(scch4=fund_scch4_fairch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_50.csv"), DataFrame(scch4=fund_scch4_fairch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_70.csv"), DataFrame(scch4=fund_scch4_fairch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_fairch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_fairch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_fairch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_fairch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_fairch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_25.csv"), DataFrame(scch4=fund_scch4_fundch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_50.csv"), DataFrame(scch4=fund_scch4_fundch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_70.csv"), DataFrame(scch4=fund_scch4_fundch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_fundch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_fundch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_fundch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_fundch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_fundch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_25.csv"), DataFrame(scch4=fund_scch4_hectorch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_50.csv"), DataFrame(scch4=fund_scch4_hectorch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_70.csv"), DataFrame(scch4=fund_scch4_hectorch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_hectorch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_hectorch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_hectorch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_hectorch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_hectorch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_25.csv"), DataFrame(scch4=fund_scch4_magiccch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_50.csv"), DataFrame(scch4=fund_scch4_magiccch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_70.csv"), DataFrame(scch4=fund_scch4_magiccch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_10.csv"), DataFrame(scch4=fund_scch4_magiccch4_ramsey_10))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_15.csv"), DataFrame(scch4=fund_scch4_magiccch4_ramsey_15))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_25.csv"), DataFrame(fund_discounted_damages_magiccch4_const25))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_30.csv"), DataFrame(fund_discounted_damages_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_50.csv"), DataFrame(fund_discounted_damages_magiccch4_const50))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_70.csv"), DataFrame(fund_discounted_damages_magiccch4_const70))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+
+        # Save equity-weighted SC-CH4 estimates.
+        println("Saving equity-weighted SC-CH4 estimates for baseline scenario.\n")
+
+        # FUND region names.
+        col_names = Symbol.(["usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states"])
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_00.csv"), DataFrame(fund_scch4_magiccch4_equity00, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_01.csv"), DataFrame(fund_scch4_magiccch4_equity01, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_02.csv"), DataFrame(fund_scch4_magiccch4_equity02, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_03.csv"), DataFrame(fund_scch4_magiccch4_equity03, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_04.csv"), DataFrame(fund_scch4_magiccch4_equity04, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_05.csv"), DataFrame(fund_scch4_magiccch4_equity05, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_06.csv"), DataFrame(fund_scch4_magiccch4_equity06, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_07.csv"), DataFrame(fund_scch4_magiccch4_equity07, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_08.csv"), DataFrame(fund_scch4_magiccch4_equity08, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_09.csv"), DataFrame(fund_scch4_magiccch4_equity09, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_10.csv"), DataFrame(fund_scch4_magiccch4_equity10, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_11.csv"), DataFrame(fund_scch4_magiccch4_equity11, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_12.csv"), DataFrame(fund_scch4_magiccch4_equity12, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_13.csv"), DataFrame(fund_scch4_magiccch4_equity13, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_14.csv"), DataFrame(fund_scch4_magiccch4_equity14, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_15.csv"), DataFrame(fund_scch4_magiccch4_equity15, Symbol.(col_names)))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_16.csv"), DataFrame(fund_scch4_magiccch4_equity16, Symbol.(col_names)))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_00.csv"), DataFrame(fund_scch4_magiccch4_equity00_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_01.csv"), DataFrame(fund_scch4_magiccch4_equity01_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_02.csv"), DataFrame(fund_scch4_magiccch4_equity02_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_03.csv"), DataFrame(fund_scch4_magiccch4_equity03_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_04.csv"), DataFrame(fund_scch4_magiccch4_equity04_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_05.csv"), DataFrame(fund_scch4_magiccch4_equity05_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_06.csv"), DataFrame(fund_scch4_magiccch4_equity06_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_07.csv"), DataFrame(fund_scch4_magiccch4_equity07_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_08.csv"), DataFrame(fund_scch4_magiccch4_equity08_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_09.csv"), DataFrame(fund_scch4_magiccch4_equity09_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_10.csv"), DataFrame(fund_scch4_magiccch4_equity10_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_11.csv"), DataFrame(fund_scch4_magiccch4_equity11_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_12.csv"), DataFrame(fund_scch4_magiccch4_equity12_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_13.csv"), DataFrame(fund_scch4_magiccch4_equity13_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"), DataFrame(fund_scch4_magiccch4_equity14_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"), DataFrame(fund_scch4_magiccch4_equity15_ci))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_16.csv"), DataFrame(fund_scch4_magiccch4_equity16_ci))
+    end
+
+
+    @spawnat :any begin
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+        # Calculate SC-CH4 for RCP 2.6 Scenario.
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+
+        println("Calculate the SC-CH4 for the RCP2.6 scenario.\n")
+
+        # Load temperature and CO₂ projections for each climate model.
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
+
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
+
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
+
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for RCP2.6 scenario.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for RCP2.6 scenario.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
+
+        # Calculate the SC-CH4 for DICE under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using DICE for RCP2.6 scenario.\n")
+
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using FUND for RCP2.6 scenario.\n")
+
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for RCP2.6 scenario.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+    end
+
+
+    @spawnat :any begin
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+        # Calculate SC-CH4 for Outdated CH₄ Forcing Scenario.
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+
+        println("Calculate the SC-CH4 for the outdated CH₄ radiative forcing scenario.\n")
+
+        # Load temperature and CO₂ projections for each climate model.
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
+
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
+
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
+
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for outdated CH₄ radiative forcing scenario.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for outdated CH₄ radiative forcing scenario.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
+
+        # Calculate the SC-CH4 for DICE under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using DICE for outdated CH₄ radiative forcing scenario.\n")
+
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using FUND for outdated CH₄ radiative forcing scenario.\n")
+
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for outdated CH₄ radiative forcing scenario.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+    end
+
+    @spawnat :any begin
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+        # Calculate SC-CH4 for Scenario That Removes Posterior Parameter Correlations.
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+
+        println("Calculate the SC-CH4 for scenario that removes posterior parameter correlations.\n")
+
+        # Load temperature and CO₂ projections for each climate model.
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
+
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
+
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
+
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for scenario that removes posterior parameter correlations.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for scenario that removes posterior parameter correlations.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
+
+        # Calculate the SC-CH4 for DICE under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using DICE for scenario that removes posterior parameter correlations.\n")
+
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using FUND for scenario that removes posterior parameter correlations.\n")
+
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
+        fund_non_extreme_indicies_fairch4   = findall(x-> abs(x) < 100000, fund_scch4_fairch4_const30)
+        fund_non_extreme_indicies_fundch4   = findall(x-> abs(x) < 100000, fund_scch4_fundch4_const30)
+        fund_non_extreme_indicies_hectorch4 = findall(x-> abs(x) < 100000, fund_scch4_hectorch4_const30)
+        fund_non_extreme_indicies_magiccch4 = findall(x-> abs(x) < 100000, fund_scch4_magiccch4_const30)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for scenario that removes posterior parameter correlations.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30[fund_non_extreme_indicies_fairch4]))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30[fund_non_extreme_indicies_fairch4]))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30[fund_non_extreme_indicies_fairch4]))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30[fund_non_extreme_indicies_fairch4]))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "non_extreme_indices.csv"), DataFrame(indices=fund_non_extreme_indicies_magiccch4))
+    end
+
+    @spawnat :any begin
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+        # Calculate SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution.
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+
+        println("Calculate the SC-CH4 for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        # Load temperature and CO₂ projections for each climate model.
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
+
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
+
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
+
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
+
+        # Calculate the SC-CH4 for DICE under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using DICE for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using FUND for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for scenario that uses U.S. climate sensitivity distribution.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+    end
+
+
+    @spawnat :any begin
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+        # Calculate SC-CH4 for Scenario Using Wider Prior Parameter Distributions.
+        #---------------------------------------------------------------------------------------------
+        #---------------------------------------------------------------------------------------------
+
+        println("Calculate the SC-CH4 for scenario that uses wider prior parameter distributions.\n")
+
+        # Load temperature and CO₂ projections for each climate model.
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
+
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
+
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
+
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
+
+        # Calculate marginal damages for DICE.
+        println("Begin calculating marginal climate damages using DICE for scenario that uses wider prior parameter distributions.\n")
+
+        dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
+        dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
+        dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
+        dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
+
+        # Calculate marginal damages for FUND.
+        println("Begin calculating marginal climate damages using FUND for scenario that uses wider prior parameter distributions.\n")
+
+        fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
+        fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
+        fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
+        fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
+
+        # Calculate the SC-CH4 for DICE under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using DICE for scenario that uses wider prior parameter distributions.\n")
+
+        dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+        dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
+
+        # Calculate the SC-CH4 for FUND under a constant 3% discount rate.
+        println("Begin calculating SC-CH4 estimates using FUND for scenario that uses wider prior parameter distributions.\n")
+
+        fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+        fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
+
+        # Save SC-CH4 estimates.
+        println("Saving SC-CH4 estimates for scenario that uses wider prior parameter distributions.\n")
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "error_indices.csv"), DataFrame(indices=dice_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "good_indices.csv"), DataFrame(indices=dice_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "scch4_30.csv"), DataFrame(scch4=dice_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "error_indices.csv"), DataFrame(indices=dice_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "good_indices.csv"), DataFrame(indices=dice_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "scch4_30.csv"), DataFrame(scch4=dice_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "error_indices.csv"), DataFrame(indices=dice_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "good_indices.csv"), DataFrame(indices=dice_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "scch4_30.csv"), DataFrame(scch4=dice_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "error_indices.csv"), DataFrame(indices=dice_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "good_indices.csv"), DataFrame(indices=dice_good_indices_magiccch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fairch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "error_indices.csv"), DataFrame(indices=fund_error_indices_fairch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "good_indices.csv"), DataFrame(indices=fund_good_indices_fairch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "scch4_30.csv"), DataFrame(scch4=fund_scch4_fundch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_fundch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_fundch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "scch4_30.csv"), DataFrame(scch4=fund_scch4_hectorch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "error_indices.csv"), DataFrame(indices=fund_error_indices_hectorch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "good_indices.csv"), DataFrame(indices=fund_good_indices_hectorch4))
+
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "scch4_30.csv"), DataFrame(scch4=fund_scch4_magiccch4_const30))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "error_indices.csv"), DataFrame(indices=fund_error_indices_magiccch4))
+        save(joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "good_indices.csv"), DataFrame(indices=fund_good_indices_magiccch4))
+    end
+end
 
 println("All done.")
