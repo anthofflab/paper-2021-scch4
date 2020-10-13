@@ -587,462 +587,11 @@ fund_posterior_params   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@_
 hector_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"))))
 magicc_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"))))
 
-#----------------------------------------------------------------------------#
-#----------------------------------------------------------------------------#
-#------ Calculate Climate Projections for Baseline Scenario (RCP 8.5). ------#
-#----------------------------------------------------------------------------#
-#----------------------------------------------------------------------------#
-
-# Set RCP scenario.
-rcp_scenario = "RCP85"
-
-# Create a function for each climate model to make baseline projections.
-fair_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_baseline_climate = construct_sneasych4_baseline_case(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_baseline_climate = construct_sneasych4_baseline_case(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
-
-# SNEASY-FAIR
-println("Begin baseline climate projections for SNEASY+FAIR-CH4.\n")
-
-fair_base_temperature_baseline, fair_base_co2_baseline, fair_base_ch4_baseline, fair_base_ocean_heat_baseline,
-fair_base_oceanco2_baseline, fair_pulse_temperature_baseline, fair_pulse_co2_baseline, fair_ci_temperature_baseline,
-fair_ci_co2_baseline, fair_ci_ocean_heat_baseline, fair_ci_oceanco2_baseline, fair_ci_ch4_baseline, fair_error_indices_baseline,
-fair_good_indices_baseline = fair_baseline_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-FUND
-println("Begin baseline climate projections for SNEASY+FUND-CH4.\n")
-
-fund_base_temperature_baseline, fund_base_co2_baseline, fund_base_ch4_baseline, fund_base_ocean_heat_baseline,
-fund_base_oceanco2_baseline, fund_pulse_temperature_baseline, fund_pulse_co2_baseline, fund_ci_temperature_baseline,
-fund_ci_co2_baseline, fund_ci_ocean_heat_baseline, fund_ci_oceanco2_baseline, fund_ci_ch4_baseline, fund_error_indices_baseline,
-fund_good_indices_baseline = fund_baseline_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-Hector
-println("Begin baseline climate projections for SNEASY+Hector-CH4.\n")
-
-hector_base_temperature_baseline, hector_base_co2_baseline, hector_base_ch4_baseline, hector_base_ocean_heat_baseline,
-hector_base_oceanco2_baseline, hector_pulse_temperature_baseline, hector_pulse_co2_baseline, hector_ci_temperature_baseline,
-hector_ci_co2_baseline, hector_ci_ocean_heat_baseline, hector_ci_oceanco2_baseline, hector_ci_ch4_baseline, hector_error_indices_baseline,
-hector_good_indices_baseline = hector_baseline_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-MAGICC
-println("Begin baseline climate projections for SNEASY+MAGICC-CH4.\n")
-
-magicc_base_temperature_baseline, magicc_base_co2_baseline, magicc_base_ch4_baseline, magicc_base_ocean_heat_baseline,
-magicc_base_oceanco2_baseline, magicc_pulse_temperature_baseline, magicc_pulse_co2_baseline, magicc_ci_temperature_baseline,
-magicc_ci_co2_baseline, magicc_ci_ocean_heat_baseline, magicc_ci_oceanco2_baseline, magicc_ci_ch4_baseline, magicc_error_indices_baseline,
-magicc_good_indices_baseline = magicc_baseline_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
-
-# Save baseline climate projections for each model.
-println("Saving baseline climate projections.\n")
-
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_baseline))
-
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_baseline))
-
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_baseline))
-
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_baseline))
-save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_baseline))
-
-
-#----------------------------------------------------------------#
-#----------------------------------------------------------------#
-#------ Calculate Climate Projections for RCP2.6 Scenario. ------#
-#----------------------------------------------------------------#
-#----------------------------------------------------------------#
-
-# Set RCP scenario.
-rcp_scenario = "RCP26"
-
-# Create a function for each climate model to make RCP2.6 projections.
-fair_rcp26_climate   = construct_sneasych4_baseline_case(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_rcp26_climate   = construct_sneasych4_baseline_case(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_rcp26_climate = construct_sneasych4_baseline_case(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_rcp26_climate = construct_sneasych4_baseline_case(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
-
-# SNEASY-FAIR
-println("Begin RCP2.6 climate projections for SNEASY+FAIR-CH4.\n")
-
-fair_base_temperature_rcp26, fair_base_co2_rcp26, fair_base_ch4_rcp26, fair_base_ocean_heat_rcp26,
-fair_base_oceanco2_rcp26, fair_pulse_temperature_rcp26, fair_pulse_co2_rcp26, fair_ci_temperature_rcp26,
-fair_ci_co2_rcp26, fair_ci_ocean_heat_rcp26, fair_ci_oceanco2_rcp26, fair_ci_ch4_rcp26, fair_error_indices_rcp26,
-fair_good_indices_rcp26 = fair_rcp26_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-FUND
-println("Begin RCP2.6 climate projections for SNEASY+FUND-CH4.\n")
-
-fund_base_temperature_rcp26, fund_base_co2_rcp26, fund_base_ch4_rcp26, fund_base_ocean_heat_rcp26,
-fund_base_oceanco2_rcp26, fund_pulse_temperature_rcp26, fund_pulse_co2_rcp26, fund_ci_temperature_rcp26,
-fund_ci_co2_rcp26, fund_ci_ocean_heat_rcp26, fund_ci_oceanco2_rcp26, fund_ci_ch4_rcp26, fund_error_indices_rcp26,
-fund_good_indices_rcp26 = fund_rcp26_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-Hector
-println("Begin RCP2.6 climate projections for SNEASY+Hector-CH4.\n")
-
-hector_base_temperature_rcp26, hector_base_co2_rcp26, hector_base_ch4_rcp26, hector_base_ocean_heat_rcp26,
-hector_base_oceanco2_rcp26, hector_pulse_temperature_rcp26, hector_pulse_co2_rcp26, hector_ci_temperature_rcp26,
-hector_ci_co2_rcp26, hector_ci_ocean_heat_rcp26, hector_ci_oceanco2_rcp26, hector_ci_ch4_rcp26, hector_error_indices_rcp26,
-hector_good_indices_rcp26 = hector_rcp26_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
-
-#SNEASY-MAGICC
-println("Begin RCP2.6 climate projections for SNEASY+MAGICC-CH4.\n")
-
-magicc_base_temperature_rcp26, magicc_base_co2_rcp26, magicc_base_ch4_rcp26, magicc_base_ocean_heat_rcp26,
-magicc_base_oceanco2_rcp26, magicc_pulse_temperature_rcp26, magicc_pulse_co2_rcp26, magicc_ci_temperature_rcp26,
-magicc_ci_co2_rcp26, magicc_ci_ocean_heat_rcp26, magicc_ci_oceanco2_rcp26, magicc_ci_ch4_rcp26, magicc_error_indices_rcp26,
-magicc_good_indices_rcp26 = magicc_rcp26_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
-
-# Save RCP2.6 climate projections for each model.
-println("Saving RCP2.6 climate projections.\n")
-
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_rcp26))
-
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_rcp26))
-
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_rcp26))
-
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_rcp26))
-save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_rcp26))
-
-
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-#------ Calculate Climate Projections for Outdated CH₄ Forcing Scenario. ------#
-#------------------------------------------------------------------------------#
-#------------------------------------------------------------------------------#
-
-# Set RCP scenario.
-rcp_scenario = "RCP85"
-
-# Create a function for each climate model to make outdated CH₄ climate projections.
-fair_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_oldrf_climate = construct_sneasych4_outdated_forcing(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_oldrf_climate = construct_sneasych4_outdated_forcing(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
-
-# SNEASY-FAIR
-println("Begin climate projections for SNEASY+FAIR-CH4 using outdated CH₄ forcing.\n")
-
-fair_base_temperature_oldrf, fair_base_co2_oldrf, fair_base_ch4_oldrf, fair_base_ocean_heat_oldrf,
-fair_base_oceanco2_oldrf, fair_pulse_temperature_oldrf, fair_pulse_co2_oldrf, fair_ci_temperature_oldrf,
-fair_ci_co2_oldrf, fair_ci_ocean_heat_oldrf, fair_ci_oceanco2_oldrf, fair_ci_ch4_oldrf, fair_error_indices_oldrf,
-fair_good_indices_oldrf = fair_oldrf_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-FUND
-println("Begin climate projections for SNEASY+FUND-CH4 using outdated CH₄ forcing.\n")
-
-fund_base_temperature_oldrf, fund_base_co2_oldrf, fund_base_ch4_oldrf, fund_base_ocean_heat_oldrf,
-fund_base_oceanco2_oldrf, fund_pulse_temperature_oldrf, fund_pulse_co2_oldrf, fund_ci_temperature_oldrf,
-fund_ci_co2_oldrf, fund_ci_ocean_heat_oldrf, fund_ci_oceanco2_oldrf, fund_ci_ch4_oldrf, fund_error_indices_oldrf,
-fund_good_indices_oldrf = fund_oldrf_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-Hector
-println("Begin climate projections for SNEASY+Hector-CH4 using outdated CH₄ forcing.\n")
-
-hector_base_temperature_oldrf, hector_base_co2_oldrf, hector_base_ch4_oldrf, hector_base_ocean_heat_oldrf,
-hector_base_oceanco2_oldrf, hector_pulse_temperature_oldrf, hector_pulse_co2_oldrf, hector_ci_temperature_oldrf,
-hector_ci_co2_oldrf, hector_ci_ocean_heat_oldrf, hector_ci_oceanco2_oldrf, hector_ci_ch4_oldrf, hector_error_indices_oldrf,
-hector_good_indices_oldrf = hector_oldrf_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
-
-#SNEASY-MAGICC
-println("Begin climate projections for SNEASY+MAGICC-CH4 using outdated CH₄ forcing.\n")
-
-magicc_base_temperature_oldrf, magicc_base_co2_oldrf, magicc_base_ch4_oldrf, magicc_base_ocean_heat_oldrf,
-magicc_base_oceanco2_oldrf, magicc_pulse_temperature_oldrf, magicc_pulse_co2_oldrf, magicc_ci_temperature_oldrf,
-magicc_ci_co2_oldrf, magicc_ci_ocean_heat_oldrf, magicc_ci_oceanco2_oldrf, magicc_ci_ch4_oldrf, magicc_error_indices_oldrf,
-magicc_good_indices_oldrf = magicc_oldrf_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
-
-# Save outdated CH₄ forcing climate projections for each model.
-println("Saving climate projections using outdated CH₄ forcing.\n")
-
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_oldrf))
-
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_oldrf))
-
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_oldrf))
-
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_oldrf))
-save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_oldrf))
-
-
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#
-#------ Calculate Climate Projections for Scenario Without Posterior Correlations. ------#
-#----------------------------------------------------------------------------------------#
-#----------------------------------------------------------------------------------------#
-
-# Set RCP scenario.
-rcp_scenario = "RCP85"
-
-# Create a function for each climate model to make climate projections without posterior parameter correlations.
-fair_remove_correlations_climate   = construct_sneasych4_remove_correlations(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_remove_correlations_climate   = construct_sneasych4_remove_correlations(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_remove_correlations_climate = construct_sneasych4_remove_correlations(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_remove_correlations_climate = construct_sneasych4_remove_correlations(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
-
-# SNEASY-FAIR
-println("Begin climate projections for SNEASY+FAIR-CH4 without posterior parameter correlations.\n")
-
-fair_base_temperature_corr, fair_base_co2_corr, fair_base_ch4_corr, fair_base_ocean_heat_corr,
-fair_base_oceanco2_corr, fair_pulse_temperature_corr, fair_pulse_co2_corr, fair_ci_temperature_corr,
-fair_ci_co2_corr, fair_ci_ocean_heat_corr, fair_ci_oceanco2_corr, fair_ci_ch4_corr, fair_error_indices_corr,
-fair_good_indices_corr, fair_random_indices_corr = fair_remove_correlations_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-FUND
-println("Begin climate projections for SNEASY+FUND-CH4 without posterior parameter correlations.\n")
-
-fund_base_temperature_corr, fund_base_co2_corr, fund_base_ch4_corr, fund_base_ocean_heat_corr,
-fund_base_oceanco2_corr, fund_pulse_temperature_corr, fund_pulse_co2_corr, fund_ci_temperature_corr,
-fund_ci_co2_corr, fund_ci_ocean_heat_corr, fund_ci_oceanco2_corr, fund_ci_ch4_corr, fund_error_indices_corr,
-fund_good_indices_corr, fund_random_indices_corr = fund_remove_correlations_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
-
-# SNEASY-Hector
-println("Begin climate projections for SNEASY+Hector-CH4 without posterior parameter correlations.\n")
-
-hector_base_temperature_corr, hector_base_co2_corr, hector_base_ch4_corr, hector_base_ocean_heat_corr,
-hector_base_oceanco2_corr, hector_pulse_temperature_corr, hector_pulse_co2_corr, hector_ci_temperature_corr,
-hector_ci_co2_corr, hector_ci_ocean_heat_corr, hector_ci_oceanco2_corr, hector_ci_ch4_corr, hector_error_indices_corr,
-hector_good_indices_corr, hector_random_indices_corr = hector_remove_correlations_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
-
-#SNEASY-MAGICC
-println("Begin climate projections for SNEASY+MAGICC-CH4 without posterior parameter correlations.\n")
-
-magicc_base_temperature_corr, magicc_base_co2_corr, magicc_base_ch4_corr, magicc_base_ocean_heat_corr,
-magicc_base_oceanco2_corr, magicc_pulse_temperature_corr, magicc_pulse_co2_corr, magicc_ci_temperature_corr,
-magicc_ci_co2_corr, magicc_ci_ocean_heat_corr, magicc_ci_oceanco2_corr, magicc_ci_ch4_corr, magicc_error_indices_corr,
-magicc_good_indices_corr, magicc_random_indices_corr = magicc_remove_correlations_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
-
-# Save climate projections for each model that remove posterior parameter correlations.
-println("Saving climate projections without posterior parameter correlations.\n")
-
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "random_indices.csv"), DataFrame(fair_random_indices_corr))
-
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "random_indices.csv"), DataFrame(fund_random_indices_corr))
-
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "random_indices.csv"), DataFrame(hector_random_indices_corr))
-
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_corr))
-save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "random_indices.csv"), DataFrame(magicc_random_indices_corr))
-
-
-#--------------------------------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------------------------------#
-#------ Calculate Climate Projections for Scenario Sampling U.S. Climate Sensitivity Distribution. ------#
-#--------------------------------------------------------------------------------------------------------#
-#--------------------------------------------------------------------------------------------------------#
-
-# Set RCP scenario.
-rcp_scenario = "RCP85"
+# Load calibrated parameters for each climate model using wider prior parameter distributions.
+fair_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"))))
+fund_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"))))
+hector_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"))))
+magicc_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"))))
 
 # Load mean posterior parameter values.
 fair_posterior_means   = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"))).fair_mean
@@ -1050,232 +599,711 @@ fund_posterior_means   = DataFrame(load(joinpath(@__DIR__, output, "calibrated_p
 hector_posterior_means = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"))).hector_mean
 magicc_posterior_means = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"))).magicc_mean
 
-# Create a function for each climate model to make projections that sample the U.S. ECS distribution.
-fair_ecs_climate   = construct_sneasych4_ecs(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_ecs_climate   = construct_sneasych4_ecs(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_ecs_climate = construct_sneasych4_ecs(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_ecs_climate = construct_sneasych4_ecs(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
-
 # Create an ECS sample from the Roe & Baker equilibrium climate sensitivty distribution using the U.S. calibration settings.
 norm_dist = Truncated(Normal(0.6198, 0.1841), -0.2, 0.88)
 ecs_sample = 1.2 ./ (1 .- rand(norm_dist, test_run ? 100 : 100_000))
 
-# SNEASY-FAIR
-println("Begin climate projections for SNEASY+FAIR-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+@sync begin
 
-fair_base_temp_ecs, fair_base_co2_ecs, fair_base_ch4_ecs, fair_base_ocean_heat_ecs,
-fair_base_oceanco2_ecs, fair_pulse_temperature_ecs, fair_pulse_co2_ecs, fair_ci_temperature_ecs,
-fair_ci_co2_ecs, fair_ci_ocean_heat_ecs, fair_ci_oceanco2_ecs, fair_ci_ch4_ecs, fair_error_indices_ecs,
-fair_good_indices_ecs, fair_ecs_sample = fair_ecs_climate(ecs_sample, fair_posterior_means, low_ci_interval, high_ci_interval)
+    #----------------------------------------------------------------------------#
+    #----------------------------------------------------------------------------#
+    #------ Calculate Climate Projections for Baseline Scenario (RCP 8.5). ------#
+    #----------------------------------------------------------------------------#
+    #----------------------------------------------------------------------------#
 
-# SNEASY-FUND
-println("Begin climate projections for SNEASY+FUND-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin baseline climate projections for SNEASY+FAIR-CH4.\n")
 
-fund_base_temp_ecs, fund_base_co2_ecs, fund_base_ch4_ecs, fund_base_ocean_heat_ecs,
-fund_base_oceanco2_ecs, fund_pulse_temperature_ecs, fund_pulse_co2_ecs, fund_ci_temperature_ecs,
-fund_ci_co2_ecs, fund_ci_ocean_heat_ecs, fund_ci_oceanco2_ecs, fund_ci_ch4_ecs, fund_error_indices_ecs,
-fund_good_indices_ecs, fund_ecs_sample = fund_ecs_climate(ecs_sample, fund_posterior_means, low_ci_interval, high_ci_interval)
+        fair_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fair, "RCP85", pulse_year, pulse_size, 2300)
 
-# SNEASY-Hector
-println("Begin climate projections for SNEASY+Hector-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+        fair_base_temperature_baseline, fair_base_co2_baseline, fair_base_ch4_baseline, fair_base_ocean_heat_baseline,
+        fair_base_oceanco2_baseline, fair_pulse_temperature_baseline, fair_pulse_co2_baseline, fair_ci_temperature_baseline,
+        fair_ci_co2_baseline, fair_ci_ocean_heat_baseline, fair_ci_oceanco2_baseline, fair_ci_ch4_baseline, fair_error_indices_baseline,
+        fair_good_indices_baseline = fair_baseline_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
 
-hector_base_temp_ecs, hector_base_co2_ecs, hector_base_ch4_ecs, hector_base_ocean_heat_ecs,
-hector_base_oceanco2_ecs, hector_pulse_temperature_ecs, hector_pulse_co2_ecs, hector_ci_temperature_ecs,
-hector_ci_co2_ecs, hector_ci_ocean_heat_ecs, hector_ci_oceanco2_ecs, hector_ci_ch4_ecs, hector_error_indices_ecs,
-hector_good_indices_ecs, hector_ecs_sample = hector_ecs_climate(ecs_sample, hector_posterior_means, low_ci_interval, high_ci_interval)
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_baseline))
+    end
 
-#SNEASY-MAGICC
-println("Begin climate projections for SNEASY+MAGICC-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin baseline climate projections for SNEASY+FUND-CH4.\n")
 
-magicc_base_temp_ecs, magicc_base_co2_ecs, magicc_base_ch4_ecs, magicc_base_ocean_heat_ecs,
-magicc_base_oceanco2_ecs, magicc_pulse_temperature_ecs, magicc_pulse_co2_ecs, magicc_ci_temperature_ecs,
-magicc_ci_co2_ecs, magicc_ci_ocean_heat_ecs, magicc_ci_oceanco2_ecs, magicc_ci_ch4_ecs, magicc_error_indices_ecs,
-magicc_good_indices_ecs, magicc_ecs_sample = magicc_ecs_climate(ecs_sample, magicc_posterior_means, low_ci_interval, high_ci_interval)
+        fund_baseline_climate   = construct_sneasych4_baseline_case(:sneasy_fund, "RCP85", pulse_year, pulse_size, 2300)
 
-# Save climate projections for each climate model that samples the U.S. ECS distribution.
-println("Saving climate projections that sample the U.S. climate sensitivity distribution.\n")
+        fund_base_temperature_baseline, fund_base_co2_baseline, fund_base_ch4_baseline, fund_base_ocean_heat_baseline,
+        fund_base_oceanco2_baseline, fund_pulse_temperature_baseline, fund_pulse_co2_baseline, fund_ci_temperature_baseline,
+        fund_ci_co2_baseline, fund_ci_ocean_heat_baseline, fund_ci_oceanco2_baseline, fund_ci_ch4_baseline, fund_error_indices_baseline,
+        fund_good_indices_baseline = fund_baseline_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
 
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temp_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ecs_sample.csv"), DataFrame(ecs_samples=fair_ecs_sample))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_baseline))        
+    end
 
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temp_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ecs_sample.csv"), DataFrame(ecs_samples=fund_ecs_sample))
+    @spawnat :any begin
+        # SNEASY-Hector
+        println("Begin baseline climate projections for SNEASY+Hector-CH4.\n")
 
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temp_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ecs_sample.csv"), DataFrame(ecs_samples=hector_ecs_sample))
+        hector_baseline_climate = construct_sneasych4_baseline_case(:sneasy_hector, "RCP85", pulse_year, pulse_size, 2300)
 
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temp_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_ecs))
-save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ecs_sample.csv"), DataFrame(ecs_samples=magicc_ecs_sample))
+        hector_base_temperature_baseline, hector_base_co2_baseline, hector_base_ch4_baseline, hector_base_ocean_heat_baseline,
+        hector_base_oceanco2_baseline, hector_pulse_temperature_baseline, hector_pulse_co2_baseline, hector_ci_temperature_baseline,
+        hector_ci_co2_baseline, hector_ci_ocean_heat_baseline, hector_ci_oceanco2_baseline, hector_ci_ch4_baseline, hector_error_indices_baseline,
+        hector_good_indices_baseline = hector_baseline_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_baseline))        
+    end
+
+    @spawnat :any begin
+        # SNEASY-MAGICC
+        println("Begin baseline climate projections for SNEASY+MAGICC-CH4.\n")
+
+        magicc_baseline_climate = construct_sneasych4_baseline_case(:sneasy_magicc, "RCP85", pulse_year, pulse_size, 2300)
+
+        magicc_base_temperature_baseline, magicc_base_co2_baseline, magicc_base_ch4_baseline, magicc_base_ocean_heat_baseline,
+        magicc_base_oceanco2_baseline, magicc_pulse_temperature_baseline, magicc_pulse_co2_baseline, magicc_ci_temperature_baseline,
+        magicc_ci_co2_baseline, magicc_ci_ocean_heat_baseline, magicc_ci_oceanco2_baseline, magicc_ci_ch4_baseline, magicc_error_indices_baseline,
+        magicc_good_indices_baseline = magicc_baseline_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_baseline))
+        save(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_baseline))
+    end
+
+    #----------------------------------------------------------------#
+    #----------------------------------------------------------------#
+    #------ Calculate Climate Projections for RCP2.6 Scenario. ------#
+    #----------------------------------------------------------------#
+    #----------------------------------------------------------------#
+
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin RCP2.6 climate projections for SNEASY+FAIR-CH4.\n")
+
+        fair_rcp26_climate   = construct_sneasych4_baseline_case(:sneasy_fair, "RCP26", pulse_year, pulse_size, 2300)
+
+        fair_base_temperature_rcp26, fair_base_co2_rcp26, fair_base_ch4_rcp26, fair_base_ocean_heat_rcp26,
+        fair_base_oceanco2_rcp26, fair_pulse_temperature_rcp26, fair_pulse_co2_rcp26, fair_ci_temperature_rcp26,
+        fair_ci_co2_rcp26, fair_ci_ocean_heat_rcp26, fair_ci_oceanco2_rcp26, fair_ci_ch4_rcp26, fair_error_indices_rcp26,
+        fair_good_indices_rcp26 = fair_rcp26_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_rcp26))
+
+    end
+
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin RCP2.6 climate projections for SNEASY+FUND-CH4.\n")
+
+        fund_rcp26_climate   = construct_sneasych4_baseline_case(:sneasy_fund, "RCP26", pulse_year, pulse_size, 2300)
+
+        fund_base_temperature_rcp26, fund_base_co2_rcp26, fund_base_ch4_rcp26, fund_base_ocean_heat_rcp26,
+        fund_base_oceanco2_rcp26, fund_pulse_temperature_rcp26, fund_pulse_co2_rcp26, fund_ci_temperature_rcp26,
+        fund_ci_co2_rcp26, fund_ci_ocean_heat_rcp26, fund_ci_oceanco2_rcp26, fund_ci_ch4_rcp26, fund_error_indices_rcp26,
+        fund_good_indices_rcp26 = fund_rcp26_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_rcp26))
+    end
+
+    @spawnat :any begin
+        # SNEASY-Hector
+        println("Begin RCP2.6 climate projections for SNEASY+Hector-CH4.\n")
+
+        hector_rcp26_climate = construct_sneasych4_baseline_case(:sneasy_hector, "RCP26", pulse_year, pulse_size, 2300)
+
+        hector_base_temperature_rcp26, hector_base_co2_rcp26, hector_base_ch4_rcp26, hector_base_ocean_heat_rcp26,
+        hector_base_oceanco2_rcp26, hector_pulse_temperature_rcp26, hector_pulse_co2_rcp26, hector_ci_temperature_rcp26,
+        hector_ci_co2_rcp26, hector_ci_ocean_heat_rcp26, hector_ci_oceanco2_rcp26, hector_ci_ch4_rcp26, hector_error_indices_rcp26,
+        hector_good_indices_rcp26 = hector_rcp26_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_rcp26))        
+    end
+
+    @spawnat :any begin
+        #SNEASY-MAGICC
+        println("Begin RCP2.6 climate projections for SNEASY+MAGICC-CH4.\n")
+
+        magicc_rcp26_climate = construct_sneasych4_baseline_case(:sneasy_magicc, "RCP26", pulse_year, pulse_size, 2300)
+
+        magicc_base_temperature_rcp26, magicc_base_co2_rcp26, magicc_base_ch4_rcp26, magicc_base_ocean_heat_rcp26,
+        magicc_base_oceanco2_rcp26, magicc_pulse_temperature_rcp26, magicc_pulse_co2_rcp26, magicc_ci_temperature_rcp26,
+        magicc_ci_co2_rcp26, magicc_ci_ocean_heat_rcp26, magicc_ci_oceanco2_rcp26, magicc_ci_ch4_rcp26, magicc_error_indices_rcp26,
+        magicc_good_indices_rcp26 = magicc_rcp26_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_rcp26))
+        save(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_rcp26))
+    end
 
 
-#---------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------#
-#------ Calculate Climate Projections for Scenario Using Wider Prior Parameter Distributions. ------#
-#---------------------------------------------------------------------------------------------------#
-#---------------------------------------------------------------------------------------------------#
+    #------------------------------------------------------------------------------#
+    #------------------------------------------------------------------------------#
+    #------ Calculate Climate Projections for Outdated CH₄ Forcing Scenario. ------#
+    #------------------------------------------------------------------------------#
+    #------------------------------------------------------------------------------#
 
-# Set RCP scenario.
-rcp_scenario = "RCP85"
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin climate projections for SNEASY+FAIR-CH4 using outdated CH₄ forcing.\n")
 
-# Load calibrated parameters for each climate model using wider prior parameter distributions.
-fair_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"))))
-fund_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"))))
-hector_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"))))
-magicc_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"))))
+        fair_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fair, "RCP85", pulse_year, pulse_size, 2300)
 
-# Create a function for each climate model to make climate projections based on wider prior parameter distributions.
-fair_wider_climate   = construct_sneasych4_baseline_case(:sneasy_fair, rcp_scenario, pulse_year, pulse_size, 2300)
-fund_wider_climate   = construct_sneasych4_baseline_case(:sneasy_fund, rcp_scenario, pulse_year, pulse_size, 2300)
-hector_wider_climate = construct_sneasych4_baseline_case(:sneasy_hector, rcp_scenario, pulse_year, pulse_size, 2300)
-magicc_wider_climate = construct_sneasych4_baseline_case(:sneasy_magicc, rcp_scenario, pulse_year, pulse_size, 2300)
+        fair_base_temperature_oldrf, fair_base_co2_oldrf, fair_base_ch4_oldrf, fair_base_ocean_heat_oldrf,
+        fair_base_oceanco2_oldrf, fair_pulse_temperature_oldrf, fair_pulse_co2_oldrf, fair_ci_temperature_oldrf,
+        fair_ci_co2_oldrf, fair_ci_ocean_heat_oldrf, fair_ci_oceanco2_oldrf, fair_ci_ch4_oldrf, fair_error_indices_oldrf,
+        fair_good_indices_oldrf = fair_oldrf_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
 
-# SNEASY-FAIR
-println("Begin climate projections for SNEASY+FAIR-CH4 using wider prior parameter distributions.\n")
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_oldrf))
+    end
 
-fair_base_temperature_wider, fair_base_co2_wider, fair_base_ch4_wider, fair_base_ocean_heat_wider,
-fair_base_oceanco2_wider, fair_pulse_temperature_wider, fair_pulse_co2_wider, fair_ci_temperature_wider,
-fair_ci_co2_wider, fair_ci_ocean_heat_wider, fair_ci_oceanco2_wider, fair_ci_ch4_wider, fair_error_indices_wider,
-fair_good_indices_wider = fair_wider_climate(fair_posterior_params_wider, low_ci_interval, high_ci_interval)
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin climate projections for SNEASY+FUND-CH4 using outdated CH₄ forcing.\n")
 
-# SNEASY-FUND
-println("Begin climate projections for SNEASY+FUND-CH4 using wider prior parameter distributions.\n")
+        fund_oldrf_climate   = construct_sneasych4_outdated_forcing(:sneasy_fund, "RCP85", pulse_year, pulse_size, 2300)
 
-fund_base_temperature_wider, fund_base_co2_wider, fund_base_ch4_wider, fund_base_ocean_heat_wider,
-fund_base_oceanco2_wider, fund_pulse_temperature_wider, fund_pulse_co2_wider, fund_ci_temperature_wider,
-fund_ci_co2_wider, fund_ci_ocean_heat_wider, fund_ci_oceanco2_wider, fund_ci_ch4_wider, fund_error_indices_wider,
-fund_good_indices_wider = fund_wider_climate(fund_posterior_params_wider, low_ci_interval, high_ci_interval)
+        fund_base_temperature_oldrf, fund_base_co2_oldrf, fund_base_ch4_oldrf, fund_base_ocean_heat_oldrf,
+        fund_base_oceanco2_oldrf, fund_pulse_temperature_oldrf, fund_pulse_co2_oldrf, fund_ci_temperature_oldrf,
+        fund_ci_co2_oldrf, fund_ci_ocean_heat_oldrf, fund_ci_oceanco2_oldrf, fund_ci_ch4_oldrf, fund_error_indices_oldrf,
+        fund_good_indices_oldrf = fund_oldrf_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
 
-# SNEASY-Hector
-println("Begin climate projections for SNEASY+Hector-CH4 using wider prior parameter distributions.\n")
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_oldrf))
+    end
 
-hector_base_temperature_wider, hector_base_co2_wider, hector_base_ch4_wider, hector_base_ocean_heat_wider,
-hector_base_oceanco2_wider, hector_pulse_temperature_wider, hector_pulse_co2_wider, hector_ci_temperature_wider,
-hector_ci_co2_wider, hector_ci_ocean_heat_wider, hector_ci_oceanco2_wider, hector_ci_ch4_wider, hector_error_indices_wider,
-hector_good_indices_wider = hector_wider_climate(hector_posterior_params_wider, low_ci_interval, high_ci_interval)
+    @spawnat :any begin
+        # SNEASY-Hector
+        println("Begin climate projections for SNEASY+Hector-CH4 using outdated CH₄ forcing.\n")
 
-# SNEASY-MAGICC
-println("Begin climate projections for SNEASY+MAGICC-CH4 using wider prior parameter distributions.\n")
+        hector_oldrf_climate = construct_sneasych4_outdated_forcing(:sneasy_hector, "RCP85", pulse_year, pulse_size, 2300)
 
-magicc_base_temperature_wider, magicc_base_co2_wider, magicc_base_ch4_wider, magicc_base_ocean_heat_wider,
-magicc_base_oceanco2_wider, magicc_pulse_temperature_wider, magicc_pulse_co2_wider, magicc_ci_temperature_wider,
-magicc_ci_co2_wider, magicc_ci_ocean_heat_wider, magicc_ci_oceanco2_wider, magicc_ci_ch4_wider, magicc_error_indices_wider,
-magicc_good_indices_wider = magicc_wider_climate(magicc_posterior_params_wider, low_ci_interval, high_ci_interval)
+        hector_base_temperature_oldrf, hector_base_co2_oldrf, hector_base_ch4_oldrf, hector_base_ocean_heat_oldrf,
+        hector_base_oceanco2_oldrf, hector_pulse_temperature_oldrf, hector_pulse_co2_oldrf, hector_ci_temperature_oldrf,
+        hector_ci_co2_oldrf, hector_ci_ocean_heat_oldrf, hector_ci_oceanco2_oldrf, hector_ci_ch4_oldrf, hector_error_indices_oldrf,
+        hector_good_indices_oldrf = hector_oldrf_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
 
-# Save climate projections for each model using wider prior parameter distributions.
-println("Saving climate projections using wider prior parameter distributions.\n")
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_oldrf))
+    end
 
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_wider))
+    @spawnat :any begin
+        #SNEASY-MAGICC
+        println("Begin climate projections for SNEASY+MAGICC-CH4 using outdated CH₄ forcing.\n")
 
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_wider))
+        magicc_oldrf_climate = construct_sneasych4_outdated_forcing(:sneasy_magicc, "RCP85", pulse_year, pulse_size, 2300)
 
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_wider))
+        magicc_base_temperature_oldrf, magicc_base_co2_oldrf, magicc_base_ch4_oldrf, magicc_base_ocean_heat_oldrf,
+        magicc_base_oceanco2_oldrf, magicc_pulse_temperature_oldrf, magicc_pulse_co2_oldrf, magicc_ci_temperature_oldrf,
+        magicc_ci_co2_oldrf, magicc_ci_ocean_heat_oldrf, magicc_ci_oceanco2_oldrf, magicc_ci_ch4_oldrf, magicc_error_indices_oldrf,
+        magicc_good_indices_oldrf = magicc_oldrf_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
 
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_wider))
-save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_oldrf))
+        save(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_oldrf))
+    end
 
+
+    #----------------------------------------------------------------------------------------#
+    #----------------------------------------------------------------------------------------#
+    #------ Calculate Climate Projections for Scenario Without Posterior Correlations. ------#
+    #----------------------------------------------------------------------------------------#
+    #----------------------------------------------------------------------------------------#
+
+
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin climate projections for SNEASY+FAIR-CH4 without posterior parameter correlations.\n")
+
+        fair_remove_correlations_climate   = construct_sneasych4_remove_correlations(:sneasy_fair, "RCP85", pulse_year, pulse_size, 2300)
+
+        fair_base_temperature_corr, fair_base_co2_corr, fair_base_ch4_corr, fair_base_ocean_heat_corr,
+        fair_base_oceanco2_corr, fair_pulse_temperature_corr, fair_pulse_co2_corr, fair_ci_temperature_corr,
+        fair_ci_co2_corr, fair_ci_ocean_heat_corr, fair_ci_oceanco2_corr, fair_ci_ch4_corr, fair_error_indices_corr,
+        fair_good_indices_corr, fair_random_indices_corr = fair_remove_correlations_climate(fair_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "random_indices.csv"), DataFrame(fair_random_indices_corr))
+    end
+
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin climate projections for SNEASY+FUND-CH4 without posterior parameter correlations.\n")
+
+        fund_remove_correlations_climate   = construct_sneasych4_remove_correlations(:sneasy_fund, "RCP85", pulse_year, pulse_size, 2300)
+
+        fund_base_temperature_corr, fund_base_co2_corr, fund_base_ch4_corr, fund_base_ocean_heat_corr,
+        fund_base_oceanco2_corr, fund_pulse_temperature_corr, fund_pulse_co2_corr, fund_ci_temperature_corr,
+        fund_ci_co2_corr, fund_ci_ocean_heat_corr, fund_ci_oceanco2_corr, fund_ci_ch4_corr, fund_error_indices_corr,
+        fund_good_indices_corr, fund_random_indices_corr = fund_remove_correlations_climate(fund_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "random_indices.csv"), DataFrame(fund_random_indices_corr))
+    end
+
+    @spawnat :any begin
+        # SNEASY-Hector
+        println("Begin climate projections for SNEASY+Hector-CH4 without posterior parameter correlations.\n")
+
+        hector_remove_correlations_climate = construct_sneasych4_remove_correlations(:sneasy_hector, "RCP85", pulse_year, pulse_size, 2300)
+
+        hector_base_temperature_corr, hector_base_co2_corr, hector_base_ch4_corr, hector_base_ocean_heat_corr,
+        hector_base_oceanco2_corr, hector_pulse_temperature_corr, hector_pulse_co2_corr, hector_ci_temperature_corr,
+        hector_ci_co2_corr, hector_ci_ocean_heat_corr, hector_ci_oceanco2_corr, hector_ci_ch4_corr, hector_error_indices_corr,
+        hector_good_indices_corr, hector_random_indices_corr = hector_remove_correlations_climate(hector_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "random_indices.csv"), DataFrame(hector_random_indices_corr))
+    end
+
+    @spawnat :any begin
+        #SNEASY-MAGICC
+        println("Begin climate projections for SNEASY+MAGICC-CH4 without posterior parameter correlations.\n")
+
+        magicc_remove_correlations_climate = construct_sneasych4_remove_correlations(:sneasy_magicc, "RCP85", pulse_year, pulse_size, 2300)
+
+        magicc_base_temperature_corr, magicc_base_co2_corr, magicc_base_ch4_corr, magicc_base_ocean_heat_corr,
+        magicc_base_oceanco2_corr, magicc_pulse_temperature_corr, magicc_pulse_co2_corr, magicc_ci_temperature_corr,
+        magicc_ci_co2_corr, magicc_ci_ocean_heat_corr, magicc_ci_oceanco2_corr, magicc_ci_ch4_corr, magicc_error_indices_corr,
+        magicc_good_indices_corr, magicc_random_indices_corr = magicc_remove_correlations_climate(magicc_posterior_params, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_corr))
+        save(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "random_indices.csv"), DataFrame(magicc_random_indices_corr))
+    end
+
+    #--------------------------------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------------------------------#
+    #------ Calculate Climate Projections for Scenario Sampling U.S. Climate Sensitivity Distribution. ------#
+    #--------------------------------------------------------------------------------------------------------#
+    #--------------------------------------------------------------------------------------------------------#
+
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin climate projections for SNEASY+FAIR-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+
+        fair_ecs_climate   = construct_sneasych4_ecs(:sneasy_fair, "RCP85", pulse_year, pulse_size, 2300)
+
+        fair_base_temp_ecs, fair_base_co2_ecs, fair_base_ch4_ecs, fair_base_ocean_heat_ecs,
+        fair_base_oceanco2_ecs, fair_pulse_temperature_ecs, fair_pulse_co2_ecs, fair_ci_temperature_ecs,
+        fair_ci_co2_ecs, fair_ci_ocean_heat_ecs, fair_ci_oceanco2_ecs, fair_ci_ch4_ecs, fair_error_indices_ecs,
+        fair_good_indices_ecs, fair_ecs_sample = fair_ecs_climate(ecs_sample, fair_posterior_means, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temp_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "ecs_sample.csv"), DataFrame(ecs_samples=fair_ecs_sample))
+    end
+
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin climate projections for SNEASY+FUND-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+
+        fund_ecs_climate   = construct_sneasych4_ecs(:sneasy_fund, "RCP85", pulse_year, pulse_size, 2300)
+
+        fund_base_temp_ecs, fund_base_co2_ecs, fund_base_ch4_ecs, fund_base_ocean_heat_ecs,
+        fund_base_oceanco2_ecs, fund_pulse_temperature_ecs, fund_pulse_co2_ecs, fund_ci_temperature_ecs,
+        fund_ci_co2_ecs, fund_ci_ocean_heat_ecs, fund_ci_oceanco2_ecs, fund_ci_ch4_ecs, fund_error_indices_ecs,
+        fund_good_indices_ecs, fund_ecs_sample = fund_ecs_climate(ecs_sample, fund_posterior_means, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temp_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "ecs_sample.csv"), DataFrame(ecs_samples=fund_ecs_sample))
+    end
+
+    @spawnat :any begin
+
+        # SNEASY-Hector
+        println("Begin climate projections for SNEASY+Hector-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+
+        hector_ecs_climate = construct_sneasych4_ecs(:sneasy_hector, "RCP85", pulse_year, pulse_size, 2300)
+
+        hector_base_temp_ecs, hector_base_co2_ecs, hector_base_ch4_ecs, hector_base_ocean_heat_ecs,
+        hector_base_oceanco2_ecs, hector_pulse_temperature_ecs, hector_pulse_co2_ecs, hector_ci_temperature_ecs,
+        hector_ci_co2_ecs, hector_ci_ocean_heat_ecs, hector_ci_oceanco2_ecs, hector_ci_ch4_ecs, hector_error_indices_ecs,
+        hector_good_indices_ecs, hector_ecs_sample = hector_ecs_climate(ecs_sample, hector_posterior_means, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temp_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "ecs_sample.csv"), DataFrame(ecs_samples=hector_ecs_sample))
+    end
+
+    @spawnat :any begin
+
+        #SNEASY-MAGICC
+        println("Begin climate projections for SNEASY+MAGICC-CH4 while sampling the U.S. climate sensitivity distribution.\n")
+
+        magicc_ecs_climate = construct_sneasych4_ecs(:sneasy_magicc, "RCP85", pulse_year, pulse_size, 2300)
+
+        magicc_base_temp_ecs, magicc_base_co2_ecs, magicc_base_ch4_ecs, magicc_base_ocean_heat_ecs,
+        magicc_base_oceanco2_ecs, magicc_pulse_temperature_ecs, magicc_pulse_co2_ecs, magicc_ci_temperature_ecs,
+        magicc_ci_co2_ecs, magicc_ci_ocean_heat_ecs, magicc_ci_oceanco2_ecs, magicc_ci_ch4_ecs, magicc_error_indices_ecs,
+        magicc_good_indices_ecs, magicc_ecs_sample = magicc_ecs_climate(ecs_sample, magicc_posterior_means, low_ci_interval, high_ci_interval)
+    
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temp_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_ecs))
+        save(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "ecs_sample.csv"), DataFrame(ecs_samples=magicc_ecs_sample))
+    end
+
+    #---------------------------------------------------------------------------------------------------#
+    #---------------------------------------------------------------------------------------------------#
+    #------ Calculate Climate Projections for Scenario Using Wider Prior Parameter Distributions. ------#
+    #---------------------------------------------------------------------------------------------------#
+    #---------------------------------------------------------------------------------------------------#
+
+    @spawnat :any begin
+        # SNEASY-FAIR
+        println("Begin climate projections for SNEASY+FAIR-CH4 using wider prior parameter distributions.\n")
+
+        fair_wider_climate   = construct_sneasych4_baseline_case(:sneasy_fair, "RCP85", pulse_year, pulse_size, 2300)
+
+        fair_base_temperature_wider, fair_base_co2_wider, fair_base_ch4_wider, fair_base_ocean_heat_wider,
+        fair_base_oceanco2_wider, fair_pulse_temperature_wider, fair_pulse_co2_wider, fair_ci_temperature_wider,
+        fair_ci_co2_wider, fair_ci_ocean_heat_wider, fair_ci_oceanco2_wider, fair_ci_ch4_wider, fair_error_indices_wider,
+        fair_good_indices_wider = fair_wider_climate(fair_posterior_params_wider, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"), DataFrame(fair_base_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"), DataFrame(fair_base_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_ch4.csv"), DataFrame(fair_base_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_ocean_heat.csv"), DataFrame(fair_base_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_oceanco2_flux.csv"), DataFrame(fair_base_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"), DataFrame(fair_pulse_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"), DataFrame(fair_pulse_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_temperature.csv"), DataFrame(fair_ci_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_co2.csv"), DataFrame(fair_ci_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_ch4.csv"), DataFrame(fair_ci_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_ocean_heat.csv"), DataFrame(fair_ci_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "ci_oceanco2_flux.csv"), DataFrame(fair_ci_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "error_indices.csv"), DataFrame(indices=fair_error_indices_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "good_indices.csv"), DataFrame(indices=fair_good_indices_wider))
+    end
+
+    @spawnat :any begin
+        # SNEASY-FUND
+        println("Begin climate projections for SNEASY+FUND-CH4 using wider prior parameter distributions.\n")
+
+        fund_wider_climate   = construct_sneasych4_baseline_case(:sneasy_fund, "RCP85", pulse_year, pulse_size, 2300)
+
+        fund_base_temperature_wider, fund_base_co2_wider, fund_base_ch4_wider, fund_base_ocean_heat_wider,
+        fund_base_oceanco2_wider, fund_pulse_temperature_wider, fund_pulse_co2_wider, fund_ci_temperature_wider,
+        fund_ci_co2_wider, fund_ci_ocean_heat_wider, fund_ci_oceanco2_wider, fund_ci_ch4_wider, fund_error_indices_wider,
+        fund_good_indices_wider = fund_wider_climate(fund_posterior_params_wider, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"), DataFrame(fund_base_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"), DataFrame(fund_base_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_ch4.csv"), DataFrame(fund_base_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_ocean_heat.csv"), DataFrame(fund_base_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_oceanco2_flux.csv"), DataFrame(fund_base_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"), DataFrame(fund_pulse_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"), DataFrame(fund_pulse_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_temperature.csv"), DataFrame(fund_ci_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_co2.csv"), DataFrame(fund_ci_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_ch4.csv"), DataFrame(fund_ci_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_ocean_heat.csv"), DataFrame(fund_ci_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "ci_oceanco2_flux.csv"), DataFrame(fund_ci_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "error_indices.csv"), DataFrame(indices=fund_error_indices_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "good_indices.csv"), DataFrame(indices=fund_good_indices_wider))
+
+    end
+
+    @spawnat :any begin
+        # SNEASY-Hector
+        println("Begin climate projections for SNEASY+Hector-CH4 using wider prior parameter distributions.\n")
+
+        hector_wider_climate = construct_sneasych4_baseline_case(:sneasy_hector, "RCP85", pulse_year, pulse_size, 2300)
+
+        hector_base_temperature_wider, hector_base_co2_wider, hector_base_ch4_wider, hector_base_ocean_heat_wider,
+        hector_base_oceanco2_wider, hector_pulse_temperature_wider, hector_pulse_co2_wider, hector_ci_temperature_wider,
+        hector_ci_co2_wider, hector_ci_ocean_heat_wider, hector_ci_oceanco2_wider, hector_ci_ch4_wider, hector_error_indices_wider,
+        hector_good_indices_wider = hector_wider_climate(hector_posterior_params_wider, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"), DataFrame(hector_base_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"), DataFrame(hector_base_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_ch4.csv"), DataFrame(hector_base_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_ocean_heat.csv"), DataFrame(hector_base_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_oceanco2_flux.csv"), DataFrame(hector_base_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"), DataFrame(hector_pulse_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"), DataFrame(hector_pulse_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_temperature.csv"), DataFrame(hector_ci_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_co2.csv"), DataFrame(hector_ci_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ch4.csv"), DataFrame(hector_ci_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ocean_heat.csv"), DataFrame(hector_ci_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_oceanco2_flux.csv"), DataFrame(hector_ci_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "error_indices.csv"), DataFrame(indices=hector_error_indices_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "good_indices.csv"), DataFrame(indices=hector_good_indices_wider))
+    end
+
+    @spawnat :any begin
+        # SNEASY-MAGICC
+        println("Begin climate projections for SNEASY+MAGICC-CH4 using wider prior parameter distributions.\n")
+
+        magicc_wider_climate = construct_sneasych4_baseline_case(:sneasy_magicc, "RCP85", pulse_year, pulse_size, 2300)
+
+        magicc_base_temperature_wider, magicc_base_co2_wider, magicc_base_ch4_wider, magicc_base_ocean_heat_wider,
+        magicc_base_oceanco2_wider, magicc_pulse_temperature_wider, magicc_pulse_co2_wider, magicc_ci_temperature_wider,
+        magicc_ci_co2_wider, magicc_ci_ocean_heat_wider, magicc_ci_oceanco2_wider, magicc_ci_ch4_wider, magicc_error_indices_wider,
+        magicc_good_indices_wider = magicc_wider_climate(magicc_posterior_params_wider, low_ci_interval, high_ci_interval)
+
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"), DataFrame(magicc_base_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"), DataFrame(magicc_base_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_ch4.csv"), DataFrame(magicc_base_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_ocean_heat.csv"), DataFrame(magicc_base_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_oceanco2_flux.csv"), DataFrame(magicc_base_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"), DataFrame(magicc_pulse_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"), DataFrame(magicc_pulse_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_temperature.csv"), DataFrame(magicc_ci_temperature_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_co2.csv"), DataFrame(magicc_ci_co2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_ch4.csv"), DataFrame(magicc_ci_ch4_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_ocean_heat.csv"), DataFrame(magicc_ci_ocean_heat_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "ci_oceanco2_flux.csv"), DataFrame(magicc_ci_oceanco2_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "error_indices.csv"), DataFrame(indices=magicc_error_indices_wider))
+        save(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "good_indices.csv"), DataFrame(indices=magicc_good_indices_wider))
+    end
+end
 
 
 ########################################################################
