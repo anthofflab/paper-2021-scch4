@@ -513,22 +513,18 @@ end
 # --------------------------------------------#
 #---------------------------------------------#
 if !test_run
+    @sync begin
+        @workunit "BMA Weights" begin    
+            thin100k_chain_fairch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv")))
+            thin100k_chain_fundch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv")))
+            thin100k_chain_hectorch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv")))
+            thin100k_chain_magiccch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv")))
 
-    thin100k_chain_fairch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv")))
-    thin100k_chain_fundch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv")))
-    thin100k_chain_hectorch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv")))
-    thin100k_chain_magiccch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv")))
-
-    println("\nCalculating BMA Weights for baseline calibration.\n")
-
-    bma_weights = calculate_bma_weights(Matrix(fetch(thin100k_chain_fairch4)), Matrix(fetch(thin100k_chain_fundch4)), Matrix(fetch(thin100k_chain_hectorch4)), Matrix(fetch(thin100k_chain_magiccch4)), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)    
-    save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(col1=bma_weights))
-
-    # Free some memory
-    thin100k_chain_fairch4 = nothing
-    thin100k_chain_fundch4 = nothing
-    thin100k_chain_hectorch4 = nothing
-    thin100k_chain_magiccch4 = nothing
+            bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)    
+        end [
+            DataFrame(col1=bma_weights) => joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv")
+        ]
+    end
 else
     println("\nNot Calculating BMA Weights for test run.\n")
 end
