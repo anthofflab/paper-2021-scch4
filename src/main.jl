@@ -4,6 +4,10 @@
 # #-------------------------------------------------------------------------------------------------------
 # #-------------------------------------------------------------------------------------------------------
 
+using Dates
+
+@info "Starting simulation at $(now())"
+
 # Install required Julia packages if they are not already installed
 using Pkg
 Pkg.activate(joinpath(@__DIR__, ".."))
@@ -68,7 +72,7 @@ output = joinpath("..", "results", results_folder_name)
 #---------------------------------------------------------------------#
 #######################################################################
 
-println("\nBEGIN CALIBRATING MODELS.\n")
+@info "BEGIN CALIBRATING MODELS"
 
 # Set final year for model calibration.
 calibration_end_year = 2017
@@ -80,7 +84,7 @@ final_chain_length = test_run ? 10_000 : 5_000_000
 burn_in_length = test_run ? 5_000 : final_chain_length * 0.2
 
 # Load inital conditions for all models.
-initial_parameters = DataFrame(load(joinpath(@__DIR__, "..", "data", "calibration_data", "calibration_initial_values.csv"), skiplines_begin=7))
+initial_parameters = DataFrame!(load(joinpath(@__DIR__, "..", "data", "calibration_data", "calibration_initial_values.csv"), skiplines_begin=7))
 
 # Select initial MCMC algorithm step size (set to 5% of difference between upper and lower parameter bounds).
 mcmc_step_size = (initial_parameters[:, :upper_bound] .- initial_parameters[:, :lower_bound]) * 0.05
@@ -213,10 +217,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_fairch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
         names!(thin10k_chain_fairch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4)])
     end [
-        DataFrame(fair_acceptance=accept_rate_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4)], fair_mean=mean_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"),
+        DataFrame!(fair_acceptance=accept_rate_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_fairch4)], fair_mean=mean_fairch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"),
+        thin10k_chain_fairch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_10k.csv"),
+        thin100k_chain_fairch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"),
     ]
 
     
@@ -251,10 +255,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_fairch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4_wider)])
         names!(thin10k_chain_fairch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fairch4_wider)])
     end [
-        DataFrame(fair_acceptance=accept_rate_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_fairch4_wider)], fair_mean=mean_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"),
+        DataFrame!(fair_acceptance=accept_rate_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_fairch4_wider)], fair_mean=mean_fairch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "mean_parameters.csv"),
+        thin10k_chain_fairch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_10k.csv"),
+        thin100k_chain_fairch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"),
     ]
 
     #-------------------------------#
@@ -295,10 +299,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_fundch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
         names!(thin10k_chain_fundch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4)])
     end [
-        DataFrame(fund_acceptance=accept_rate_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4)], fund_mean=mean_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"),
+        DataFrame!(fund_acceptance=accept_rate_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_fundch4)], fund_mean=mean_fundch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"),
+        thin10k_chain_fundch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_10k.csv"),
+        thin100k_chain_fundch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"),
     ]
 
     
@@ -333,10 +337,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_fundch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4_wider)])
         names!(thin10k_chain_fundch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_fundch4_wider)])
     end [
-        DataFrame(fund_acceptance=accept_rate_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_fundch4_wider)], fund_mean=mean_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"),
+        DataFrame!(fund_acceptance=accept_rate_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_fundch4_wider)], fund_mean=mean_fundch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "mean_parameters.csv"),
+        thin10k_chain_fundch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_10k.csv"),
+        thin100k_chain_fundch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"),
     ]
 
     #-------------------------------#
@@ -377,10 +381,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_hectorch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
         names!(thin10k_chain_hectorch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4)])
     end [
-        DataFrame(hector_acceptance=accept_rate_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4)], hector_mean=mean_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"),
+        DataFrame!(hector_acceptance=accept_rate_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_hectorch4)], hector_mean=mean_hectorch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"),
+        thin10k_chain_hectorch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_10k.csv"),
+        thin100k_chain_hectorch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"),
     ]
 
     
@@ -415,10 +419,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_hectorch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4_wider)])
         names!(thin10k_chain_hectorch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_hectorch4_wider)])
     end [
-        DataFrame(hector_acceptance=accept_rate_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_hectorch4_wider)], hector_mean=mean_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"),
+        DataFrame!(hector_acceptance=accept_rate_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_hectorch4_wider)], hector_mean=mean_hectorch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "mean_parameters.csv"),
+        thin10k_chain_hectorch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_10k.csv"),
+        thin100k_chain_hectorch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"),
     ]
 
     #-------------------------------#
@@ -459,10 +463,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_magiccch4, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
         names!(thin10k_chain_magiccch4,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4)])
     end [
-        DataFrame(magicc_acceptance=accept_rate_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4)], magicc_mean=mean_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"),
+        DataFrame!(magicc_acceptance=accept_rate_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_magiccch4)], magicc_mean=mean_magiccch4) => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"),
+        thin10k_chain_magiccch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_10k.csv"),
+        thin100k_chain_magiccch4 => joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"),
     ]
 
     
@@ -497,10 +501,10 @@ log_posterior_magiccch4_wider = construct_log_posterior_wider(run_sneasy_magiccc
         names!(thin100k_chain_magiccch4_wider, [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4_wider)])
         names!(thin10k_chain_magiccch4_wider,  [Symbol(initial_parameters.parameter[i]) for i in 1:length(mean_magiccch4_wider)])
     end [
-        DataFrame(magicc_acceptance=accept_rate_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mcmc_acceptance_rate.csv"),
-        DataFrame(parameter = initial_parameters.parameter[1:length(mean_magiccch4_wider)], magicc_mean=mean_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mean_parameters.csv"),
-        DataFrame(thin10k_chain_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_10k.csv"),
-        DataFrame(thin100k_chain_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"),
+        DataFrame!(magicc_acceptance=accept_rate_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mcmc_acceptance_rate.csv"),
+        DataFrame!(parameter = initial_parameters.parameter[1:length(mean_magiccch4_wider)], magicc_mean=mean_magiccch4_wider) => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "mean_parameters.csv"),
+        thin10k_chain_magiccch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_10k.csv"),
+        thin100k_chain_magiccch4_wider => joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"),
     ]
 
 end
@@ -516,16 +520,16 @@ if !test_run
     if !isfile(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"))
         println("STARTING: BMA")
 
-        thin100k_chain_fairch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv")))
-        thin100k_chain_fundch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv")))
-        thin100k_chain_hectorch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv")))
-        thin100k_chain_magiccch4 = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv")))
+        thin100k_chain_fairch4 = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv")))
+        thin100k_chain_fundch4 = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv")))
+        thin100k_chain_hectorch4 = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv")))
+        thin100k_chain_magiccch4 = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv")))
 
         bma_weights = calculate_bma_weights(Matrix(thin100k_chain_fairch4), Matrix(thin100k_chain_fundch4), Matrix(thin100k_chain_hectorch4), Matrix(thin100k_chain_magiccch4), log_posterior_fairch4, log_posterior_fundch4, log_posterior_hectorch4, log_posterior_magiccch4)    
 
         println("SAVING: BMA")
 
-        save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame(col1=bma_weights))
+        save(joinpath(@__DIR__, output, "calibrated_parameters", "bma_weights", "bma_weights.csv"), DataFrame!(col1=bma_weights))
 
         thin100k_chain_fairch4 = nothing
         thin100k_chain_fundch4 = nothing
@@ -537,7 +541,7 @@ if !test_run
         println("SKPPING: BMA")
     end
 else
-    println("\nNot Calculating BMA Weights for test run.\n")
+    @info "Not Calculating BMA Weights for test run"
 end
 
 
@@ -548,7 +552,7 @@ end
 #---------------------------------------------------------------------#
 #######################################################################
 
-println("\nBEGIN MAKING CLIMATE PROJECTIONS.\n")
+@info "BEGIN MAKING CLIMATE PROJECTIONS"
 
 #----------------------------------------------------------------------
 # Load Data and Settings Common to All Climate Projection Scenarios.
@@ -561,22 +565,22 @@ low_ci_interval  = 0.95
 high_ci_interval = 0.98
 
 # Load baseline calibrated parameters for each climate model.
-fair_posterior_params   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"))))
-fund_posterior_params   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"))))
-hector_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"))))
-magicc_posterior_params = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"))))
+fair_posterior_params   = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "parameters_100k.csv"))))
+fund_posterior_params   = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "parameters_100k.csv"))))
+hector_posterior_params = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "parameters_100k.csv"))))
+magicc_posterior_params = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "parameters_100k.csv"))))
 
 # Load calibrated parameters for each climate model using wider prior parameter distributions.
-fair_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"))))
-fund_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"))))
-hector_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"))))
-magicc_posterior_params_wider = convert(Array{Float64,2, }, DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"))))
+fair_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fair", "parameters_100k.csv"))))
+fund_posterior_params_wider   = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_fund", "parameters_100k.csv"))))
+hector_posterior_params_wider = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_hector", "parameters_100k.csv"))))
+magicc_posterior_params_wider = convert(Array{Float64,2, }, DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "wider_priors", "s_magicc", "parameters_100k.csv"))))
 
 # Load mean posterior parameter values.
-fair_posterior_means   = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"))).fair_mean
-fund_posterior_means   = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"))).fund_mean
-hector_posterior_means = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"))).hector_mean
-magicc_posterior_means = DataFrame(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"))).magicc_mean
+fair_posterior_means   = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fair", "mean_parameters.csv"))).fair_mean
+fund_posterior_means   = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_fund", "mean_parameters.csv"))).fund_mean
+hector_posterior_means = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_hector", "mean_parameters.csv"))).hector_mean
+magicc_posterior_means = DataFrame!(load(joinpath(@__DIR__, output, "calibrated_parameters", "s_magicc", "mean_parameters.csv"))).magicc_mean
 
 # Create an ECS sample from the Roe & Baker equilibrium climate sensitivty distribution using the U.S. calibration settings.
 norm_dist = Truncated(Normal(0.6198, 0.1841), -0.2, 0.88)
@@ -1143,7 +1147,7 @@ ecs_sample = 1.2 ./ (1 .- rand(norm_dist, test_run ? 100 : 100_000))
         DataFrame(hector_pulse_temperature_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"),
         DataFrame(hector_pulse_co2_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"),
         DataFrame(hector_ci_temperature_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_temperature.csv"),
-     DataFrame(hector_ci_co2_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_co2.csv"),
+        DataFrame(hector_ci_co2_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_co2.csv"),
         DataFrame(hector_ci_ch4_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ch4.csv"),
         DataFrame(hector_ci_ocean_heat_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_ocean_heat.csv"),
         DataFrame(hector_ci_oceanco2_wider) => joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "ci_oceanco2_flux.csv"),
@@ -1183,7 +1187,7 @@ end
 #----------------------------------------------------------------------#
 ########################################################################
 
-println("\nBEGIN ESTIMATING THE SC-CH4.\n")
+@info "BEGIN ESTIMATING THE SC-CH4"
 
 #----------------------------------------------------------------------
 # Load Data and Settings Common to All SC-CH4 Scenarios.
@@ -1209,10 +1213,10 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - DICE - FAIR" begin        
         # Load scenario temperature and CO₂ projections for each climate model.
-        temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
-        temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
-        co2_base_fairch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
-        co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
+        temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
+        temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
+        co2_base_fairch4            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
+        co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(temperature_base_fairch4, temperature_pulse_fairch4, end_year)
 
@@ -1223,25 +1227,25 @@ high_ci_interval       = 0.98
         dice_scch4_fairch4_ramsey_10, dice_discounted_damages_fairch4_ramsey_10     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
         dice_scch4_fairch4_ramsey_15, dice_discounted_damages_fairch4_ramsey_15     = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_25.csv"),
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(scch4=dice_scch4_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_50.csv"),
-        DataFrame(scch4=dice_scch4_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_70.csv"),
-        DataFrame(scch4=dice_scch4_fairch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=dice_scch4_fairch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_25.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_50.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_70.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_ramsey_15.csv"),
         DataFrame(dice_discounted_damages_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_25.csv"),
         DataFrame(dice_discounted_damages_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_30.csv"),
         DataFrame(dice_discounted_damages_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_50.csv"),
         DataFrame(dice_discounted_damages_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "discounted_damages_70.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - DICE - FUNDCH4" begin
-        temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
-        temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
-        co2_base_fundch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
-        co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
+        temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
+        temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
+        co2_base_fundch4            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
+        co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(temperature_base_fundch4, temperature_pulse_fundch4, end_year)
 
@@ -1252,26 +1256,26 @@ high_ci_interval       = 0.98
         dice_scch4_fundch4_ramsey_10, dice_discounted_damages_fundch4_ramsey_10     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
         dice_scch4_fundch4_ramsey_15, dice_discounted_damages_fundch4_ramsey_15     = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_25.csv"),
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(scch4=dice_scch4_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_50.csv"),
-        DataFrame(scch4=dice_scch4_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_70.csv"),
-        DataFrame(scch4=dice_scch4_fundch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=dice_scch4_fundch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_25.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_50.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_70.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_ramsey_15.csv"),
         DataFrame(dice_discounted_damages_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_25.csv"),
         DataFrame(dice_discounted_damages_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_30.csv"),
         DataFrame(dice_discounted_damages_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_50.csv"),
         DataFrame(dice_discounted_damages_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "discounted_damages_70.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - DICE - HECTOR" begin
 
-        temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
-        temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
-        co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
-        co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
+        temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
+        temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
+        co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
+        co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(temperature_base_hectorch4, temperature_pulse_hectorch4, end_year)
 
@@ -1282,25 +1286,25 @@ high_ci_interval       = 0.98
         dice_scch4_hectorch4_ramsey_10, dice_discounted_damages_hectorch4_ramsey_10 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
         dice_scch4_hectorch4_ramsey_15, dice_discounted_damages_hectorch4_ramsey_15 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_25.csv"),
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(scch4=dice_scch4_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_50.csv"),
-        DataFrame(scch4=dice_scch4_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_70.csv"),
-        DataFrame(scch4=dice_scch4_hectorch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=dice_scch4_hectorch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_25.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_50.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_70.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_ramsey_15.csv"),
         DataFrame(dice_discounted_damages_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_25.csv"),
         DataFrame(dice_discounted_damages_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_30.csv"),
         DataFrame(dice_discounted_damages_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_50.csv"),
         DataFrame(dice_discounted_damages_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "discounted_damages_70.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - DICE - MAGICC" begin
-        temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
-        temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
-        co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
-        co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
+        temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
+        temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
+        co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
+        co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(temperature_base_magiccch4, temperature_pulse_magiccch4, end_year)
 
@@ -1311,26 +1315,26 @@ high_ci_interval       = 0.98
         dice_scch4_magiccch4_ramsey_10, dice_discounted_damages_magiccch4_ramsey_10 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.0, ρ=0.015, dollar_conversion=dice_dollar_conversion)
         dice_scch4_magiccch4_ramsey_15, dice_discounted_damages_magiccch4_ramsey_15 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, end_year, constant=false, η=1.5, ρ=0.015, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_25.csv"),
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(scch4=dice_scch4_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_50.csv"),
-        DataFrame(scch4=dice_scch4_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_70.csv"),
-        DataFrame(scch4=dice_scch4_magiccch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=dice_scch4_magiccch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_25.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_50.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_70.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "scch4_ramsey_15.csv"),
         DataFrame(dice_discounted_damages_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_25.csv"),
         DataFrame(dice_discounted_damages_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_30.csv"),
         DataFrame(dice_discounted_damages_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_50.csv"),
         DataFrame(dice_discounted_damages_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "discounted_damages_70.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - FUND - FAIR" begin        
         # Load scenario temperature and CO₂ projections for each climate model.
-        temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
-        temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
-        co2_base_fairch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
-        co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
+        temperature_base_fairch4    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_temperature.csv"))))
+        temperature_pulse_fairch4   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_temperature.csv"))))
+        co2_base_fairch4            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "base_co2.csv"))))
+        co2_pulse_fairch4           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(temperature_base_fairch4, co2_base_fairch4, temperature_pulse_fairch4, co2_pulse_fairch4, end_year)
 
@@ -1341,25 +1345,25 @@ high_ci_interval       = 0.98
         fund_scch4_fairch4_ramsey_10, fund_discounted_damages_fairch4_ramsey_10     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
         fund_scch4_fairch4_ramsey_15, fund_discounted_damages_fairch4_ramsey_15     = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_25.csv"),
-        DataFrame(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(scch4=fund_scch4_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_50.csv"),
-        DataFrame(scch4=fund_scch4_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_70.csv"),
-        DataFrame(scch4=fund_scch4_fairch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=fund_scch4_fairch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_25.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_50.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_70.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_ramsey_15.csv"),
         DataFrame(fund_discounted_damages_fairch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_25.csv"),
         DataFrame(fund_discounted_damages_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_30.csv"),
         DataFrame(fund_discounted_damages_fairch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_50.csv"),
         DataFrame(fund_discounted_damages_fairch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "discounted_damages_70.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - FUND - FUNDCH4" begin
-        temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
-        temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
-        co2_base_fundch4            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
-        co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
+        temperature_base_fundch4    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_temperature.csv"))))
+        temperature_pulse_fundch4   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_temperature.csv"))))
+        co2_base_fundch4            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "base_co2.csv"))))
+        co2_pulse_fundch4           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(temperature_base_fundch4, co2_base_fundch4, temperature_pulse_fundch4, co2_pulse_fundch4, end_year)
 
@@ -1370,25 +1374,25 @@ high_ci_interval       = 0.98
         fund_scch4_fundch4_ramsey_10, fund_discounted_damages_fundch4_ramsey_10     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
         fund_scch4_fundch4_ramsey_15, fund_discounted_damages_fundch4_ramsey_15     = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_25.csv"),
-        DataFrame(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(scch4=fund_scch4_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_50.csv"),
-        DataFrame(scch4=fund_scch4_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_70.csv"),
-        DataFrame(scch4=fund_scch4_fundch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=fund_scch4_fundch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_25.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_50.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_70.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_ramsey_15.csv"),
         DataFrame(fund_discounted_damages_fundch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_25.csv"),
         DataFrame(fund_discounted_damages_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_30.csv"),
         DataFrame(fund_discounted_damages_fundch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_50.csv"),
         DataFrame(fund_discounted_damages_fundch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "discounted_damages_70.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - FUND - HECTOR" begin
-        temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
-        temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
-        co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
-        co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
+        temperature_base_hectorch4  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_temperature.csv"))))
+        temperature_pulse_hectorch4 = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_temperature.csv"))))
+        co2_base_hectorch4          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "base_co2.csv"))))
+        co2_pulse_hectorch4         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(temperature_base_hectorch4, co2_base_hectorch4, temperature_pulse_hectorch4, co2_pulse_hectorch4, end_year)
 
@@ -1399,25 +1403,25 @@ high_ci_interval       = 0.98
         fund_scch4_hectorch4_ramsey_10, fund_discounted_damages_hectorch4_ramsey_10 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.0, γ=1.0, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
         fund_scch4_hectorch4_ramsey_15, fund_discounted_damages_hectorch4_ramsey_15 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, end_year, constant=false, η=1.5, γ=1.5, ρ=0.015, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_25.csv"),
-        DataFrame(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"),
-        DataFrame(scch4=fund_scch4_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_50.csv"),
-        DataFrame(scch4=fund_scch4_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_70.csv"),
-        DataFrame(scch4=fund_scch4_hectorch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=fund_scch4_hectorch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_25.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_50.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_70.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_ramsey_15.csv"),
         DataFrame(fund_discounted_damages_hectorch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_25.csv"),
         DataFrame(fund_discounted_damages_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_30.csv"),
         DataFrame(fund_discounted_damages_hectorch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_50.csv"),
         DataFrame(fund_discounted_damages_hectorch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "discounted_damages_70.csv"),
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"),
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Baseline Scenario (RCP 8.5) - FUND - MAGICC" begin
-        temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
-        temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
-        co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
-        co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
+        temperature_base_magiccch4  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_temperature.csv"))))
+        temperature_pulse_magiccch4 = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_temperature.csv"))))
+        co2_base_magiccch4          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "base_co2.csv"))))
+        co2_pulse_magiccch4         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "baseline_run", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(temperature_base_magiccch4, co2_base_magiccch4, temperature_pulse_magiccch4, co2_pulse_magiccch4, end_year)
 
@@ -1470,18 +1474,18 @@ high_ci_interval       = 0.98
         # FUND region names.
         col_names = Symbol.(["usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states"])
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_25.csv"),
-        DataFrame(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(scch4=fund_scch4_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_50.csv"),
-        DataFrame(scch4=fund_scch4_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_70.csv"),
-        DataFrame(scch4=fund_scch4_magiccch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_10.csv"),
-        DataFrame(scch4=fund_scch4_magiccch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_15.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_25.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_50.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_70.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_ramsey_10) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_10.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_ramsey_15) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "scch4_ramsey_15.csv"),
         DataFrame(fund_discounted_damages_magiccch4_const25) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_25.csv"),
         DataFrame(fund_discounted_damages_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_30.csv"),
         DataFrame(fund_discounted_damages_magiccch4_const50) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_50.csv"),
         DataFrame(fund_discounted_damages_magiccch4_const70) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "discounted_damages_70.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"),
         DataFrame(fund_scch4_magiccch4_equity00, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_00.csv"),
         DataFrame(fund_scch4_magiccch4_equity01, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_01.csv"),
         DataFrame(fund_scch4_magiccch4_equity02, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_02.csv"),
@@ -1526,130 +1530,130 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - DICE - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 
         dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - DICE - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
 
         dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)        
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - DICE - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)        
 
         dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - DICE - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)        
 
         dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - FUND - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
 
         fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - FUND - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
 
         fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - FUND - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
 
         fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for RCP 2.6 Scenario - FUND - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "rcp26", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
 
         fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "rcp26", "fund", "s_magicc", "good_indices.csv"),
     ]
 
     #---------------------------------------------------------------------------------------------
@@ -1661,130 +1665,130 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - DICE - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)        
 
         dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - DICE - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
 
         dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - DICE - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
 
         dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - DICE - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)   
         
         dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - FUND - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
 
         fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - FUND - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
 
         fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - FUND - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
 
         fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Outdated CH₄ Forcing Scenario - FUND - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "outdated_ch4_forcing", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
 
         fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "outdated_ch4_forcing", "fund", "s_magicc", "good_indices.csv"),
     ]
 
 
@@ -1796,74 +1800,74 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - DICE - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4, dice_error_indices_fairch4, dice_good_indices_fairch4         = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 
         dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - DICE - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4, dice_error_indices_fundch4, dice_good_indices_fundch4         = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
 
         dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - DICE - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
 
         dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - DICE - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
 
         dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - FUND - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
 
@@ -1872,18 +1876,18 @@ high_ci_interval       = 0.98
         # Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
         fund_non_extreme_indicies_fairch4   = findall(x-> abs(x) < 100000, fund_scch4_fairch4_const30)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const30[fund_non_extreme_indicies_fairch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "good_indices.csv"),
-        DataFrame(indices=fund_non_extreme_indicies_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "non_extreme_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30[fund_non_extreme_indicies_fairch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(indices=fund_non_extreme_indicies_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fair", "non_extreme_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - FUND - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
 
@@ -1892,18 +1896,18 @@ high_ci_interval       = 0.98
         # Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
         fund_non_extreme_indicies_fundch4   = findall(x-> abs(x) < 100000, fund_scch4_fundch4_const30)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const30[fund_non_extreme_indicies_fundch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "good_indices.csv"),
-        DataFrame(indices=fund_non_extreme_indicies_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "non_extreme_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30[fund_non_extreme_indicies_fundch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(indices=fund_non_extreme_indicies_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_fund", "non_extreme_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - FUND - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
 
@@ -1912,18 +1916,18 @@ high_ci_interval       = 0.98
         # Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
         fund_non_extreme_indicies_hectorch4 = findall(x-> abs(x) < 100000, fund_scch4_hectorch4_const30)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const30[fund_non_extreme_indicies_hectorch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "good_indices.csv"),
-        DataFrame(indices=fund_non_extreme_indicies_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "non_extreme_indices.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const30[fund_non_extreme_indicies_hectorch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "good_indices.csv"),
+        DataFrame!(indices=fund_non_extreme_indicies_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_hector", "non_extreme_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario That Removes Posterior Parameter Correlations - FUND - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "remove_correlations", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
 
@@ -1932,10 +1936,10 @@ high_ci_interval       = 0.98
         # Filter out small number of random parameter combinations for FUND that cause errors but don't crash the model (indicated by values much larger than ± $100,000)
         fund_non_extreme_indicies_magiccch4 = findall(x-> abs(x) < 100000, fund_scch4_magiccch4_const30)
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const30[fund_non_extreme_indicies_magiccch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "good_indices.csv"),
-        DataFrame(indices=fund_non_extreme_indicies_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "non_extreme_indices.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30[fund_non_extreme_indicies_magiccch4]) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(indices=fund_non_extreme_indicies_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "remove_correlations", "fund", "s_magicc", "non_extreme_indices.csv"),
     ]
 
     #---------------------------------------------------------------------------------------------
@@ -1946,130 +1950,130 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - DICE - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 
         dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - DICE - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
 
         dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - DICE - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
 
         dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - DICE - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
 
         dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - FUND - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
 
         fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - FUND - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
 
         fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - FUND - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
 
         fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "scch4_30.csv")
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "error_indices.csv")
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "good_indices.csv")
+        DataFrame!(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "scch4_30.csv")
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "error_indices.csv")
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_hector", "good_indices.csv")
     ]
 
     @workunit "SC-CH4 for Scenario Using U.S. Climate Sensitivity Distribution - FUND - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "us_climate_sensitivity", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
 
         fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "us_climate_sensitivity", "fund", "s_magicc", "good_indices.csv"),
     ]
 
     #---------------------------------------------------------------------------------------------
@@ -2080,132 +2084,134 @@ high_ci_interval       = 0.98
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - DICE - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
 
         dice_marginal_damages_fairch4,   dice_pc_consumption_fairch4,   dice_error_indices_fairch4,   dice_good_indices_fairch4   = dice_damages(fair_temperature_base, fair_temperature_pulse, 2300)
 
         dice_scch4_fairch4_const30,   dice_discounted_damages_fairch4_const30   = dice_scch4(dice_marginal_damages_fairch4, dice_pc_consumption_fairch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - DICE - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
 
         dice_marginal_damages_fundch4,   dice_pc_consumption_fundch4,   dice_error_indices_fundch4,   dice_good_indices_fundch4   = dice_damages(fund_temperature_base, fund_temperature_pulse, 2300)
 
         dice_scch4_fundch4_const30,   dice_discounted_damages_fundch4_const30   = dice_scch4(dice_marginal_damages_fundch4, dice_pc_consumption_fundch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - DICE - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
 
         dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, dice_error_indices_hectorch4, dice_good_indices_hectorch4 = dice_damages(hector_temperature_base, hector_temperature_pulse, 2300)
 
         dice_scch4_hectorch4_const30, dice_discounted_damages_hectorch4_const30 = dice_scch4(dice_marginal_damages_hectorch4, dice_pc_consumption_hectorch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - DICE - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
 
         dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, dice_error_indices_magiccch4, dice_good_indices_magiccch4 = dice_damages(magicc_temperature_base, magicc_temperature_pulse, 2300)
 
         dice_scch4_magiccch4_const30, dice_discounted_damages_magiccch4_const30 = dice_scch4(dice_marginal_damages_magiccch4, dice_pc_consumption_magiccch4, pulse_year, 2300, constant=true, η=0.0, ρ=0.03, dollar_conversion=dice_dollar_conversion)
     end [
-        DataFrame(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=dice_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=dice_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=dice_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "dice", "s_magicc", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - FUND - FAIR" begin
         # Load temperature and CO₂ projections for each climate model.
-        fair_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
-        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
-        fair_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
-        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
+        fair_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_temperature.csv"))))
+        fair_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_temperature.csv"))))
+        fair_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "base_co2.csv"))))
+        fair_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fair", "pulse_co2.csv"))))
 
         fund_marginal_damages_fairch4,   fund_population_fairch4,   fund_consumption_fairch4,   fund_error_indices_fairch4,   fund_good_indices_fairch4   = fund_damages(fair_temperature_base, fair_co2_base, fair_temperature_pulse, fair_co2_pulse, 2300)
 
         fund_scch4_fairch4_const30,   fund_discounted_damages_fairch4_const30   = fund_scch4(fund_marginal_damages_fairch4, fund_consumption_fairch4, fund_population_fairch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fairch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fairch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fair", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - FUND - FUNDCH4" begin
 
-        fund_temperature_base    = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
-        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
-        fund_co2_base            = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
-        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
+        fund_temperature_base    = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_temperature.csv"))))
+        fund_temperature_pulse   = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_temperature.csv"))))
+        fund_co2_base            = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "base_co2.csv"))))
+        fund_co2_pulse           = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_fund", "pulse_co2.csv"))))
 
         fund_marginal_damages_fundch4,   fund_population_fundch4,   fund_consumption_fundch4,   fund_error_indices_fundch4,   fund_good_indices_fundch4   = fund_damages(fund_temperature_base, fund_co2_base, fund_temperature_pulse, fund_co2_pulse, 2300)
 
         fund_scch4_fundch4_const30,   fund_discounted_damages_fundch4_const30   = fund_scch4(fund_marginal_damages_fundch4, fund_consumption_fundch4, fund_population_fundch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_fundch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_fundch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_fund", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - FUND - HECTOR" begin
 
-        hector_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
-        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
-        hector_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
-        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
+        hector_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_temperature.csv"))))
+        hector_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_temperature.csv"))))
+        hector_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "base_co2.csv"))))
+        hector_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_hector", "pulse_co2.csv"))))
 
         fund_marginal_damages_hectorch4, fund_population_hectorch4, fund_consumption_hectorch4, fund_error_indices_hectorch4, fund_good_indices_hectorch4 = fund_damages(hector_temperature_base, hector_co2_base, hector_temperature_pulse, hector_co2_pulse, 2300)
 
         fund_scch4_hectorch4_const30, fund_discounted_damages_hectorch4_const30 = fund_scch4(fund_marginal_damages_hectorch4, fund_consumption_hectorch4, fund_population_hectorch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_hectorch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_hectorch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_hector", "good_indices.csv"),
     ]
 
     @workunit "SC-CH4 for Scenario Using Wider Prior Parameter Distributions - FUND - MAGICC" begin
 
-        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
-        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
-        magicc_co2_base          = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
-        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
+        magicc_temperature_base  = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_temperature.csv"))))
+        magicc_temperature_pulse = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_temperature.csv"))))
+        magicc_co2_base          = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "base_co2.csv"))))
+        magicc_co2_pulse         = convert(Array{Float64,2}, DataFrame!(load(joinpath(@__DIR__, output, "climate_projections", "wider_priors", "s_magicc", "pulse_co2.csv"))))
 
         fund_marginal_damages_magiccch4, fund_population_magiccch4, fund_consumption_magiccch4, fund_error_indices_magiccch4, fund_good_indices_magiccch4 = fund_damages(magicc_temperature_base, magicc_co2_base, magicc_temperature_pulse, magicc_co2_pulse, 2300)
 
         fund_scch4_magiccch4_const30, fund_discounted_damages_magiccch4_const30 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, 2300, constant=true, η=0.0, γ=0.0, ρ=0.03, dollar_conversion=fund_dollar_conversion, equity_weighting=false)
     end [
-        DataFrame(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "scch4_30.csv"),
-        DataFrame(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "error_indices.csv"),
-        DataFrame(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "good_indices.csv"),
+        DataFrame!(scch4=fund_scch4_magiccch4_const30) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "scch4_30.csv"),
+        DataFrame!(indices=fund_error_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "error_indices.csv"),
+        DataFrame!(indices=fund_good_indices_magiccch4) => joinpath(@__DIR__, output, "scch4_estimates", "wider_priors", "fund", "s_magicc", "good_indices.csv"),
     ]
 
 end
 
-println("\nAll done.")
+@info "All done"
+
+@info "Ending simulation at $(now())"
