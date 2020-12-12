@@ -896,23 +896,46 @@ ggsave(extended_fig_4, file=file.path("figures", results_folder_name, "pdf_figur
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 
+# Load climate model indices that successfully ran.
+fairch4_climate_indices   = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_fair", "good_indices.csv"))[,1]
+fundch4_climate_indices   = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_fund", "good_indices.csv"))[,1]
+hectorch4_climate_indices = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_hector", "good_indices.csv"))[,1]
+magiccch4_climate_indices = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_magicc", "good_indices.csv"))[,1]
+
+# Load SC-CH4 model indices that successfully ran.
+fairch4_scch4_indices_dice   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"))[,1]
+fundch4_scch4_indices_dice   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"))[,1]
+hectorch4_scch4_indices_dice = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"))[,1]
+magiccch4_scch4_indices_dice = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"))[,1]
+
+fairch4_scch4_indices_fund   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"))[,1]
+fundch4_scch4_indices_fund   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"))[,1]
+hectorch4_scch4_indices_fund = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"))[,1]
+magiccch4_scch4_indices_fund = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"))[,1]
+
+# Combine indices (all successful climate runs that also ran for both DICE and FUND).
+fairch4_indices   = fairch4_climate_indices[unique(c(fairch4_scch4_indices_dice, fairch4_scch4_indices_fund))]
+fundch4_indices   = fundch4_climate_indices[unique(c(fundch4_scch4_indices_dice, fundch4_scch4_indices_fund))]
+hectorch4_indices = hectorch4_climate_indices[unique(c(hectorch4_scch4_indices_dice, hectorch4_scch4_indices_fund))]
+magiccch4_indices = magiccch4_climate_indices[unique(c(magiccch4_scch4_indices_dice, magiccch4_scch4_indices_fund))]
+
 # Load S-FAIR posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_fairch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fair", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), data.table=FALSE)
+post_param_fairch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fair", "parameters_100k.csv"), data.table=FALSE)[fairch4_indices, ]
+dice_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), data.table=FALSE)[fairch4_indices, ]
+fund_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), data.table=FALSE)[fairch4_indices, ]
 
 # Load S-FUND posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_fundch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fund", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), data.table=FALSE)
+post_param_fundch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fund", "parameters_100k.csv"), data.table=FALSE)[fundch4_indices, ]
+dice_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), data.table=FALSE)[fundch4_indices, ]
+fund_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), data.table=FALSE)[fundch4_indices, ]
 
 # Load S-Hector posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_hectorch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_hector", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), data.table=FALSE)
+post_param_hectorch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_hector", "parameters_100k.csv"), data.table=FALSE)[hectorch4_indices, ]
+dice_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), data.table=FALSE)[hectorch4_indices, ]
+fund_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), data.table=FALSE)[hectorch4_indices, ]
 
 # Get upper bound point size value from Figure 3.
-post_param_magiccch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), data.table=FALSE)
+post_param_magiccch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), data.table=FALSE)[magiccch4_indices, ]
 upper_bound_size = ceiling(as.numeric(quantile(post_param_magiccch4$Q10, 0.99)))
 
 # Set Figure 3's upper bound point size value across all other models.
@@ -926,9 +949,9 @@ post_param_hectorch4$Q10_size = post_param_hectorch4$Q10
 post_param_hectorch4[which(post_param_hectorch4$Q10 > upper_bound_size), "Q10_size"] = upper_bound_size
 
 # Create data.frames of each model's parameters and SC-CH4 values for plotting.
-scatter_data_fairch4   = data.frame(ECS=post_param_fairch4$ECS, aerosol=post_param_fairch4$alpha, Q10_size = post_param_fairch4$Q10_size, heat_diffusion=post_param_fairch4$kappa, dice=dice_scch4_fairch4[,1], fund=fund_scch4_fairch4[,1])
-scatter_data_fundch4   = data.frame(ECS=post_param_fundch4$ECS, aerosol=post_param_fundch4$alpha, Q10_size = post_param_fundch4$Q10_size, heat_diffusion=post_param_fundch4$kappa, dice=dice_scch4_fundch4[,1], fund=fund_scch4_fundch4[,1])
-scatter_data_hectorch4 = data.frame(ECS=post_param_hectorch4$ECS, aerosol=post_param_hectorch4$alpha, Q10_size = post_param_hectorch4$Q10_size, heat_diffusion=post_param_hectorch4$kappa, dice=dice_scch4_hectorch4[,1], fund=fund_scch4_hectorch4[,1])
+scatter_data_fairch4   = data.frame(ECS=post_param_fairch4$ECS, aerosol=post_param_fairch4$alpha, Q10_size = post_param_fairch4$Q10_size, heat_diffusion=post_param_fairch4$kappa, dice=dice_scch4_fairch4, fund=fund_scch4_fairch4)
+scatter_data_fundch4   = data.frame(ECS=post_param_fundch4$ECS, aerosol=post_param_fundch4$alpha, Q10_size = post_param_fundch4$Q10_size, heat_diffusion=post_param_fundch4$kappa, dice=dice_scch4_fundch4, fund=fund_scch4_fundch4)
+scatter_data_hectorch4 = data.frame(ECS=post_param_hectorch4$ECS, aerosol=post_param_hectorch4$alpha, Q10_size = post_param_hectorch4$Q10_size, heat_diffusion=post_param_hectorch4$kappa, dice=dice_scch4_hectorch4, fund=fund_scch4_hectorch4)
 
 #----------------------------------
 # SNEASY+FAIR-CH4 Scatter Plots
