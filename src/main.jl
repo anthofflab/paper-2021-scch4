@@ -4,12 +4,12 @@
 # #-------------------------------------------------------------------------------------------------------
 # #-------------------------------------------------------------------------------------------------------
 
-using Dates
+using Dates, Distributed
 
 @info "Starting simulation at $(now())"
 
 # Install required Julia packages if they are not already installed
-using Pkg, Distributed
+@everywhere using Pkg, 
 @everywhere Pkg.activate(joinpath(@__DIR__, ".."))
 Pkg.instantiate()
 
