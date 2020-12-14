@@ -42,7 +42,7 @@ using Distributed
     using Distributed
 end
 
-include("workflow_helper.jl")
+include("utils/workflow_helper.jl")
 
 test_run = "--testrun" in ARGS ? true : false
 

@@ -1,4 +1,4 @@
-include("helper_functions.jl")
+include("utils/helper_functions.jl")
 include("calibration/calibration_helper_functions.jl")
 include("calibration/create_log_posterior.jl")
 include("calibration/create_log_posterior_wide_priors.jl")
