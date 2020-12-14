@@ -31,7 +31,7 @@ function load_calibration_data(model_end::Int)
     #-------------------------------------------------------------------
 
     # Load raw temperature data.
-    raw_temp_data = DataFrame(load(joinpath(@__DIR__, "..", "data", "calibration_data", "global_temp_hadcrut4.csv"), skiplines_begin=24))
+    raw_temp_data = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "calibration_data", "global_temp_hadcrut4.csv"), skiplines_begin=24))
 
     # Find indices to normalize temperature data to 1861-1880 mean.
     hadcrut_norm_indices = findall((in)(collect(1861:1880)), collect(1850:2017))
@@ -43,7 +43,7 @@ function load_calibration_data(model_end::Int)
     df = join(df, norm_temp_data, on=:year, kind=:outer)
 
     # Read in HadCRUT4 1σ errors and rename column.
-    raw_temp_errors  = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "global_temp_hadcrut4_1sigma_uncertainty.csv"), skiplines_begin=21))
+    raw_temp_errors  = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "global_temp_hadcrut4_1sigma_uncertainty.csv"), skiplines_begin=21))
     rename!(raw_temp_errors, :one_sigma_all => :hadcrut_temperature_sigma)
 
     # Join data on year.
@@ -55,7 +55,7 @@ function load_calibration_data(model_end::Int)
     #---------------------------------------------------------------------------------
 
     # Load ocean heat content (0-3000m) observations and errors.
-    ocean_heat_raw = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "ocean_heat_gouretski_3000m.csv"), colnames=["year", "ocean_heat_obs", "ocean_heat_sigma"], skiplines_begin=3))
+    ocean_heat_raw = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "ocean_heat_gouretski_3000m.csv"), colnames=["year", "ocean_heat_obs", "ocean_heat_sigma"], skiplines_begin=3))
 
     # Join data on year.
     df = join(df, ocean_heat_raw, on=:year, kind=:outer)
@@ -66,7 +66,7 @@ function load_calibration_data(model_end::Int)
     #--------------------------------------------------------
 
     # Load Mauna Loa CO₂ observations and errors, and rename columns.
-    raw_mauna_loa_co2_data  = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "co2_mauna_loa.csv"), skiplines_begin=59))
+    raw_mauna_loa_co2_data  = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "co2_mauna_loa.csv"), skiplines_begin=59))
     rename!(raw_mauna_loa_co2_data, :mean => :maunaloa_co2_obs, :unc => :maunaloa_co2_sigma)
 
     # Join data on year.
@@ -78,7 +78,7 @@ function load_calibration_data(model_end::Int)
     #-----------------------------------------------------
 
     # Load Law Dome CO₂ observations and errors, and rename columns.
-    raw_law_dome_co2_data = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "law_dome_co2.csv"), skiplines_begin=4))
+    raw_law_dome_co2_data = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "law_dome_co2.csv"), skiplines_begin=4))
     rename!(raw_law_dome_co2_data, :co2_ice => :lawdome_co2_obs, :one_sigma_error => :lawdome_co2_sigma)
 
     # Join data on year.
@@ -101,7 +101,7 @@ function load_calibration_data(model_end::Int)
     #---------------------------------------------------------------------------------
 
     # Load NOAA CH₄ observations and errors, and rename columns.
-    raw_noaa_ch4_data = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "ch4_noaa.csv"), skiplines_begin=58))
+    raw_noaa_ch4_data = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "ch4_noaa.csv"), skiplines_begin=58))
     rename!(raw_noaa_ch4_data, :mean => :noaa_ch4_obs, :unc => :noaa_ch4_sigma)
 
     # Join data on year.
@@ -113,7 +113,7 @@ function load_calibration_data(model_end::Int)
     #---------------------------------------------------------------------------------
 
     # Load Law Dome CH₄ observations and dates.
-    raw_law_dome_ch4_data = DataFrame(load(joinpath(@__DIR__, "..", "data", "calibration_data", "ch4_ice_core_etheridge_1998.csv"), skiplines_begin=14))
+    raw_law_dome_ch4_data = DataFrame(load(joinpath(@__DIR__, "..", "..", "data", "calibration_data", "ch4_ice_core_etheridge_1998.csv"), skiplines_begin=14))
 
     # Get all listed years and number of unique years (multiple observations may occur for a single year).
     years = trunc.(Int, raw_law_dome_ch4_data.air_age)
@@ -133,7 +133,7 @@ function load_calibration_data(model_end::Int)
     end
 
     # Load CH₄ ice firn observations and dates (also Etheridge 1998).
-    raw_ch4_firn_data = DataFrame(load(joinpath(@__DIR__,  "..", "data", "calibration_data", "ch4_firn_etheridge_1998.csv"), skiplines_begin=14))
+    raw_ch4_firn_data = DataFrame(load(joinpath(@__DIR__,  "..", "..", "data", "calibration_data", "ch4_firn_etheridge_1998.csv"), skiplines_begin=14))
 
     # Get years (averaging data together for multiple observations in the same year).
     years = trunc.(Int, raw_ch4_firn_data[:,:air_age])
