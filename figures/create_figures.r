@@ -441,18 +441,41 @@ eq_ci_13 = fread(file.path("results", results_folder_name, "scch4_estimates", "e
 eq_ci_14 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"), data.table=FALSE)
 eq_ci_15 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"), data.table=FALSE)
 
+# Load credible intervals for sensitivity analyses that sets regional inequality aversion to 0.
+eq_no_reg_ci_01 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_01.csv"), data.table=FALSE)
+eq_no_reg_ci_02 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_02.csv"), data.table=FALSE)
+eq_no_reg_ci_03 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_03.csv"), data.table=FALSE)
+eq_no_reg_ci_04 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_04.csv"), data.table=FALSE)
+eq_no_reg_ci_05 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_05.csv"), data.table=FALSE)
+eq_no_reg_ci_06 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_06.csv"), data.table=FALSE)
+eq_no_reg_ci_07 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_07.csv"), data.table=FALSE)
+eq_no_reg_ci_08 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_08.csv"), data.table=FALSE)
+eq_no_reg_ci_09 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_09.csv"), data.table=FALSE)
+eq_no_reg_ci_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_10.csv"), data.table=FALSE)
+eq_no_reg_ci_11 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_11.csv"), data.table=FALSE)
+eq_no_reg_ci_12 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_12.csv"), data.table=FALSE)
+eq_no_reg_ci_13 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_13.csv"), data.table=FALSE)
+eq_no_reg_ci_14 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_14.csv"), data.table=FALSE)
+eq_no_reg_ci_15 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_15.csv"), data.table=FALSE)
+
 # Combine all regions into plot-friendly data format for full range of eta values.
 fund_regions = c("usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states")
 equity_ci_data = list()
+equity_noreg_ci_data = list()
 
 for(r in 1:16){
 	equity_ci_data[[fund_regions[r]]] = cbind(seq(0,1.5,by=0.1), rbind(eq_ci_00[r,2:4], eq_ci_01[r,2:4], eq_ci_02[r,2:4], eq_ci_03[r,2:4], eq_ci_04[r,2:4], eq_ci_05[r,2:4], eq_ci_06[r,2:4], eq_ci_07[r,2:4], eq_ci_08[r,2:4], eq_ci_09[r,2:4], eq_ci_10[r,2:4], eq_ci_11[r,2:4], eq_ci_12[r,2:4], eq_ci_13[r,2:4], eq_ci_14[r,2:4], eq_ci_15[r,2:4]))
 	colnames(equity_ci_data[[fund_regions[r]]]) = c("eta", "mean", "lower_ci", "upper_ci")
 }
 
-# Load individual equity-weighted SC-CH4 estimates for eta = 0.0 and 1.0.
-equity_00 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_00.csv"), data.table=FALSE)
+for(r in 1:16){
+	equity_noreg_ci_data[[fund_regions[r]]] = cbind(seq(0,1.5,by=0.1), rbind(eq_ci_00[r,2:4], eq_no_reg_ci_01[r,2:4], eq_no_reg_ci_02[r,2:4], eq_no_reg_ci_03[r,2:4], eq_no_reg_ci_04[r,2:4], eq_no_reg_ci_05[r,2:4], eq_no_reg_ci_06[r,2:4], eq_no_reg_ci_07[r,2:4], eq_no_reg_ci_08[r,2:4], eq_no_reg_ci_09[r,2:4], eq_no_reg_ci_10[r,2:4], eq_no_reg_ci_11[r,2:4], eq_no_reg_ci_12[r,2:4], eq_no_reg_ci_13[r,2:4], eq_no_reg_ci_14[r,2:4], eq_no_reg_ci_15[r,2:4]))
+	colnames(equity_noreg_ci_data[[fund_regions[r]]]) = c("eta", "mean", "lower_ci", "upper_ci")
+}
+
+# Load individual equity-weighted SC-CH4 estimates for eta = 1.0 and a sensitivity analysis where regional inequality aversion = 0.
 equity_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_10.csv"), data.table=FALSE)
+equity_no_regional_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_no_regional_10.csv"), data.table=FALSE)
 
 #------------------------------------------------------
 # Equity-Weighted SC-CH4 Across Different Elasticities
@@ -467,6 +490,7 @@ sub_saharan_africa_color = "#E55934"
 
 plot_region_colors = c(usa_color, western_europe_color, central_america_color, china_plus_color, sub_saharan_africa_color)
 plot_regions = c("usa", "western_europe", "central_america", "china_plus", "sub_saharan_africa")
+
 plot_region_indices = match(plot_regions, colnames(equity_10))
 
 # Set axis settings for Figure 5a.
@@ -487,6 +511,10 @@ axis_5b_settings = list(x_lim=c(0,1.5), x_breaks=seq(0,1.5,by=0.3), x_labels=as.
 
 fig_5b = equity_ci(equity_ci_data, plot_regions, plot_region_colors, c(0.8,0.7,0.6,0.55,0.55), axis_5b_settings, 1.0, c(5,7,1,1), FALSE, 0, TRUE)
 
+# Add dashed line for sensitivity results where regional inequality aversion = 0.
+fig_5b = fig_5b + geom_line(data=equity_noreg_ci_data[[plot_regions[1]]], aes_string(x="eta", y="mean"), size=0.25, colour="black", linetype="22")
+
+
 #----------------------------------------
 # Equity-Weighted SC-CH4 Distributions
 #----------------------------------------
@@ -495,7 +523,7 @@ fig_5b = equity_ci(equity_ci_data, plot_regions, plot_region_colors, c(0.8,0.7,0
 equity_pdf_data = list(region1=equity_10[,plot_region_indices[5]], region2=equity_10[,plot_region_indices[4]], region3=equity_10[,plot_region_indices[3]], region4=equity_10[,plot_region_indices[2]], region5=equity_10[,plot_region_indices[1]])
 
 # Get mean values.
-mean_vals = data.frame(zeros=rep(0,6), scch4=c(mean(equity_10[,plot_region_indices[5]]), mean(equity_10[,plot_region_indices[4]]), mean(equity_00$usa), mean(equity_10[,plot_region_indices[3]]), mean(equity_10[,plot_region_indices[2]]), mean(equity_10[,plot_region_indices[1]])))
+mean_vals = data.frame(zeros=rep(0,6), scch4=c(mean(equity_10[,plot_region_indices[5]]), mean(equity_10[,plot_region_indices[4]]), mean(equity_no_regional_10$usa), mean(equity_10[,plot_region_indices[3]]), mean(equity_10[,plot_region_indices[2]]), mean(equity_10[,plot_region_indices[1]])))
 
 # Set distribution colors.
 pdf_region_colors = c(sub_saharan_africa_color, china_plus_color, central_america_color, western_europe_color, usa_color)
@@ -508,8 +536,8 @@ axis_5c_settings = list(x_lim=c(-450,14000), x_breaks=seq(0,13500,by=3000), x_la
 # Create Figure 5c.
 fig_5c = equity_pdfs(equity_pdf_data, pdf_region_colors, rep(0.7, 5), axis_5c_settings, 0.25, c(2,7,1,4), "red", FALSE, 0)
 
-# Add density for eta = 0.0 and all mean estimate points.
-fig_5c = fig_5c + geom_density(aes(x=equity_00$usa), colour="black", size=0.25, linetype="33")
+# Add density for sensitivity without inequality aversion (intertemporal = 0.0) and all mean estimate points.
+fig_5c = fig_5c + geom_density(aes(x=equity_no_regional_10$usa), colour="black", size=0.25, linetype="22")
 fig_5c = fig_5c + geom_point(data=mean_vals, aes(x=scch4, y=zeros), shape=21, fill=mean_colors, size=1.4, stroke=0.3)
 
 # Combine figures for top and bottom part of Figure 5.
