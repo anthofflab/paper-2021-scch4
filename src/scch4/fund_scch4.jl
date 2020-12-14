@@ -187,7 +187,11 @@ function fund_scch4(marginal_damages::Array{Float64,3}, regional_consumption::Ar
             end
         end
 
+        # Calculate indices for equity weighted estimates that produce an error (implausible parameter combinations can produce -Inf values).
+        error_indices = unique(getindex.(findall(x -> !isfinite(x), scch4), 1))
+        good_indices  = findall(!in(error_indices), collect(1:number_samples))
+
         # Return equity-weighted SC-CH4 values.
-        return scch4
+        return scch4[good_indices, :]
     end
 end
