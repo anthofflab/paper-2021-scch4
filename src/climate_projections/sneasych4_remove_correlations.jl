@@ -4,17 +4,6 @@ using Distributions
 using Mimi
 using Statistics
 
-# Load files with additional functions needed for analysis.
-include(joinpath("..", "helper_functions.jl"))
-include(joinpath("..", "..", "calibration", "calibration_helper_functions.jl"))
-
-# Load the four versions of SNEASY-CH4.
-include(joinpath("..", "create_models", "create_sneasy_fairch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_fundch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_hectorch4.jl"))
-include(joinpath("..", "create_models", "create_sneasy_magiccch4.jl"))
-
-
 ##################################################################################################################################
 # RUN VERSION OF SNEASY+CH4 THAT NEGLECTS POSTERIOR PARAMETER CORRELATIONS.
 ##################################################################################################################################
@@ -122,6 +111,9 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
     # Create a function to return projected CH₄ concentrations (component and variable names differ across models).
     get_ch4_results! = create_get_ch4_results_function(climate_model)
 
+    # Create model instances
+    sneasych4_base_mi = Mimi.build(sneasych4_base)
+    sneasych4_pulse_mi = Mimi.build(sneasych4_pulse)
 
     #-------------------------------------------------------------------------------------------------------------------------
     # Given user-specified settings, create a function to run SNEASY+CH4 over the independently sampled posterior parameters.
@@ -179,39 +171,39 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
             CO₂_diffusivity    = random_parameters[i,21]
 
             # Set parameters for base version of SNEASY+CH4.
-            update_param!(sneasych4_base, :t2co, ECS)
-            update_param!(sneasych4_base, :kappa, heat_diffusivity)
-            update_param!(sneasych4_base, :F2x_CO₂, F2x_CO₂)
-            update_param!(sneasych4_base, :Q10, Q10)
-            update_param!(sneasych4_base, :Beta, CO₂_fertilization)
-            update_param!(sneasych4_base, :Eta, CO₂_diffusivity)
-            update_param!(sneasych4_base, :atmco20, CO₂_0)
-            update_param!(sneasych4_base, :CO₂_0, CO₂_0)
-            update_param!(sneasych4_base, :N₂O_0, N₂O_0)
-            update_param!(sneasych4_base, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
-            update_param!(sneasych4_base, :α, rf_scale_aerosol)
-            update_ch4_params!(sneasych4_base, Vector(random_parameters[i,:]))
+            update_param!(sneasych4_base_mi, :t2co, ECS)
+            update_param!(sneasych4_base_mi, :kappa, heat_diffusivity)
+            update_param!(sneasych4_base_mi, :F2x_CO₂, F2x_CO₂)
+            update_param!(sneasych4_base_mi, :Q10, Q10)
+            update_param!(sneasych4_base_mi, :Beta, CO₂_fertilization)
+            update_param!(sneasych4_base_mi, :Eta, CO₂_diffusivity)
+            update_param!(sneasych4_base_mi, :atmco20, CO₂_0)
+            update_param!(sneasych4_base_mi, :CO₂_0, CO₂_0)
+            update_param!(sneasych4_base_mi, :N₂O_0, N₂O_0)
+            update_param!(sneasych4_base_mi, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
+            update_param!(sneasych4_base_mi, :α, rf_scale_aerosol)
+            update_ch4_params!(sneasych4_base_mi, Vector(random_parameters[i,:]))
 
             # Set parameters for version of SNEASY+CH4 with CH₄ emissions pulse.
-            update_param!(sneasych4_pulse, :t2co, ECS)
-            update_param!(sneasych4_pulse, :kappa, heat_diffusivity)
-            update_param!(sneasych4_pulse, :F2x_CO₂, F2x_CO₂)
-            update_param!(sneasych4_pulse, :Q10, Q10)
-            update_param!(sneasych4_pulse, :Beta, CO₂_fertilization)
-            update_param!(sneasych4_pulse, :Eta, CO₂_diffusivity)
-            update_param!(sneasych4_pulse, :atmco20, CO₂_0)
-            update_param!(sneasych4_pulse, :CO₂_0, CO₂_0)
-            update_param!(sneasych4_pulse, :N₂O_0, N₂O_0)
-            update_param!(sneasych4_pulse, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
-            update_param!(sneasych4_pulse, :α, rf_scale_aerosol)
-            update_ch4_params!(sneasych4_pulse, Vector(random_parameters[i,:]))
+            update_param!(sneasych4_pulse_mi, :t2co, ECS)
+            update_param!(sneasych4_pulse_mi, :kappa, heat_diffusivity)
+            update_param!(sneasych4_pulse_mi, :F2x_CO₂, F2x_CO₂)
+            update_param!(sneasych4_pulse_mi, :Q10, Q10)
+            update_param!(sneasych4_pulse_mi, :Beta, CO₂_fertilization)
+            update_param!(sneasych4_pulse_mi, :Eta, CO₂_diffusivity)
+            update_param!(sneasych4_pulse_mi, :atmco20, CO₂_0)
+            update_param!(sneasych4_pulse_mi, :CO₂_0, CO₂_0)
+            update_param!(sneasych4_pulse_mi, :N₂O_0, N₂O_0)
+            update_param!(sneasych4_pulse_mi, :rf_scale_CO₂, co2_rf_scale(F2x_CO₂, CO₂_0, N₂O_0))
+            update_param!(sneasych4_pulse_mi, :α, rf_scale_aerosol)
+            update_ch4_params!(sneasych4_pulse_mi, Vector(random_parameters[i,:]))
 
             # Wrap code in a try/catch statement in case non-physical parameter combinations produce a model error.
             try
 
                 # Run both models.
-                run(sneasych4_base)
-                run(sneasych4_pulse)
+                run(sneasych4_base_mi)
+                run(sneasych4_pulse_mi)
 
                 # Create noise to superimpose on results using calibrated statistical parameters and measurement noise (note: Both models use same estimated noise).
                 ar1_temperature[:] = simulate_ar1_noise(number_years, σ_temperature, ρ_temperature, obs_error_temperature)
@@ -223,15 +215,15 @@ function construct_sneasych4_remove_correlations(climate_model::Symbol, rcp::Str
                 car1_ch4[:] = simulate_car1_noise(number_years, α₀_CH₄, σ²_white_noise_CH₄, obs_error_ch4)
 
                 # Store model projections resulting from parameter sample `i` for base model.
-                base_temperature[i,:]  = sneasych4_base[:doeclim, :temp] .- mean(sneasych4_base[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
-                base_co2[i,:]          = sneasych4_base[:ccm, :atmco2] .+ car1_co2
-                base_ocean_heat[i,:]   = sneasych4_base[:doeclim, :heat_interior] .+ ar1_oceanheat .+ ocean_heat_0
-                base_oceanco2[i,:]     = sneasych4_base[:ccm, :atm_oc_flux] .+ norm_oceanco2
-                base_ch4[i,:]          = get_ch4_results!(sneasych4_base) .+ car1_ch4
+                base_temperature[i,:]  = sneasych4_base_mi[:doeclim, :temp] .- mean(sneasych4_base_mi[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
+                base_co2[i,:]          = sneasych4_base_mi[:ccm, :atmco2] .+ car1_co2
+                base_ocean_heat[i,:]   = sneasych4_base_mi[:doeclim, :heat_interior] .+ ar1_oceanheat .+ ocean_heat_0
+                base_oceanco2[i,:]     = sneasych4_base_mi[:ccm, :atm_oc_flux] .+ norm_oceanco2
+                base_ch4[i,:]          = get_ch4_results!(sneasych4_base_mi) .+ car1_ch4
 
                 # Store tempeature and CO₂ projections resulting from parameter sample `i` for pulse model (used for estimating the SC-CH₄).
-                pulse_temperature[i,:] = sneasych4_pulse[:doeclim, :temp] .- mean(sneasych4_pulse[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
-                pulse_co2[i,:]         = sneasych4_pulse[:ccm, :atmco2] .+ car1_co2
+                pulse_temperature[i,:] = sneasych4_pulse_mi[:doeclim, :temp] .- mean(sneasych4_pulse_mi[:doeclim, :temp][indices_1861_1880]) .+ ar1_temperature .+ temperature_0
+                pulse_co2[i,:]         = sneasych4_pulse_mi[:ccm, :atmco2] .+ car1_co2
 
             catch
 

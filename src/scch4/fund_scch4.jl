@@ -1,6 +1,3 @@
-# Load file to run version of FUND that can incorporate SNEASY+CH4 results.
-include("../create_models/create_iam_fund.jl")
-
 #######################################################################################################################
 # CALCULATE MARGINAL DAMAGES FROM A CH₄ EMISSION PULSE WITH FUND.
 #######################################################################################################################
@@ -159,10 +156,10 @@ function fund_scch4(marginal_damages::Array{Float64,3}, regional_consumption::Ar
             end
 
             # Calculate discounted global annual marginal damages (summed across the FUND regions).
-            discounted_global_marginal_damages[i,:] = sum(marginal_damages[:,:,i] .* df, dims=2)
+            discounted_global_marginal_damages[i,:] = @views sum(marginal_damages[:,:,i] .* df, dims=2)
 
             # Calculate the SC-CH4 as the sum of discounted annual marginal damages (scaled by inflation conversion factor for desired year).
-            scch4[i] = sum(discounted_global_marginal_damages[i,:]) * dollar_conversion
+            scch4[i] = @views sum(discounted_global_marginal_damages[i,:]) * dollar_conversion
         end
 
         # Return SC-CH4 and discounted annual marginal damage values.
@@ -182,15 +179,19 @@ function fund_scch4(marginal_damages::Array{Float64,3}, regional_consumption::Ar
             for r = 1:16
                 for t = pulse_index:length(fund_years)
                     cde_consumption[t,i] = sum(regional_population[t,:,i] ./ sum(regional_population[t,:,i]) .* pc_consumption_regional[t,:,i] .^(1-γ)) ^ (1/(1-γ))
-                    tempvar_1[:] = (regional_consumption[t,:,i] ./ regional_consumption[pulse_index,r,i]) .^ -γ
+                    tempvar_1[:] .= @views (pc_consumption_regional[t,:,i] ./ pc_consumption_regional[pulse_index,r,i]) .^ -γ
                     tempvar_2    = (cde_consumption[t,i] ./ cde_consumption[pulse_index,i]) .^ (γ-η)
-                    annual_vals[t] = sum(tempvar_1 .* tempvar_2 .* (1+ρ) ^ (-t+pulse_index) .* marginal_damages[t,:,i])
+                    annual_vals[t] = @views sum(tempvar_1 .* tempvar_2 .* (1+ρ) ^ (-t+pulse_index) .* marginal_damages[t,:,i])
                 end
                 scch4[i,r] = sum(annual_vals) * dollar_conversion
             end
         end
 
+        # Calculate indices for equity weighted estimates that produce an error (implausible parameter combinations can produce -Inf values).
+        error_indices = unique(getindex.(findall(x -> !isfinite(x), scch4), 1))
+        good_indices  = findall(!in(error_indices), collect(1:number_samples))
+
         # Return equity-weighted SC-CH4 values.
-        return scch4
+        return scch4[good_indices, :]
     end
 end

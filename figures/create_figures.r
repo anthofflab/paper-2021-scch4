@@ -240,7 +240,7 @@ point_stroke = 0.2
 no_corr_color = "gray80"
 
 # Plot temperature projections (with and without posterior correlations).
-fig_3a_main =  climate_projection(magicc_temperature_ci_baseline, obs, "hadcrut_temperature_obs", magiccch4_color, c(-0.5,11.5), c(1850:2210), "Year", "Surface Temperature (C)", seq(0,10,by=2), as.character(seq(0,10,by=2)), TRUE, TRUE, point_size, point_stroke, ci_width, "dashed", mean_width, "", c(1856, 15.5), TRUE, magicc_temperature_ci_no_corr, no_corr_color)
+fig_3a_main =  climate_projection(magicc_temperature_ci_baseline, obs, "hadcrut_temperature_obs", magiccch4_color, c(-0.5,11.5), c(1850,2210), "Year", "Surface Temperature (C)", seq(0,10,by=2), as.character(seq(0,10,by=2)), TRUE, TRUE, point_size, point_stroke, ci_width, "dashed", mean_width, "", c(1856, 15.5), TRUE, magicc_temperature_ci_no_corr, no_corr_color)
 fig_3a_main = fig_3a_main + theme(plot.margin = unit(c(3,1,5,1), "mm"))
 
 # Get years for temperature pdf inset.
@@ -441,18 +441,41 @@ eq_ci_13 = fread(file.path("results", results_folder_name, "scch4_estimates", "e
 eq_ci_14 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"), data.table=FALSE)
 eq_ci_15 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"), data.table=FALSE)
 
+# Load credible intervals for sensitivity analyses that sets regional inequality aversion to 0.
+eq_no_reg_ci_01 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_01.csv"), data.table=FALSE)
+eq_no_reg_ci_02 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_02.csv"), data.table=FALSE)
+eq_no_reg_ci_03 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_03.csv"), data.table=FALSE)
+eq_no_reg_ci_04 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_04.csv"), data.table=FALSE)
+eq_no_reg_ci_05 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_05.csv"), data.table=FALSE)
+eq_no_reg_ci_06 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_06.csv"), data.table=FALSE)
+eq_no_reg_ci_07 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_07.csv"), data.table=FALSE)
+eq_no_reg_ci_08 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_08.csv"), data.table=FALSE)
+eq_no_reg_ci_09 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_09.csv"), data.table=FALSE)
+eq_no_reg_ci_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_10.csv"), data.table=FALSE)
+eq_no_reg_ci_11 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_11.csv"), data.table=FALSE)
+eq_no_reg_ci_12 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_12.csv"), data.table=FALSE)
+eq_no_reg_ci_13 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_13.csv"), data.table=FALSE)
+eq_no_reg_ci_14 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_14.csv"), data.table=FALSE)
+eq_no_reg_ci_15 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_15.csv"), data.table=FALSE)
+
 # Combine all regions into plot-friendly data format for full range of eta values.
 fund_regions = c("usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states")
 equity_ci_data = list()
+equity_noreg_ci_data = list()
 
 for(r in 1:16){
 	equity_ci_data[[fund_regions[r]]] = cbind(seq(0,1.5,by=0.1), rbind(eq_ci_00[r,2:4], eq_ci_01[r,2:4], eq_ci_02[r,2:4], eq_ci_03[r,2:4], eq_ci_04[r,2:4], eq_ci_05[r,2:4], eq_ci_06[r,2:4], eq_ci_07[r,2:4], eq_ci_08[r,2:4], eq_ci_09[r,2:4], eq_ci_10[r,2:4], eq_ci_11[r,2:4], eq_ci_12[r,2:4], eq_ci_13[r,2:4], eq_ci_14[r,2:4], eq_ci_15[r,2:4]))
 	colnames(equity_ci_data[[fund_regions[r]]]) = c("eta", "mean", "lower_ci", "upper_ci")
 }
 
-# Load individual equity-weighted SC-CH4 estimates for eta = 0.0 and 1.0.
-equity_00 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_00.csv"), data.table=FALSE)
+for(r in 1:16){
+	equity_noreg_ci_data[[fund_regions[r]]] = cbind(seq(0,1.5,by=0.1), rbind(eq_ci_00[r,2:4], eq_no_reg_ci_01[r,2:4], eq_no_reg_ci_02[r,2:4], eq_no_reg_ci_03[r,2:4], eq_no_reg_ci_04[r,2:4], eq_no_reg_ci_05[r,2:4], eq_no_reg_ci_06[r,2:4], eq_no_reg_ci_07[r,2:4], eq_no_reg_ci_08[r,2:4], eq_no_reg_ci_09[r,2:4], eq_no_reg_ci_10[r,2:4], eq_no_reg_ci_11[r,2:4], eq_no_reg_ci_12[r,2:4], eq_no_reg_ci_13[r,2:4], eq_no_reg_ci_14[r,2:4], eq_no_reg_ci_15[r,2:4]))
+	colnames(equity_noreg_ci_data[[fund_regions[r]]]) = c("eta", "mean", "lower_ci", "upper_ci")
+}
+
+# Load individual equity-weighted SC-CH4 estimates for eta = 1.0 and a sensitivity analysis where regional inequality aversion = 0.
 equity_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_10.csv"), data.table=FALSE)
+equity_no_regional_10 = fread(file.path("results", results_folder_name, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_no_regional_10.csv"), data.table=FALSE)
 
 #------------------------------------------------------
 # Equity-Weighted SC-CH4 Across Different Elasticities
@@ -467,6 +490,7 @@ sub_saharan_africa_color = "#E55934"
 
 plot_region_colors = c(usa_color, western_europe_color, central_america_color, china_plus_color, sub_saharan_africa_color)
 plot_regions = c("usa", "western_europe", "central_america", "china_plus", "sub_saharan_africa")
+
 plot_region_indices = match(plot_regions, colnames(equity_10))
 
 # Set axis settings for Figure 5a.
@@ -487,6 +511,10 @@ axis_5b_settings = list(x_lim=c(0,1.5), x_breaks=seq(0,1.5,by=0.3), x_labels=as.
 
 fig_5b = equity_ci(equity_ci_data, plot_regions, plot_region_colors, c(0.8,0.7,0.6,0.55,0.55), axis_5b_settings, 1.0, c(5,7,1,1), FALSE, 0, TRUE)
 
+# Add dashed line for sensitivity results where regional inequality aversion = 0.
+fig_5b = fig_5b + geom_line(data=equity_noreg_ci_data[[plot_regions[1]]], aes_string(x="eta", y="mean"), size=0.25, colour="black", linetype="22")
+
+
 #----------------------------------------
 # Equity-Weighted SC-CH4 Distributions
 #----------------------------------------
@@ -495,7 +523,7 @@ fig_5b = equity_ci(equity_ci_data, plot_regions, plot_region_colors, c(0.8,0.7,0
 equity_pdf_data = list(region1=equity_10[,plot_region_indices[5]], region2=equity_10[,plot_region_indices[4]], region3=equity_10[,plot_region_indices[3]], region4=equity_10[,plot_region_indices[2]], region5=equity_10[,plot_region_indices[1]])
 
 # Get mean values.
-mean_vals = data.frame(zeros=rep(0,6), scch4=c(mean(equity_10[,plot_region_indices[5]]), mean(equity_10[,plot_region_indices[4]]), mean(equity_00$usa), mean(equity_10[,plot_region_indices[3]]), mean(equity_10[,plot_region_indices[2]]), mean(equity_10[,plot_region_indices[1]])))
+mean_vals = data.frame(zeros=rep(0,6), scch4=c(mean(equity_10[,plot_region_indices[5]]), mean(equity_10[,plot_region_indices[4]]), mean(equity_no_regional_10$usa), mean(equity_10[,plot_region_indices[3]]), mean(equity_10[,plot_region_indices[2]]), mean(equity_10[,plot_region_indices[1]])))
 
 # Set distribution colors.
 pdf_region_colors = c(sub_saharan_africa_color, china_plus_color, central_america_color, western_europe_color, usa_color)
@@ -508,8 +536,8 @@ axis_5c_settings = list(x_lim=c(-450,14000), x_breaks=seq(0,13500,by=3000), x_la
 # Create Figure 5c.
 fig_5c = equity_pdfs(equity_pdf_data, pdf_region_colors, rep(0.7, 5), axis_5c_settings, 0.25, c(2,7,1,4), "red", FALSE, 0)
 
-# Add density for eta = 0.0 and all mean estimate points.
-fig_5c = fig_5c + geom_density(aes(x=equity_00$usa), colour="black", size=0.25, linetype="33")
+# Add density for sensitivity without inequality aversion (intertemporal = 0.0) and all mean estimate points.
+fig_5c = fig_5c + geom_density(aes(x=equity_no_regional_10$usa), colour="black", size=0.25, linetype="22")
 fig_5c = fig_5c + geom_point(data=mean_vals, aes(x=scch4, y=zeros), shape=21, fill=mean_colors, size=1.4, stroke=0.3)
 
 # Combine figures for top and bottom part of Figure 5.
@@ -896,23 +924,46 @@ ggsave(extended_fig_4, file=file.path("figures", results_folder_name, "pdf_figur
 #--------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------
 
+# Load climate model indices that successfully ran.
+fairch4_climate_indices   = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_fair", "good_indices.csv"))[,1]
+fundch4_climate_indices   = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_fund", "good_indices.csv"))[,1]
+hectorch4_climate_indices = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_hector", "good_indices.csv"))[,1]
+magiccch4_climate_indices = read.csv(file.path("results", results_folder_name, "climate_projections", "baseline_run", "s_magicc", "good_indices.csv"))[,1]
+
+# Load SC-CH4 model indices that successfully ran.
+fairch4_scch4_indices_dice   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "good_indices.csv"))[,1]
+fundch4_scch4_indices_dice   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "good_indices.csv"))[,1]
+hectorch4_scch4_indices_dice = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "good_indices.csv"))[,1]
+magiccch4_scch4_indices_dice = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_magicc", "good_indices.csv"))[,1]
+
+fairch4_scch4_indices_fund   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "good_indices.csv"))[,1]
+fundch4_scch4_indices_fund   = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "good_indices.csv"))[,1]
+hectorch4_scch4_indices_fund = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "good_indices.csv"))[,1]
+magiccch4_scch4_indices_fund = read.csv(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_magicc", "good_indices.csv"))[,1]
+
+# Combine indices (all successful climate runs that also ran for both DICE and FUND).
+fairch4_indices   = fairch4_climate_indices[unique(c(fairch4_scch4_indices_dice, fairch4_scch4_indices_fund))]
+fundch4_indices   = fundch4_climate_indices[unique(c(fundch4_scch4_indices_dice, fundch4_scch4_indices_fund))]
+hectorch4_indices = hectorch4_climate_indices[unique(c(hectorch4_scch4_indices_dice, hectorch4_scch4_indices_fund))]
+magiccch4_indices = magiccch4_climate_indices[unique(c(magiccch4_scch4_indices_dice, magiccch4_scch4_indices_fund))]
+
 # Load S-FAIR posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_fairch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fair", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), data.table=FALSE)
+post_param_fairch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fair", "parameters_100k.csv"), data.table=FALSE)[fairch4_indices, ]
+dice_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fair", "scch4_30.csv"), data.table=FALSE)[fairch4_indices, ]
+fund_scch4_fairch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fair", "scch4_30.csv"), data.table=FALSE)[fairch4_indices, ]
 
 # Load S-FUND posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_fundch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fund", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), data.table=FALSE)
+post_param_fundch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_fund", "parameters_100k.csv"), data.table=FALSE)[fundch4_indices, ]
+dice_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_fund", "scch4_30.csv"), data.table=FALSE)[fundch4_indices, ]
+fund_scch4_fundch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_fund", "scch4_30.csv"), data.table=FALSE)[fundch4_indices, ]
 
 # Load S-Hector posterior parameters and corresponding SC-CH4 estimates for scatter plots.
-post_param_hectorch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_hector", "parameters_100k.csv"), data.table=FALSE)
-dice_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), data.table=FALSE)
-fund_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), data.table=FALSE)
+post_param_hectorch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_hector", "parameters_100k.csv"), data.table=FALSE)[hectorch4_indices, ]
+dice_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "dice", "s_hector", "scch4_30.csv"), data.table=FALSE)[hectorch4_indices, ]
+fund_scch4_hectorch4 = fread(file.path("results", results_folder_name, "scch4_estimates", "baseline_run", "fund", "s_hector", "scch4_30.csv"), data.table=FALSE)[hectorch4_indices, ]
 
 # Get upper bound point size value from Figure 3.
-post_param_magiccch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), data.table=FALSE)
+post_param_magiccch4 = fread(file.path("results", results_folder_name, "calibrated_parameters", "s_magicc", "parameters_100k.csv"), data.table=FALSE)[magiccch4_indices, ]
 upper_bound_size = ceiling(as.numeric(quantile(post_param_magiccch4$Q10, 0.99)))
 
 # Set Figure 3's upper bound point size value across all other models.
@@ -926,9 +977,9 @@ post_param_hectorch4$Q10_size = post_param_hectorch4$Q10
 post_param_hectorch4[which(post_param_hectorch4$Q10 > upper_bound_size), "Q10_size"] = upper_bound_size
 
 # Create data.frames of each model's parameters and SC-CH4 values for plotting.
-scatter_data_fairch4   = data.frame(ECS=post_param_fairch4$ECS, aerosol=post_param_fairch4$alpha, Q10_size = post_param_fairch4$Q10_size, heat_diffusion=post_param_fairch4$kappa, dice=dice_scch4_fairch4[,1], fund=fund_scch4_fairch4[,1])
-scatter_data_fundch4   = data.frame(ECS=post_param_fundch4$ECS, aerosol=post_param_fundch4$alpha, Q10_size = post_param_fundch4$Q10_size, heat_diffusion=post_param_fundch4$kappa, dice=dice_scch4_fundch4[,1], fund=fund_scch4_fundch4[,1])
-scatter_data_hectorch4 = data.frame(ECS=post_param_hectorch4$ECS, aerosol=post_param_hectorch4$alpha, Q10_size = post_param_hectorch4$Q10_size, heat_diffusion=post_param_hectorch4$kappa, dice=dice_scch4_hectorch4[,1], fund=fund_scch4_hectorch4[,1])
+scatter_data_fairch4   = data.frame(ECS=post_param_fairch4$ECS, aerosol=post_param_fairch4$alpha, Q10_size = post_param_fairch4$Q10_size, heat_diffusion=post_param_fairch4$kappa, dice=dice_scch4_fairch4, fund=fund_scch4_fairch4)
+scatter_data_fundch4   = data.frame(ECS=post_param_fundch4$ECS, aerosol=post_param_fundch4$alpha, Q10_size = post_param_fundch4$Q10_size, heat_diffusion=post_param_fundch4$kappa, dice=dice_scch4_fundch4, fund=fund_scch4_fundch4)
+scatter_data_hectorch4 = data.frame(ECS=post_param_hectorch4$ECS, aerosol=post_param_hectorch4$alpha, Q10_size = post_param_hectorch4$Q10_size, heat_diffusion=post_param_hectorch4$kappa, dice=dice_scch4_hectorch4, fund=fund_scch4_hectorch4)
 
 #----------------------------------
 # SNEASY+FAIR-CH4 Scatter Plots

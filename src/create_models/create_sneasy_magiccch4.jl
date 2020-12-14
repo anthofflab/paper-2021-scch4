@@ -9,13 +9,6 @@ using MimiSNEASY
 using DataFrames
 using CSVFiles
 
-# Load required files.
-include(joinpath("additional_model_components", "rf_total.jl"))
-include(joinpath("additional_model_components", "rf_co2_etminan.jl"))
-include(joinpath("additional_model_components", "rf_ch4_etminan.jl"))
-include(joinpath("additional_model_components", "total_co2_emissions.jl"))
-include(joinpath("..", "helper_functions.jl"))
-
 function create_sneasy_magiccch4(;rcp_scenario::String="RCP85", start_year::Int=1765, end_year::Int=2300, etminan_ch4_forcing::Bool=true)
 
     # ---------------------------------------------
