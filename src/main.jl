@@ -1451,7 +1451,22 @@ high_ci_interval       = 0.98
         fund_scch4_magiccch4_equity16 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.6, γ=1.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
 
         # Calculate SC-CH4 estimates for S-MAGICC without regional inequality aversion.
-        fund_scch4_magiccch4_regional00 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1+1e-12, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region01 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.1, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region02 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.2, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region03 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.3, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region04 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.4, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region05 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.5, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region06 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.6, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region07 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.7, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region08 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.8, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region09 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=0.9, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region10 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1+1e-12, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region11 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.1, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region12 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.2, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region13 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.3, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region14 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.4, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.5, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+        fund_scch4_magiccch4_no_region16 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.6, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
 
         # Calculate regional confidence intervals for equity weighted SC-CH4 estimates across different η.
         fund_region_names = ["USA", "Canada", "Western Europe", "Japan and South Korea", "Australia and New Zealand", "Central and Eastern Europe", "Former Soviet Union", "Middle East", "Central America", "South America", "South Asia", "Southeast Asia", "China plus", "North Africa", "Sub Saharan Africa", "Small Island States"]
@@ -1473,8 +1488,24 @@ high_ci_interval       = 0.98
         fund_scch4_magiccch4_equity14_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity14, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity14_ci, :Year => :FUND_region)
         fund_scch4_magiccch4_equity15_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity15, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity15_ci, :Year => :FUND_region)
         fund_scch4_magiccch4_equity16_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity16, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity16_ci, :Year => :FUND_region)
-        fund_scch4_magiccch4_regional00_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_regional00, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_regional00_ci, :Year => :FUND_region)
-
+        
+        fund_scch4_magiccch4_no_region01_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region01, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region01_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region02_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region02, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region02_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region03_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region03, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region03_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region04_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region04, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region04_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region05_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region05, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region05_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region06_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region06, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region06_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region07_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region07, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region07_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region08_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region08, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region08_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region09_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region09, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region09_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region10_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region10, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region10_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region11_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region11, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region11_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region12_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region12, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region12_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region13_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region13, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region13_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region14_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region14, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region14_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region15_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region15, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region15_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_no_region16_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_no_region16, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_no_region16_ci, :Year => :FUND_region)
+        
         # FUND region names.
         col_names = Symbol.(["usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states"])
     end [
@@ -1507,7 +1538,7 @@ high_ci_interval       = 0.98
         DataFrame(fund_scch4_magiccch4_equity14, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_14.csv"),
         DataFrame(fund_scch4_magiccch4_equity15, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_15.csv"),
         DataFrame(fund_scch4_magiccch4_equity16, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_16.csv"),
-        DataFrame(fund_scch4_magiccch4_regional00, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_regional_00.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region10, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_no_regional_10.csv"),
         DataFrame(fund_scch4_magiccch4_equity00_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_00.csv"),
         DataFrame(fund_scch4_magiccch4_equity01_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_01.csv"),
         DataFrame(fund_scch4_magiccch4_equity02_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_02.csv"),
@@ -1525,7 +1556,22 @@ high_ci_interval       = 0.98
         DataFrame(fund_scch4_magiccch4_equity14_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"),
         DataFrame(fund_scch4_magiccch4_equity15_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"),
         DataFrame(fund_scch4_magiccch4_equity16_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_16.csv"),
-        DataFrame(fund_scch4_magiccch4_regional00_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_regional_00.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region01_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_01.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region02_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_02.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region03_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_03.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region04_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_04.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region05_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_05.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region06_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_06.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region07_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_07.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region08_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_08.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region09_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_09.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region10_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_10.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region11_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_11.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region12_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_12.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region13_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_13.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region14_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_14.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region15_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_15.csv"),
+        DataFrame(fund_scch4_magiccch4_no_region16_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_no_regional_16.csv"),
     ]
 
     #---------------------------------------------------------------------------------------------
