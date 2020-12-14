@@ -26,7 +26,7 @@ results_folder_name = "my_results"
 #####################################################################################################
 
 # Load generic helper functions file.
-source(file.path("figures", "figure_helper_functions.r"))
+source(file.path("src", "utils", "figure_helper_functions.r"))
 
 # Load calibration observations for hindcasts.
 obs = read.csv(file.path("data", "calibration_data", "calibration_data_combined.csv"))
@@ -116,8 +116,8 @@ fig_1 = ggarrange(fair_temperature_hindcast, fund_temperature_hindcast, hector_t
 				  nrow=2, ncol=4, labels=panel_labels, label.args = label_design)
 
 # Save a .jpg and .pdf version of Figure 1.
-ggsave(fig_1, file=file.path("figures", results_folder_name, "jpg_figures", "Figure_1.jpg"), device="jpeg", type="cairo", width=183, height=70, unit="mm", dpi=300)
-ggsave(fig_1, file=file.path("figures", results_folder_name, "pdf_figures", "Figure_1.pdf"), device="pdf", width=183, height=70, unit="mm", useDingbats = FALSE)
+ggsave(fig_1, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Figure_1.jpg"), device="jpeg", type="cairo", width=183, height=70, unit="mm", dpi=300)
+ggsave(fig_1, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Figure_1.pdf"), device="pdf", width=183, height=70, unit="mm", useDingbats = FALSE)
 
 
 
@@ -206,8 +206,8 @@ fig_2b_panel = ggarrange(fig_2b_top, fig_2b_bottom, ncol=1, labels=c("b",""), la
 fig_2        = grid.arrange(fig_2a_panel, fig_2b_panel, widths=c(3,2.5), nrow=1, ncol=2)
 
 # Save a .jpg and .pdf version of Figure 2.
-ggsave(fig_2, file=file.path("figures", results_folder_name, "jpg_figures", "Figure_2.jpg"), device="jpeg", type="cairo", width=136, height=70, unit="mm", dpi=300)
-ggsave(fig_2, file=file.path("figures", results_folder_name, "pdf_figures", "Figure_2.pdf"), device="pdf", width=136, height=70, unit="mm", useDingbats = FALSE)
+ggsave(fig_2, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Figure_2.jpg"), device="jpeg", type="cairo", width=136, height=70, unit="mm", dpi=300)
+ggsave(fig_2, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Figure_2.pdf"), device="pdf", width=136, height=70, unit="mm", useDingbats = FALSE)
 
 
 
@@ -283,8 +283,8 @@ fig_3_bottom_panel = ggarrange(fig_3b, fig_3c, labels=c("b", "c"), nrow=1, ncol=
 fig_3 = grid.arrange(fig_3_top_panel, fig_3_bottom_panel, nrow=2, ncol=1, heights=c(1.5,2))
 
 # Save a .jpg and .pdf version of Figure 3.
-ggsave(fig_3, file=file.path("figures", results_folder_name, "jpg_figures", "Figure_3.jpg"), device="jpeg", type="cairo", width=136, height=150, unit="mm", dpi=300)
-ggsave(fig_3, file=file.path("figures", results_folder_name, "pdf_figures", "Figure_3.pdf"), device="pdf", width=136, height=150, unit="mm", useDingbats = FALSE)
+ggsave(fig_3, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Figure_3.jpg"), device="jpeg", type="cairo", width=136, height=150, unit="mm", dpi=300)
+ggsave(fig_3, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Figure_3.pdf"), device="pdf", width=136, height=150, unit="mm", useDingbats = FALSE)
 
 
 
@@ -412,8 +412,8 @@ label_design   = list(gp = grid::gpar(fontsize = 8, fontface="bold"), vjust=1.1,
 figure_4 = ggarrange(fig_4a, fig_4b, fig_4c, nrow=1, ncol=3, labels=c("a","b","c"), label.args = label_design)
 
 # Save a .jpg and .pdf version of Figure 4.
-ggsave(figure_4, file=file.path("figures", results_folder_name, "jpg_figures", "Figure_4.jpg"), device="jpeg", type="cairo", width=183, height=70, unit="mm", dpi=300)
-ggsave(figure_4, file=file.path("figures", results_folder_name, "pdf_figures", "Figure_4.pdf"), device="pdf", width=183, height=70, unit="mm", useDingbats = FALSE)
+ggsave(figure_4, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Figure_4.jpg"), device="jpeg", type="cairo", width=183, height=70, unit="mm", dpi=300)
+ggsave(figure_4, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Figure_4.pdf"), device="pdf", width=183, height=70, unit="mm", useDingbats = FALSE)
 
 
 
@@ -548,8 +548,8 @@ fig_5_bottom = ggarrange(fig_5c, labels=c("c"), label.args=list(gp = grid::gpar(
 fig_5 = grid.arrange(fig_5_top, fig_5_bottom, nrow=2, ncol=1, heights=c(2,1.2))
 
 # Save a .jpg and .pdf version of Figure 5.
-ggsave(fig_5, file=file.path("figures", results_folder_name, "jpg_figures", "Figure_5.jpg"), device="jpeg", type="cairo", width=130, height=90, unit="mm", dpi=300)
-ggsave(fig_5, file=file.path("figures", results_folder_name, "pdf_figures", "Figure_5.pdf"), device="pdf", width=130, height=90, unit="mm", useDingbats = FALSE)
+ggsave(fig_5, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Figure_5.jpg"), device="jpeg", type="cairo", width=130, height=90, unit="mm", dpi=300)
+ggsave(fig_5, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Figure_5.pdf"), device="pdf", width=130, height=90, unit="mm", useDingbats = FALSE)
 
 
 
@@ -647,8 +647,8 @@ extended_fig_1 = ggarrange(fair_co2_hindcast, fund_co2_hindcast, hector_co2_hind
 					       nrow=3, ncol=4, labels=extended_fig_1_labels, label.args = extended_fig_1_label_design)
 
 # Save a .jpg and .pdf version of Extended Data Figure 1.
-ggsave(extended_fig_1, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_1.jpg"), device="jpeg", type="cairo", width=183, height=105, unit="mm", dpi=300)
-ggsave(extended_fig_1, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_1.pdf"), device="pdf", width=183, height=105, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_1, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_1.jpg"), device="jpeg", type="cairo", width=183, height=105, unit="mm", dpi=300)
+ggsave(extended_fig_1, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_1.pdf"), device="pdf", width=183, height=105, unit="mm", useDingbats = FALSE)
 
 
 
@@ -757,8 +757,8 @@ extended_fig_2c = ggarrange(extended_fig_2c_top, extended_fig_2c_bottom, ncol=1,
 extended_fig_2 = grid.arrange(extended_fig_2a, extended_fig_2b, extended_fig_2c, widths=c(1,1,1), nrow=1, ncol=3)
 
 # Save a .jpg and .pdf version of Extended Data Figure 2.
-ggsave(extended_fig_2, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_2.jpg"), device="jpeg", type="cairo", width=180, height=95, unit="mm", dpi=300)
-ggsave(extended_fig_2, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_2.pdf"), device="pdf", width=180, height=95, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_2, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_2.jpg"), device="jpeg", type="cairo", width=180, height=95, unit="mm", dpi=300)
+ggsave(extended_fig_2, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_2.pdf"), device="pdf", width=180, height=95, unit="mm", useDingbats = FALSE)
 
 
 
@@ -839,8 +839,8 @@ extended_fig_3_bottom = ggarrange(extended_fig_3e, labels=c("e"), label.args=lis
 extended_fig_3 = grid.arrange(extended_fig_3_top, extended_fig_3_bottom, heights=c(2,1.3), nrow=2, ncol=1)
 
 # Save a .jpg and .pdf version of Extended Data Figure 3.
-ggsave(extended_fig_3, file=file.path("figures",  results_folder_name, "jpg_figures", "Extended_Data_Figure_3.jpg"), device="jpeg", type="cairo", width=130, height=160, unit="mm", dpi=600)
-ggsave(extended_fig_3, file=file.path("figures",  results_folder_name, "pdf_figures", "Extended_Data_Figure_3.pdf"), device="pdf", width=130, height=160, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_3, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_3.jpg"), device="jpeg", type="cairo", width=130, height=160, unit="mm", dpi=600)
+ggsave(extended_fig_3, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_3.pdf"), device="pdf", width=130, height=160, unit="mm", useDingbats = FALSE)
 
 
 #-------------------------------------------------------------------------------------------
@@ -914,8 +914,8 @@ extended_fig_4_bottom = ggarrange(extended_fig_4b, extended_fig_4c, labels=c("b"
 extended_fig_4        = grid.arrange(extended_fig_4_top, extended_fig_4_bottom, nrow=2, ncol=1, heights=c(1,0.8))
 
 # Save a .jpg and .pdf version of Extended Data Figure 4.
-ggsave(extended_fig_4, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_4.jpg"), device="jpeg", type="cairo", width=136, height=160, unit="mm", dpi=300)
-ggsave(extended_fig_4, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_4.pdf"), device="pdf", width=136, height=160, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_4, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_4.jpg"), device="jpeg", type="cairo", width=136, height=160, unit="mm", dpi=300)
+ggsave(extended_fig_4, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_4.pdf"), device="pdf", width=136, height=160, unit="mm", useDingbats = FALSE)
 
 
 #--------------------------------------------------------------------------------
@@ -1009,8 +1009,8 @@ extended_fig_5f = scatter_4way(scatter_data_hectorch4, c("ECS", "dice", "Q10_siz
 extended_fig_5 = ggarrange(extended_fig_5a, extended_fig_5d, extended_fig_5b, extended_fig_5e, extended_fig_5c, extended_fig_5f, nrow=3, ncol=2, labels=c("a","d","b","e","c","f"), label.args = list(gp = grid::gpar(fontsize = 8, fontface="bold"), vjust=2))
 
 # Save a .jpg and .pdf version of Extended Data Figure 5.
-ggsave(extended_fig_5, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_5.jpg"), device="jpeg", type="cairo", width=136, height=190, unit="mm", dpi=300)
-ggsave(extended_fig_5, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_5.pdf"), device="pdf", width=136, height=190, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_5, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_5.jpg"), device="jpeg", type="cairo", width=136, height=190, unit="mm", dpi=300)
+ggsave(extended_fig_5, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_5.pdf"), device="pdf", width=136, height=190, unit="mm", useDingbats = FALSE)
 
 
 
@@ -1100,8 +1100,8 @@ extended_fig_6c = extended_fig_6c_main + annotation_custom(grob=extended_fig_6c_
 extended_fig_6 = ggarrange(extended_fig_6a, extended_fig_6b, extended_fig_6c, nrow=3, ncol=1, labels=c("a", "b", "c"), label.args=list(gp = grid::gpar(fontsize = 8, fontface="bold")))
 
 # Save a .jpg and .pdf version of Extended Data Figure 6.
-ggsave(extended_fig_6, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_6.jpg"), device="jpeg", type="cairo", width=130, height=170, unit="mm", dpi=300)
-ggsave(extended_fig_6, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_6.pdf"), device="pdf", width=130, height=170, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_6, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_6.jpg"), device="jpeg", type="cairo", width=130, height=170, unit="mm", dpi=300)
+ggsave(extended_fig_6, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_6.pdf"), device="pdf", width=130, height=170, unit="mm", useDingbats = FALSE)
 
 
 
@@ -1211,8 +1211,8 @@ extended_fig_7_bottom  = ggarrange(extended_fig_7b, extended_fig_7c, extended_fi
 extended_fig_7 = grid.arrange(extended_fig_7_top, extended_fig_7_bottom, heights=c(1,2), nrow=2, ncol=1)
 
 # Save a .jpg and .pdf version of Extended Data Figure 7.
-ggsave(extended_fig_7, file=file.path("figures", results_folder_name, "jpg_figures", "Extended_Data_Figure_7.jpg"), device="jpeg", type="cairo", width=130, height=180, unit="mm", dpi=300)
-ggsave(extended_fig_7, file=file.path("figures", results_folder_name, "pdf_figures", "Extended_Data_Figure_7.pdf"), device="pdf",  width=130, height=180, unit="mm", useDingbats = FALSE)
+ggsave(extended_fig_7, file=file.path("results", results_folder_name, "figures", "jpg_figures", "Extended_Data_Figure_7.jpg"), device="jpeg", type="cairo", width=130, height=180, unit="mm", dpi=300)
+ggsave(extended_fig_7, file=file.path("results", results_folder_name, "figures", "pdf_figures", "Extended_Data_Figure_7.pdf"), device="pdf",  width=130, height=180, unit="mm", useDingbats = FALSE)
 
 # Finished creating all figures.
 print("All done.")
