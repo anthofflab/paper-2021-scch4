@@ -1450,6 +1450,9 @@ high_ci_interval       = 0.98
         fund_scch4_magiccch4_equity15 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.5, γ=1.5, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
         fund_scch4_magiccch4_equity16 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1.6, γ=1.6, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
 
+        # Calculate SC-CH4 estimates for S-MAGICC without regional inequality aversion.
+        fund_scch4_magiccch4_regional00 = fund_scch4(fund_marginal_damages_magiccch4, fund_consumption_magiccch4, fund_population_magiccch4, pulse_year, end_year, constant=true, η=1+1e-12, γ=0.0, ρ=0.01, dollar_conversion=fund_dollar_conversion, equity_weighting=true)
+
         # Calculate regional confidence intervals for equity weighted SC-CH4 estimates across different η.
         fund_region_names = ["USA", "Canada", "Western Europe", "Japan and South Korea", "Australia and New Zealand", "Central and Eastern Europe", "Former Soviet Union", "Middle East", "Central America", "South America", "South Asia", "Southeast Asia", "China plus", "North Africa", "Sub Saharan Africa", "Small Island States"]
 
@@ -1470,6 +1473,7 @@ high_ci_interval       = 0.98
         fund_scch4_magiccch4_equity14_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity14, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity14_ci, :Year => :FUND_region)
         fund_scch4_magiccch4_equity15_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity15, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity15_ci, :Year => :FUND_region)
         fund_scch4_magiccch4_equity16_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_equity16, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_equity16_ci, :Year => :FUND_region)
+        fund_scch4_magiccch4_regional00_ci = get_confidence_interval(fund_region_names, fund_scch4_magiccch4_regional00, low_ci_interval, high_ci_interval); rename!(fund_scch4_magiccch4_regional00_ci, :Year => :FUND_region)
 
         # FUND region names.
         col_names = Symbol.(["usa", "canada", "western_europe", "japan_south_korea", "australia_new_zealand", "central_eastern_europe", "former_soviet_union", "middle_east", "central_america", "south_america", "south_asia", "southeast_asia", "china_plus", "north_africa", "sub_saharan_africa", "small_island_states"])
@@ -1503,6 +1507,7 @@ high_ci_interval       = 0.98
         DataFrame(fund_scch4_magiccch4_equity14, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_14.csv"),
         DataFrame(fund_scch4_magiccch4_equity15, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_15.csv"),
         DataFrame(fund_scch4_magiccch4_equity16, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_16.csv"),
+        DataFrame(fund_scch4_magiccch4_regional00, Symbol.(col_names)) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "scch4_equity_regional_00.csv"),
         DataFrame(fund_scch4_magiccch4_equity00_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_00.csv"),
         DataFrame(fund_scch4_magiccch4_equity01_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_01.csv"),
         DataFrame(fund_scch4_magiccch4_equity02_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_02.csv"),
@@ -1520,6 +1525,7 @@ high_ci_interval       = 0.98
         DataFrame(fund_scch4_magiccch4_equity14_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_14.csv"),
         DataFrame(fund_scch4_magiccch4_equity15_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_15.csv"),
         DataFrame(fund_scch4_magiccch4_equity16_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_16.csv"),
+        DataFrame(fund_scch4_magiccch4_regional00_ci) => joinpath(@__DIR__, output, "scch4_estimates", "equity_weighting", "fund", "s_magicc", "ci_scch4_equity_regional_00.csv"),
     ]
 
     #---------------------------------------------------------------------------------------------
