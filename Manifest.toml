@@ -442,11 +442,11 @@ version = "1.0.1"
 
 [[MimiFAIR]]
 deps = ["CSVFiles", "DataFrames", "Mimi", "NLsolve"]
-git-tree-sha1 = "6e90615e039dd130826b81a5554326efecc4f66f"
-repo-rev = "v0.1.1"
-repo-url = "https://github.com/anthofflab/MimiFAIR.jl"
+git-tree-sha1 = "18b2a02313ee08841ff4eb5e4e3a0622cb020baa"
+repo-rev = "oxidised_methane"
+repo-url = "https://github.com/FrankErrickson/MimiFAIR.jl-1"
 uuid = "73d86c50-c5fa-11e9-3497-c3dc913e627a"
-version = "0.1.1"
+version = "0.1.2-DEV"
 
 [[MimiFUND]]
 deps = ["Dates", "DelimitedFiles", "Distributions", "Mimi", "Random", "StatsBase"]
