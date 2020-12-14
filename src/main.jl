@@ -9,8 +9,8 @@ using Dates
 @info "Starting simulation at $(now())"
 
 # Install required Julia packages if they are not already installed
-using Pkg
-Pkg.activate(joinpath(@__DIR__, ".."))
+using Pkg, Distributed
+@everywhere Pkg.activate(joinpath(@__DIR__, ".."))
 Pkg.instantiate()
 
 using CSVFiles
@@ -27,7 +27,6 @@ import MimiHector
 import MimiMAGICC
 import MimiSNEASY
 using RobustAdaptiveMetropolisSampler
-using Distributed
 
 # Load required Julia packages.
 @everywhere begin
