@@ -20,10 +20,9 @@ To recreate all outputs and figures for this paper, open a OS shell and change i
 julia --procs auto src/main.jl
 ```
 
-Once that is finished, run the following two commands to create all figures:
+Once that is finished, run the following command to create all figures:
 
 ```
-R -e 'renv::restore()'
 Rscript src/create_figures.r
 ```
 
