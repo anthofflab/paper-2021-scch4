@@ -442,11 +442,11 @@ version = "1.0.1"
 
 [[MimiFAIR]]
 deps = ["CSVFiles", "DataFrames", "Mimi", "NLsolve"]
-git-tree-sha1 = "18b2a02313ee08841ff4eb5e4e3a0622cb020baa"
-repo-rev = "oxidised_methane"
-repo-url = "https://github.com/FrankErrickson/MimiFAIR.jl-1"
+git-tree-sha1 = "03478378920f1dd6f8726711862531c0cb80d525"
+repo-rev = "v1.0.0"
+repo-url = "https://github.com/anthofflab/MimiFAIR.jl"
 uuid = "73d86c50-c5fa-11e9-3497-c3dc913e627a"
-version = "0.1.2-DEV"
+version = "1.0.0"
 
 [[MimiFUND]]
 deps = ["Dates", "DelimitedFiles", "Distributions", "Mimi", "Random", "StatsBase"]
@@ -458,27 +458,27 @@ version = "3.12.0"
 
 [[MimiHector]]
 deps = ["CSVFiles", "DataFrames", "Mimi"]
-git-tree-sha1 = "9cdecfc23769e395fb1031e091064a23bb1fbb83"
-repo-rev = "v0.1.0"
+git-tree-sha1 = "995f45d30e75b4ccd1549e4be50259f0a2fdf0b5"
+repo-rev = "v1.0.0"
 repo-url = "https://github.com/anthofflab/MimiHector.jl"
 uuid = "331d1d40-c5fb-11e9-3214-23d1bf921302"
-version = "0.1.0"
+version = "1.0.0"
 
 [[MimiMAGICC]]
 deps = ["CSVFiles", "DataFrames", "Mimi"]
-git-tree-sha1 = "82dc5f5a4cdaa363c834322b98d5d787509e2a30"
-repo-rev = "v0.1.0"
+git-tree-sha1 = "dee8be8e0f50fced03af981d343bedd8ff20f9d9"
+repo-rev = "v1.0.0"
 repo-url = "https://github.com/anthofflab/MimiMAGICC.jl"
 uuid = "d8247850-c5fc-11e9-2c04-d1198f4450c4"
-version = "0.1.0"
+version = "1.0.0"
 
 [[MimiSNEASY]]
 deps = ["CSVFiles", "DataFrames", "DelimitedFiles", "Mimi", "Query", "SpecialFunctions"]
-git-tree-sha1 = "1b0d1b3ef6a7ebcf3842a5acdf1bb4e98433e3a3"
-repo-rev = "v0.1.0"
+git-tree-sha1 = "d47b3289ce98a33ac14f2de4cc9553a6e1f743dc"
+repo-rev = "v1.0.0"
 repo-url = "https://github.com/anthofflab/MimiSNEASY.jl"
 uuid = "3f1801d0-c5f8-11e9-1568-bf13fd643260"
-version = "0.1.0"
+version = "1.0.0"
 
 [[Missings]]
 deps = ["DataAPI"]
