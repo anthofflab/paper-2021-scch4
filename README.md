@@ -20,13 +20,14 @@ To recreate all outputs and figures for this paper, open a OS shell and change i
 julia --procs auto src/main.jl
 ```
 
-Once that is finished, run the following command to create all figures:
+Once that is finished, run the following two commands to create all figures:
 
 ```
-rscript src/create_figures.r
+R -e 'renv::restore()'
+Rscript src/create_figures.r
 ```
 
-Both scripts are configured such that they download and install any required Julia and R packages to run the replication code automatically.
+All scripts are configured such that they automatically download and install any required Julia and R packages.
 
 ## Result and figure files
 
