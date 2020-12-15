@@ -39,10 +39,12 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     rcp_aerosol_forcing   = rcp_forcing.TOTAER_DIR_RF .+ rcp_forcing.CLOUD_TOT_RF
     rcp_exogenous_forcing = rcp_forcing.TOTAL_INCLVOLCANIC_RF .- rcp_forcing.CO2_RF .- rcp_forcing.CH4_RF .- rcp_forcing.TROPOZ_RF .- rcp_forcing.CH4OXSTRATH2O_RF .- rcp_aerosol_forcing
 
-    # Calculate CH₄ emission to concentration conversion (based on atmospheric mas of 5.1352e18 kg).
-    mol_wt_air = fair_ghg_data[fair_ghg_data.gas .== "AIR", :mol_weight][1]
-    mol_wt_ch4 = fair_ghg_data[fair_ghg_data.gas .== "CH4", :mol_weight][1]
-    CH₄_emiss2conc = (5.1352e18/1.0e18) * (mol_wt_ch4 / mol_wt_air)
+    # Calculate CH₄ and CO₂ emission to concentration conversion (based on atmospheric mas of 5.1352e18 kg).
+    mol_wt_air     = fair_ghg_data[fair_ghg_data.gas .== "AIR", :mol_weight][1]
+    mol_wt_ch4     = fair_ghg_data[fair_ghg_data.gas .== "CH4", :mol_weight][1]
+    mol_wt_carbon  = fair_ghg_data[fair_ghg_data.gas .== "C", :mol_weight][1]
+    CH₄_emiss2conc = (5.1352e18 / 1.0e18) * (mol_wt_ch4 / mol_wt_air)
+    C_emiss2conc   = (5.1352e18 / 1.0e18) * (mol_wt_carbon / mol_wt_air)
 
     # ------------------------------------------------------------
     # Initialize Mimi-SNEASY and add new CH₄ components to model.
@@ -91,8 +93,9 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     set_param!(m, :ch4_cycle, :fossil_frac, rcp_fossil_ch4_frac[rcp_indices])
     set_param!(m, :ch4_cycle, :oxidation_frac, 0.61)
     set_param!(m, :ch4_cycle, :mol_weight_CH₄, fair_ghg_data[fair_ghg_data.gas .== "CH4", :mol_weight][1])
-    set_param!(m, :ch4_cycle, :mol_weight_CO₂, fair_ghg_data[fair_ghg_data.gas .== "CO2", :mol_weight][1])
+    set_param!(m, :ch4_cycle, :mol_weight_C, fair_ghg_data[fair_ghg_data.gas .== "C", :mol_weight][1])
     set_param!(m, :ch4_cycle, :emiss2conc_ch4, CH₄_emiss2conc)
+    set_param!(m, :ch4_cycle, :gtc2ppm, C_emiss2conc)
 
     # ---- Total Carbon Dioxide Emissions ---- #
     set_param!(m, :total_co2_emissions, :exogenous_CO₂_emissions, rcp_co2_emissions[rcp_indices])
@@ -144,7 +147,7 @@ function create_sneasy_fairch4(;rcp_scenario::String="RCP85", start_year::Int=17
     # Create connections between Mimi SNEASY+Hector components.
     # ----------------------------------------------------------
     connect_param!(m, :doeclim,             :forcing,             :rf_total,            :total_forcing)
-    connect_param!(m, :total_co2_emissions, :oxidized_CH₄_to_CO₂, :ch4_cycle,           :oxidised_CH₄)
+    connect_param!(m, :total_co2_emissions, :oxidized_CH₄_to_CO₂, :ch4_cycle,           :oxidised_CH₄_GtC)
     connect_param!(m, :ccm,                 :CO2_emissions,       :total_co2_emissions, :total_CO₂_emissions)
     connect_param!(m, :ccm,                 :temp,                :doeclim,             :temp)
     connect_param!(m, :rf_co2_etminan,      :CO₂,                 :ccm,                 :atmco2)
