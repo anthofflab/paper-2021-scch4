@@ -10,7 +10,7 @@ You need to install [Julia](http://julialang.org/) and [R](https://www.r-project
 
 Make sure to install both Julia and R in such a way that both the Julia and R binary are on the `PATH`.
 
-Running the complete replication code on Windows on a system with an Intel Xeon W-2195 18 core CPU, 128 GB of RAM and a 1 TB SSD hard drive takes about four days.
+Running the complete replication code on Windows on a system with an Intel Xeon W-2195 18 core CPU, 128 GB of RAM and a 1 TB SSD hard drive takes about three days.
 
 ## Running the replication script
 
