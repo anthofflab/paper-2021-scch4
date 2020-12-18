@@ -994,8 +994,8 @@ equity_pdfs = function(equity_data, colors, alphas, axis_settings, line_size, ma
     p = p + geom_density(aes(x=equity_data$region5), fill=colors[5], alpha=alphas[5], size=line_size)
 
     # Scale axes and their positioning/labeling + add titles.
-    p = p + coord_cartesian(expand = FALSE, xlim=axis_settings$x_lim, ylim=axis_settings$y_lim)
-    p = p + scale_x_continuous(breaks = axis_settings$x_breaks, labels=axis_settings$x_labels)
+    p = p + coord_cartesian(expand = FALSE, ylim=axis_settings$y_lim, axis_settings$x_lim)
+    p = p + scale_x_continuous(limits = axis_settings$x_lim, breaks = axis_settings$x_breaks, labels=axis_settings$x_labels)
     p = p + scale_y_continuous(breaks = axis_settings$y_breaks, labels=axis_settings$y_labels)
     p = p + xlab(axis_settings$x_title)
     p = p + ylab(axis_settings$y_title)
