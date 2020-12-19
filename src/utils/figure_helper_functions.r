@@ -125,16 +125,16 @@ scch4_pdf_baseline = function(model_1, model_2, model_3, model_4, alphas, colors
     p = ggplot()
 
     # Add four SC-CH4 distributions for FUND.
-    p = p + geom_density(data=model_1, aes_string(x="fund"), fill=colors[1], alpha=alphas[1], size=size)
-    p = p + geom_density(data=model_2, aes_string(x="fund"), fill=colors[2], alpha=alphas[2], size=size)
-    p = p + geom_density(data=model_3, aes_string(x="fund"), fill=colors[3], alpha=alphas[3], size=size)
-    p = p + geom_density(data=model_4, aes_string(x="fund"), fill=colors[4], alpha=alphas[4], size=size)
+    p = p + geom_density(data=model_1, aes_string(x="fund"), color=colors[1], alpha=alphas[1], size=size)
+    p = p + geom_density(data=model_2, aes_string(x="fund"), color=colors[2], alpha=alphas[2], size=size)
+    p = p + geom_density(data=model_3, aes_string(x="fund"), color=colors[3], alpha=alphas[3], size=size)
+    p = p + geom_density(data=model_4, aes_string(x="fund"), color=colors[4], alpha=alphas[4], size=size)
 
     # Add four SC-CH4 distributions for DICE.
-    p = p + geom_density(data=model_1, aes_string(x="dice"), fill=colors[1], alpha=alphas[1], size=size, linetype="dashed")
-    p = p + geom_density(data=model_2, aes_string(x="dice"), fill=colors[2], alpha=alphas[2], size=size, linetype="dashed")
-    p = p + geom_density(data=model_3, aes_string(x="dice"), fill=colors[3], alpha=alphas[3], size=size, linetype="dashed")
-    p = p + geom_density(data=model_4, aes_string(x="dice"), fill=colors[4], alpha=alphas[4], size=size, linetype="dashed")
+    p = p + geom_density(data=model_1, aes_string(x="dice"), color=colors[1], alpha=alphas[1], size=size, linetype="22")
+    p = p + geom_density(data=model_2, aes_string(x="dice"), color=colors[2], alpha=alphas[2], size=size, linetype="22")
+    p = p + geom_density(data=model_3, aes_string(x="dice"), color=colors[3], alpha=alphas[3], size=size, linetype="22")
+    p = p + geom_density(data=model_4, aes_string(x="dice"), color=colors[4], alpha=alphas[4], size=size, linetype="22")
 
     # Scale axes and their positioning/labeling + add titles.
     p = p + coord_cartesian(clip="off", ylim=y_range, expand=FALSE)
@@ -189,10 +189,10 @@ scch4_pdf_scenario = function(data1, data2, data3, data4, alpha, colors, size, x
     p = ggplot()
 
     # Add four SC-CH4 distributions.
-    p = p + geom_density(data=data1, aes_string(x="scch4"), fill=colors[1], alpha=alpha[1], size=size, linetype=linetype)
-    p = p + geom_density(data=data2, aes_string(x="scch4"), fill=colors[2], alpha=alpha[2], size=size, linetype=linetype)
-    p = p + geom_density(data=data3, aes_string(x="scch4"), fill=colors[3], alpha=alpha[3], size=size, linetype=linetype)
-    p = p + geom_density(data=data4, aes_string(x="scch4"), fill=colors[4], alpha=alpha[4], size=size, linetype=linetype)
+    p = p + geom_density(data=data1, aes_string(x="scch4"), color=colors[1], alpha=alpha[1], size=size, linetype=linetype)
+    p = p + geom_density(data=data2, aes_string(x="scch4"), color=colors[2], alpha=alpha[2], size=size, linetype=linetype)
+    p = p + geom_density(data=data3, aes_string(x="scch4"), color=colors[3], alpha=alpha[3], size=size, linetype=linetype)
+    p = p + geom_density(data=data4, aes_string(x="scch4"), color=colors[4], alpha=alpha[4], size=size, linetype=linetype)
 
     # Scale axes and their positioning/labeling.
     p = p + coord_cartesian(clip="off", ylim=y_range, expand=FALSE)
