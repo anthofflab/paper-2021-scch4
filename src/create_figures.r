@@ -34,16 +34,16 @@ source(file.path("src", "utils", "figure_helper_functions.r"))
 obs = read.csv(file.path("data", "calibration_data", "calibration_data_combined.csv"))
 
 # Set default colors for different versions of SNEASY+CH4.
-fairch4_color   = "darkorchid"
-fundch4_color   = "#42f4d7"
-hectorch4_color = "red"
-magiccch4_color = "gold"
+fairch4_color   = "#10BBFD"
+fundch4_color   = "#785EF0"
+hectorch4_color = "#DC267F"
+magiccch4_color = "#FE6100"
 
 # Set default colors for different SC-CH4 estimation scenarios.
-base_color    = "red"
-forcing_color = "darkorange"
-corr_color    = "forestgreen"
-us_ecs_color  = "dodgerblue"
+base_color    = "#2bc3a1"
+forcing_color = "#2f74ec"
+corr_color    = "#079818"
+us_ecs_color  = "#cb67e5"
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -168,13 +168,13 @@ base_dice_mean = mean(c(dice_scch4_fairch4[,1], dice_scch4_fundch4[,1], dice_scc
 base_fund_mean = mean(c(fund_scch4_fairch4[,1], fund_scch4_fundch4[,1], fund_scch4_hectorch4[,1], fund_scch4_magiccch4[,1]))
 
 # Create a vector of alpha values to set color transparency levels.
-alphas = c(0.5 ,0.5, 0.48, 0.56)
+alphas = rep(1.0, 4)
 
 # Order colors in terms of increasing SC-CH4 estimates by model.
 scch4_colors = c(fundch4_color, hectorch4_color, fairch4_color, magiccch4_color)
 
 # Create Figure 2a and add points identifying each IAM's mean SC-CH4 estimate.
-fig_2a = scch4_pdf_baseline(scch4_fundch4, scch4_hectorch4, scch4_fairch4, scch4_magiccch4, alphas, scch4_colors, 0.35, c(-100,3300), c(0,500,1000,1500,2000,2500,3000), c("0","500","1000","1500","2000","2500","3000"), "Social Cost of Methane ($/t-CH4)", c(0,0.00255))
+fig_2a = scch4_pdf_baseline(scch4_fundch4, scch4_hectorch4, scch4_fairch4, scch4_magiccch4, alphas, scch4_colors, 0.4, c(-100,3300), c(0,500,1000,1500,2000,2500,3000), c("0","500","1000","1500","2000","2500","3000"), "Social Cost of Methane ($/t-CH4)", c(0,0.00255))
 fig_2a = fig_2a + geom_point(aes(x=c(base_fund_mean, base_dice_mean), y=c(0,0)), shape=c(21,23), size=2.25,  fill="white", stroke=0.3)
 
 #-------------------------------
@@ -182,7 +182,6 @@ fig_2a = fig_2a + geom_point(aes(x=c(base_fund_mean, base_dice_mean), y=c(0,0)),
 #-------------------------------
 
 # Set alpha values and order of different scenario colors.
-alphas = c(0.55, 0.45, 0.3, 0.5)
 scenario_colors = c(forcing_color, base_color, corr_color, us_ecs_color)
 
 # Calculate baseline SC-CH4 means for each scenario - IAM pair.
@@ -191,11 +190,11 @@ scenario_mean_data = data.frame(zeros = c(0,0,0,0),
                                 dice  = c(mean(dice_scch4_oldrf[,1]), mean(dice_scch4_base[,1]), mean(dice_scch4_nocorr[,1]), mean(dice_scch4_ecs[,1])))
 
 # Create Figure 2b plots for FUND.
-fig_2b_top = scch4_pdf_scenario(fund_scch4_oldrf, fund_scch4_base, fund_scch4_nocorr, fund_scch4_ecs, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.0026), "solid", c(0.5,0.2,0.2,0))
+fig_2b_top = scch4_pdf_scenario(fund_scch4_oldrf, fund_scch4_base, fund_scch4_nocorr, fund_scch4_ecs, alphas, scenario_colors, 0.3, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.0026), "solid", c(0.5,0.2,0.2,0))
 fig_2b_top = fig_2b_top + geom_point(data=scenario_mean_data, aes_string(x="fund", y="zeros"), shape=21, size=1.4, fill=scenario_colors, stroke=0.17)
 
 # Create Figure 2b plots for DICE.
-fig_2b_bottom = scch4_pdf_scenario(dice_scch4_oldrf, dice_scch4_base, dice_scch4_nocorr, dice_scch4_ecs, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0026), "32", c(-2.2,0.2,0.2,0))
+fig_2b_bottom = scch4_pdf_scenario(dice_scch4_oldrf, dice_scch4_base, dice_scch4_nocorr, dice_scch4_ecs, alphas, scenario_colors, 0.3, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0026), "22", c(-2.2,0.2,0.2,0))
 fig_2b_bottom = fig_2b_bottom + geom_point(data=scenario_mean_data, aes_string(x="dice", y="zeros"), shape=23, size=1.4, fill=scenario_colors, stroke=0.17)
 
 # Set panel design.
@@ -694,7 +693,8 @@ dice_scch4_ecs_hectorch4    = fread(file.path("results", results_folder_name, "s
 
 # Set colors and transparency values for all panels.
 scenario_colors = c(forcing_color, base_color, corr_color, us_ecs_color)
-alphas = c(0.55, 0.45, 0.3, 0.5)
+alphas = rep(1.0, 4)
+line_size = 0.3
 
 #----------------------------------
 # SNEASY+FAIR-CH4 Distributions
@@ -706,11 +706,11 @@ scenario_means_fairch4 = data.frame(zeros = c(0,0,0,0),
                                 dice  = c(mean(dice_scch4_oldrf_fairch4[,1]), mean(dice_scch4_base_fairch4[,1]), mean(dice_scch4_nocorr_fairch4[,1]), mean(dice_scch4_ecs_fairch4[,1])))
 
 # Plot SC-CH4 distributions for FUND + FAIR-CH4.
-extended_fig_2a_top = scch4_pdf_scenario(fund_scch4_oldrf_fairch4, fund_scch4_base_fairch4, fund_scch4_nocorr_fairch4, fund_scch4_ecs_fairch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.4,0.2,0))
+extended_fig_2a_top = scch4_pdf_scenario(fund_scch4_oldrf_fairch4, fund_scch4_base_fairch4, fund_scch4_nocorr_fairch4, fund_scch4_ecs_fairch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.4,0.2,0))
 extended_fig_2a_top = extended_fig_2a_top + geom_point(data=scenario_means_fairch4, aes_string(x="fund", y="zeros"), shape=21, size=1.75, fill=scenario_colors, stroke=0.2)
 
 # Plot SC-CH4 distributions for DICE + FAIR-CH4.
-extended_fig_2a_bottom = scch4_pdf_scenario(dice_scch4_oldrf_fairch4, dice_scch4_base_fairch4, dice_scch4_nocorr_fairch4, dice_scch4_ecs_fairch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "32", c(-3.2,0.4,0.2,0))
+extended_fig_2a_bottom = scch4_pdf_scenario(dice_scch4_oldrf_fairch4, dice_scch4_base_fairch4, dice_scch4_nocorr_fairch4, dice_scch4_ecs_fairch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "22", c(-3.2,0.4,0.2,0))
 extended_fig_2a_bottom = extended_fig_2a_bottom + geom_point(data=scenario_means_fairch4, aes_string(x="dice", y="zeros"), shape=23, size=1.75, fill=scenario_colors, stroke=0.2)
 
 #----------------------------------
@@ -723,11 +723,11 @@ scenario_means_fundch4 = data.frame(zeros = c(0,0,0,0),
                                 dice  = c(mean(dice_scch4_oldrf_fundch4[,1]), mean(dice_scch4_base_fundch4[,1]), mean(dice_scch4_nocorr_fundch4[,1]), mean(dice_scch4_ecs_fundch4[,1])))
 
 # Plot SC-CH4 distributions for FUND + FUND-CH4.
-extended_fig_2b_top = scch4_pdf_scenario(fund_scch4_oldrf_fundch4, fund_scch4_base_fundch4, fund_scch4_nocorr_fundch4, fund_scch4_ecs_fundch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.3,0.2,0.1))
+extended_fig_2b_top = scch4_pdf_scenario(fund_scch4_oldrf_fundch4, fund_scch4_base_fundch4, fund_scch4_nocorr_fundch4, fund_scch4_ecs_fundch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.3,0.2,0.1))
 extended_fig_2b_top = extended_fig_2b_top + geom_point(data=scenario_means_fundch4, aes_string(x="fund", y="zeros"), shape=21, size=1.75, fill=scenario_colors, stroke=0.2)
 
 # Plot SC-CH4 distributions for DICE + FUND-CH4.
-extended_fig_2b_bottom = scch4_pdf_scenario(dice_scch4_oldrf_fundch4, dice_scch4_base_fundch4, dice_scch4_nocorr_fundch4, dice_scch4_ecs_fundch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "32", c(-3.2,0.3,0.2,0.1))
+extended_fig_2b_bottom = scch4_pdf_scenario(dice_scch4_oldrf_fundch4, dice_scch4_base_fundch4, dice_scch4_nocorr_fundch4, dice_scch4_ecs_fundch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "22", c(-3.2,0.3,0.2,0.1))
 extended_fig_2b_bottom = extended_fig_2b_bottom + geom_point(data=scenario_means_fundch4, aes_string(x="dice", y="zeros"), shape=23, size=1.75, fill=scenario_colors, stroke=0.2)
 
 #----------------------------------
@@ -740,11 +740,11 @@ scenario_means_hectorch4 = data.frame(zeros = c(0,0,0,0),
                                 dice  = c(mean(dice_scch4_oldrf_hectorch4[,1]), mean(dice_scch4_base_hectorch4[,1]), mean(dice_scch4_nocorr_hectorch4[,1]), mean(dice_scch4_ecs_hectorch4[,1])))
 
 # Plot SC-CH4 distributions for FUND + Hector-CH4.
-extended_fig_2c_top = scch4_pdf_scenario(fund_scch4_oldrf_hectorch4, fund_scch4_base_hectorch4, fund_scch4_nocorr_hectorch4, fund_scch4_ecs_hectorch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.2,0.2,0.2))
+extended_fig_2c_top = scch4_pdf_scenario(fund_scch4_oldrf_hectorch4, fund_scch4_base_hectorch4, fund_scch4_nocorr_hectorch4, fund_scch4_ecs_hectorch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "", FALSE, c(0,0.003), "solid", c(0.5,0.2,0.2,0.2))
 extended_fig_2c_top = extended_fig_2c_top + geom_point(data=scenario_means_hectorch4, aes_string(x="fund", y="zeros"), shape=21, size=1.75, fill=scenario_colors, stroke=0.2)
 
 # Plot SC-CH4 distributions for DICE + Hector-CH4.
-extended_fig_2c_bottom = scch4_pdf_scenario(dice_scch4_oldrf_hectorch4, dice_scch4_base_hectorch4, dice_scch4_nocorr_hectorch4, dice_scch4_ecs_hectorch4, alphas, scenario_colors, 0.25, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "32", c(-3.2,0.2,0.2,0.2))
+extended_fig_2c_bottom = scch4_pdf_scenario(dice_scch4_oldrf_hectorch4, dice_scch4_base_hectorch4, dice_scch4_nocorr_hectorch4, dice_scch4_ecs_hectorch4, alphas, scenario_colors, line_size, c(-200,5200), c(0,1000,2000,3000,4000,5000), c("0","1000","2000","3000","4000","5000"), "Social Cost of Methane ($/t-CH4)", TRUE, c(0,0.0033), "22", c(-3.2,0.2,0.2,0.2))
 extended_fig_2c_bottom = extended_fig_2c_bottom + geom_point(data=scenario_means_hectorch4, aes_string(x="dice", y="zeros"), shape=23, size=1.75, fill=scenario_colors, stroke=0.2)
 
 # Create pannel design settings.
@@ -811,7 +811,7 @@ extended_fig_3d = rcp26_projection(magicc_rcp26_ci_temperature, obs, "hadcrut_te
 
 # Set colors and transparencies for different versions of SNEASY+CH4.
 scch4_colors = c(fundch4_color, hectorch4_color, fairch4_color, magiccch4_color)
-alphas = c(0.5 ,0.5, 0.48, 0.56)
+alphas = rep(1.0, 4)
 
 # Merge baseline data into a data.frame for plotting.
 scch4_rcp26_fairch4   = data.frame(fund=fund_scch4_fairch4_rcp26[,1], dice=dice_scch4_fairch4_rcp26[,1])
