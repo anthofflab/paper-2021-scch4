@@ -358,8 +358,8 @@ fig_4a = fig_4a_main + annotation_custom(grob=ggplotGrob(fig_4a_inset), xmin=206
 #-----------------------------------
 
 # Set damage impulse colors and transparency.
-impulse_colors = c("darkorange", "red","dodgerblue", "mediumseagreen")
-impulse_alphas = c(0.7,0.3,0.15,0.07)
+impulse_colors = c("#d585ae", "#de9b18", "#57b3e2", "#1c8967")
+impulse_alphas = c(0.7,0.3,0.25,0.07)
 
 # Set years for each IAM.
 dice_years = 2010:2300
@@ -395,14 +395,14 @@ colnames(fund_pdf_data_25) = c("Year_1", "Year_2", "Year_3", "Year_4")
 colnames(fund_pdf_data_50) = c("Year_1", "Year_2", "Year_3", "Year_4")
 
 # Create DICE inset and add to main panel.
-dice_25_pdf = inset_4pdfs(dice_pdf_data_25, rep("darkorange",4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,51), c(0,25,50), c("0","25","50"), "Discounted Damages", c(0,0.29), 6, c(-1.5,0.0,0.0,0.0))
-dice_50_pdf = inset_4pdfs(dice_pdf_data_50, rep("dodgerblue",4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,51), c(0,25,50), c("0","25","50"), NULL, c(0,0.29), 6, c(-0.01,0.0,0.0,0.0))
+dice_25_pdf = inset_4pdfs(dice_pdf_data_25, rep(impulse_colors[1], 4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,51), c(0,25,50), c("0","25","50"), "Discounted Damages", c(0,0.29), 6, c(-1.5,0.0,0.0,0.0))
+dice_50_pdf = inset_4pdfs(dice_pdf_data_50, rep(impulse_colors[3] ,4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,51), c(0,25,50), c("0","25","50"), NULL, c(0,0.29), 6, c(-0.01,0.0,0.0,0.0))
 fig_4b_inset = ggarrange(dice_50_pdf, dice_25_pdf, nrow=2, ncol=1)
 fig_4b = fig_4b_main + annotation_custom(grob=fig_4b_inset, xmin=2080, xmax=Inf, ymin=22, ymax=Inf)
 
 # Create FUND inset and add to main panel.
-fund_25_pdf = inset_4pdfs(fund_pdf_data_25, rep("darkorange",4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,20), c(0,10,20), c("0","10","20"), "Discounted Damages", c(0,1.05), 6, c(-1.5,0.0,0.0,0.0))
-fund_50_pdf = inset_4pdfs(fund_pdf_data_50, rep("dodgerblue",4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,20), c(0,10,20), c("0","10","20"), NULL, c(0,1.05), 6, c(-0.01,0.0,0.0,0.0))
+fund_25_pdf = inset_4pdfs(fund_pdf_data_25, rep(impulse_colors[1], 4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,20), c(0,10,20), c("0","10","20"), "Discounted Damages", c(0,1.05), 6, c(-1.5,0.0,0.0,0.0))
+fund_50_pdf = inset_4pdfs(fund_pdf_data_50, rep(impulse_colors[3] ,4), c(0.5,0.4,0.35,0.3), c(1,3,2,4), 0.25, c(-1,20), c(0,10,20), c("0","10","20"), NULL, c(0,1.05), 6, c(-0.01,0.0,0.0,0.0))
 fig_4c_inset = ggarrange(fund_50_pdf, fund_25_pdf, nrow=2, ncol=1)
 fig_4c = fig_4c_main + annotation_custom(grob=fig_4c_inset, xmin=2080, xmax=Inf, ymin=22, ymax=Inf)
 
