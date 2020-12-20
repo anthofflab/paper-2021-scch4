@@ -241,7 +241,7 @@ point_stroke = 0.2
 no_corr_color = "gray80"
 
 # Plot temperature projections (with and without posterior correlations).
-fig_3a_main =  climate_projection(magicc_temperature_ci_baseline, obs, "hadcrut_temperature_obs", magiccch4_color, c(-0.5,11.5), c(1850,2210), "Year", "Surface Temperature (C)", seq(0,10,by=2), as.character(seq(0,10,by=2)), TRUE, TRUE, point_size, point_stroke, ci_width, "dashed", mean_width, "", c(1856, 15.5), TRUE, magicc_temperature_ci_no_corr, no_corr_color)
+fig_3a_main =  climate_projection(magicc_temperature_ci_baseline, obs, "hadcrut_temperature_obs", magiccch4_color, c(-0.5,12.5), c(1850,2210), "Year", "Surface Temperature (C)", seq(0,12,by=2), as.character(seq(0,12,by=2)), TRUE, TRUE, point_size, point_stroke, ci_width, "dashed", mean_width, "", c(1856, 15.5), TRUE, magicc_temperature_ci_no_corr, no_corr_color)
 fig_3a_main = fig_3a_main + theme(plot.margin = unit(c(3,1,5,1), "mm"))
 
 # Get years for temperature pdf inset.
