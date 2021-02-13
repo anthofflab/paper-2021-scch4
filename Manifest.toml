@@ -104,12 +104,6 @@ git-tree-sha1 = "034174e607d254b8ca0853a1a9029b265114bf6c"
 uuid = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 version = "0.8.2"
 
-[[Conda]]
-deps = ["JSON", "VersionParsing"]
-git-tree-sha1 = "c0647249d785f1d5139c0cc96db8f6b32f7ec416"
-uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.5.0"
-
 [[ConstructionBase]]
 git-tree-sha1 = "a2a6a5fea4d6f730ec4c18a76d27ec10e8ec1c50"
 uuid = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
@@ -190,12 +184,6 @@ deps = ["Base64", "FilePaths", "JSON", "Pkg", "Sockets", "URIParser", "UUIDs"]
 git-tree-sha1 = "4ba2ccac5a8f752f9974120c85e44d1a56236742"
 uuid = "a1bb12fb-d4d1-54b4-b10a-ee7951ef7ad3"
 version = "3.1.1"
-
-[[ExcelReaders]]
-deps = ["DataValues", "Dates", "PyCall", "Test"]
-git-tree-sha1 = "6f9db420dd362bd5bcea3a0f6dabf8bda587fec3"
-uuid = "c04bee98-12a5-510c-87df-2a230cb6e075"
-version = "0.11.0"
 
 [[ExprTools]]
 git-tree-sha1 = "10407a39b87f29d47ebaca8edbc75d7c302ff93e"
@@ -433,12 +421,12 @@ uuid = "e4e893b0-ee5e-52ea-8111-44b3bdec128c"
 version = "1.1.1"
 
 [[MimiDICE2013]]
-deps = ["ExcelReaders", "Mimi"]
-git-tree-sha1 = "66d48bc23c71ca99dffa2d4bad83d3c92227dd1f"
-repo-rev = "v1.0.1"
+deps = ["Mimi", "XLSX"]
+git-tree-sha1 = "0d950fd853e1cc6183d8ce3b5953b0ca9715c7b6"
+repo-rev = "v1.0.2"
 repo-url = "https://github.com/anthofflab/MimiDICE2013.jl"
 uuid = "98fa84f0-42a6-11e9-254c-d7945e8c710f"
-version = "1.0.1"
+version = "1.0.2"
 
 [[MimiFAIR]]
 deps = ["CSVFiles", "DataFrames", "Mimi", "NLsolve"]
@@ -589,12 +577,6 @@ deps = ["Distributed", "Printf"]
 git-tree-sha1 = "4cff8da83f89e06eeae5b81307a08bb33a96a602"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.4.0"
-
-[[PyCall]]
-deps = ["Conda", "Dates", "Libdl", "LinearAlgebra", "MacroTools", "Serialization", "VersionParsing"]
-git-tree-sha1 = "b6dff5fa725eff4f775f472acd86756d6e31fb02"
-uuid = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
-version = "1.92.1"
 
 [[QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
@@ -828,11 +810,6 @@ git-tree-sha1 = "57634eda07c4a48f543c7e8701eb6f4ee09ba2fa"
 uuid = "112f6efa-9a02-5b7d-90c0-432ed331239a"
 version = "2.3.0"
 
-[[VersionParsing]]
-git-tree-sha1 = "80229be1f670524750d905f8fc8148e5a8c4537f"
-uuid = "81def892-9a0e-5fdd-b105-ffc91e053289"
-version = "1.2.0"
-
 [[WeakRefStrings]]
 deps = ["DataAPI", "Random", "Test"]
 git-tree-sha1 = "28807f85197eaad3cbd2330386fac1dcb9e7e11d"
@@ -845,11 +822,23 @@ git-tree-sha1 = "59e2ad8fd1591ea019a5259bd012d7aee15f995c"
 uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
 version = "0.5.3"
 
+[[XLSX]]
+deps = ["Dates", "EzXML", "Printf", "Tables", "ZipFile"]
+git-tree-sha1 = "7744a996cdd07b05f58392eb1318bca0c4cc1dc7"
+uuid = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
+version = "0.7.6"
+
 [[XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "Zlib_jll"]
 git-tree-sha1 = "be0db24f70aae7e2b89f2f3092e93b8606d659a6"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
 version = "2.9.10+3"
+
+[[ZipFile]]
+deps = ["Libdl", "Printf", "Zlib_jll"]
+git-tree-sha1 = "c3a5637e27e914a7a445b8d0ad063d701931e9f7"
+uuid = "a5390f91-8eb1-5f08-bee0-b1d1ffed6cea"
+version = "0.9.3"
 
 [[Zlib_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
