@@ -2,7 +2,7 @@
 
 This repository holds all code required to replicate the results of:
 
-Errickson, Keller, Collins, Srikrishnan and Anthoff (forthcoming) "Improving the Climate Model Calibration Reduces the Social Cost of Methane".
+Errickson, Keller, Collins, Srikrishnan and Anthoff (2021) "Improving the Climate Model Calibration Reduces the Social Cost of Methane".
 
 ## Hardware and software requirements
 
